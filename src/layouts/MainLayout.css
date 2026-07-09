@@ -1,0 +1,18 @@
+.layout{
+  display: flex;
+}
+
+.main-content{
+  margin-left: 260px;   /* Same as sidebar width */
+  width: calc(100% - 270px);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #f7f7f7;
+}
+
+@media (max-width: 860px){
+  .main-content{
+    margin-left: 84px;
+    width: calc(100% - 84px);
+  }
+}

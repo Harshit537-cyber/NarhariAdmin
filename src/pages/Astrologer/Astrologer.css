@@ -1,0 +1,111 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.astro-page{
+    padding:30px;
+    background:#f8f6ff;
+    min-height:100vh;
+}
+
+h2{
+    color:#4c1d95;
+    margin-bottom:20px;
+}
+
+.search{
+    width:100%;
+    padding:12px;
+    border:2px solid #facc15;
+    border-radius:10px;
+    margin-bottom:20px;
+    outline:none;
+}
+
+.category{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.category button{
+    padding:8px 18px;
+    border:none;
+    border-radius:20px;
+    background:#ede9fe;
+    color:#4c1d95;
+    cursor:pointer;
+}
+
+.category .active{
+    background:#facc15;
+}
+
+.card{
+    background:#fff;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    border:1px solid #facc15;
+}
+
+.top{
+    display:flex;
+    gap:15px;
+    align-items:center;
+}
+
+.top img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    border:3px solid #facc15;
+}
+
+.top h3{
+    color:#4c1d95;
+    margin-bottom:5px;
+}
+
+.top p{
+    color:#666;
+    font-size:14px;
+}
+
+.top span{
+    color:#888;
+    font-size:13px;
+}
+
+.card h4{
+    color:#ca8a04;
+    margin:18px 0;
+}
+
+.btns{
+    display:flex;
+    gap:10px;
+}
+
+.chat,
+.call{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.chat{
+    background:#4c1d95;
+    color:#fff;
+}
+
+.call{
+    background:#facc15;
+    color:#4c1d95;
+}

@@ -1,0 +1,156 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.product-page{
+    background:#f8f6ff;
+    min-height:100vh;
+    padding:40px 20px;
+}
+
+.product-card{
+    max-width:1000px;
+    margin:auto;
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border:1px solid #facc15;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.product-image{
+    background:#faf5ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+}
+
+.product-image img{
+    width:100%;
+    max-width:350px;
+    border-radius:15px;
+}
+
+.product-details{
+    padding:35px;
+}
+
+.tag{
+    display:inline-block;
+    background:#facc15;
+    color:#4c1d95;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:15px;
+}
+
+.product-details h2{
+    color:#4c1d95;
+    margin-bottom:15px;
+}
+
+.price{
+    font-size:28px;
+    color:#ca8a04;
+    font-weight:700;
+    margin-bottom:18px;
+}
+
+.price span{
+    margin-left:10px;
+    color:#999;
+    text-decoration:line-through;
+    font-size:18px;
+}
+
+.desc{
+    color:#666;
+    line-height:1.7;
+    margin-bottom:25px;
+}
+
+.info{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.info div{
+    background:#faf5ff;
+    border-radius:12px;
+    padding:15px;
+    text-align:center;
+}
+
+.info h4{
+    color:#4c1d95;
+    margin-bottom:8px;
+}
+
+.info p{
+    color:#666;
+    font-size:14px;
+}
+
+.buttons{
+    display:flex;
+    gap:15px;
+}
+
+.cart-btn,
+.buy-btn{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.cart-btn{
+    background:#fff;
+    color:#4c1d95;
+    border:2px solid #4c1d95;
+}
+
+.buy-btn{
+    background:#4c1d95;
+    color:#fff;
+}
+
+.buy-btn:hover{
+    background:#5b21b6;
+}
+
+.cart-btn:hover{
+    background:#f3e8ff;
+}
+
+@media(max-width:768px){
+
+.product-card{
+    grid-template-columns:1fr;
+}
+
+.product-details{
+    padding:25px;
+}
+
+.info{
+    grid-template-columns:1fr;
+}
+
+.buttons{
+    flex-direction:column;
+}
+
+}

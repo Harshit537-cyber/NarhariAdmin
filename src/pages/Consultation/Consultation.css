@@ -1,0 +1,115 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.consultation{
+    background:#f8f6ff;
+    min-height:100vh;
+    padding:30px 20px;
+}
+
+.success-icon{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#5b21b6;
+    color:#fff;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:32px;
+    font-weight:bold;
+}
+
+h2{
+    text-align:center;
+    color:#4c1d95;
+    margin-top:20px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin:10px 0 25px;
+    font-size:14px;
+}
+
+.details{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.box{
+    background:#fff;
+    border:1px solid #facc15;
+    border-radius:12px;
+    padding:15px;
+}
+
+.box span{
+    color:#888;
+    font-size:12px;
+}
+
+.box h4{
+    margin-top:8px;
+    color:#4c1d95;
+}
+
+.note{
+    margin:25px 0;
+    background:#fff;
+    border-left:4px solid #5b21b6;
+    padding:15px;
+    border-radius:10px;
+    color:#555;
+    font-size:14px;
+}
+
+.astrologer{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    background:#fff;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.astrologer img{
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    border:3px solid #facc15;
+}
+
+.astrologer h3{
+    color:#4c1d95;
+    margin-bottom:5px;
+}
+
+.astrologer p{
+    color:#777;
+    font-size:14px;
+}
+
+.booking-btn{
+    width:100%;
+    margin-top:30px;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#5b21b6;
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.booking-btn:hover{
+    background:#4c1d95;
+}

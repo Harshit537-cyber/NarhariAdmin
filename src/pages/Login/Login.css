@@ -1,0 +1,93 @@
+:root {
+  --dark-green: #2d462b;
+  --deep-brown: #3e3226;
+  --dark-yellow: #b8860b;
+  --bg-color: #f4f1ea;
+}
+
+.an-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0b130a 0%, #362d16 100%);
+  font-family: 'Segoe UI', sans-serif;
+}
+.an-login-wordmark {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 0.2em;
+  color: var(--dark-green);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.an-login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0dbd0;
+  transition: transform 0.3s ease;
+}
+
+.an-login-card:hover { transform: translateY(-5px); }
+
+.an-login-emblem { width: 50px; margin: 0 auto 20px; }
+
+.an-login-heading { color: var(--dark-green); font-size: 24px; text-align: center; margin-bottom: 8px; }
+
+.an-login-subheading { color: var(--deep-brown); opacity: 0.7; text-align: center; margin-bottom: 30px; }
+
+.an-field { position: relative; margin-bottom: 20px; }
+
+.an-field input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.4s ease;
+}
+
+.an-field input:focus {
+  border-color: var(--dark-green);
+  outline: none;
+  box-shadow: 0 0 8px rgba(45, 70, 43, 0.2);
+}
+
+.an-toggle {
+  position: absolute;
+  right: 15px;
+  top: 14px;
+  background: none;
+  border: none;
+  color: var(--dark-yellow);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.an-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--dark-yellow);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.an-submit:hover {
+  background: var(--dark-green);
+  box-shadow: 0 10px 20px rgba(45, 70, 43, 0.3);
+}
+
+.an-login-footer { text-align: center; margin-top: 20px; color: var(--deep-brown); }
+
+.an-login-footer a { color: var(--dark-yellow); text-decoration: none; font-weight: bold; }
