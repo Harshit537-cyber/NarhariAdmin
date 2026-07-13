@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom"; // Add this import
+import splashBg from "../assets/splash_Austro.png";
 
 export default function SplashScreen() {
   const [stage, setStage] = useState(0);
   const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
-    const t1 = setTimeout(() => setStage(1), 100);
+    const t1 = setTimeout(() => setStage(1), 200);
     const t2 = setTimeout(() => setStage(2), 700);
     const t3 = setTimeout(() => setStage(3), 1150);
     const t4 = setTimeout(() => {
       navigate("/login"); // Redirect here
-    }, 2600);
+    }, 2700);
     return () => [t1, t2, t3, t4].forEach(clearTimeout);
   }, [navigate]);
 
@@ -23,8 +24,8 @@ export default function SplashScreen() {
           position: relative;
           width: 100%;
           min-height: 100vh;
-          background: #fffdf9;
-          display: flex;
+background: #fffdf9 url(${splashBg}) center center / cover no-repeat;
+  animation: anBgBlink 2.5s ease-in-out infinite;          display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
@@ -144,6 +145,10 @@ export default function SplashScreen() {
             transform: none !important;
           }
         }
+          @keyframes anBgBlink {
+  0%, 100% { background-color: rgba(255,253,249,1); }
+  50% { background-color: rgba(255,253,249,0.4); }
+}
       `}</style>
 
       <div className="an-stack">

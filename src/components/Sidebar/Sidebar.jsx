@@ -34,7 +34,7 @@ export default function Sidebar() {
             />
           </svg>
         </div>
-        <span className="an-sidebar-brand-text">ASTRONARHARI</span>
+        <span className="an-sidebar-brand-text">AUSTRONARHARI</span>
       </div>
 
       <nav className="an-sidebar-nav">

@@ -1,8 +1,6 @@
 :root {
-  --dark-green: #2d462b;
-  --deep-brown: #3e3226;
   --dark-yellow: #b8860b;
-  --bg-color: #f4f1ea;
+  --gold-light: #ffd700;
 }
 
 .an-login {
@@ -10,84 +8,232 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0b130a 0%, #362d16 100%);
   font-family: 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
-.an-login-wordmark {
-  text-align: center;
-  font-size: 20px;
-  letter-spacing: 0.2em;
-  color: var(--dark-green);
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  font-weight: bold;
+
+.an-login::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: var(--bg-image); 
+  background-size: cover;
+  background-position: center;
+  z-index: -1; 
+  animation: bgZoom 15s ease-in-out infinite alternate; 
+}
+
+@keyframes bgZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
 }
 
 .an-login-card {
   width: 100%;
   max-width: 380px;
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0dbd0;
-  transition: transform 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.an-login-card:hover { transform: translateY(-5px); }
+.an-login-card:hover { 
+  transform: translateY(-5px); 
+  box-shadow: 0 20px 40px rgba(184, 134, 11, 0.3); 
+}
 
-.an-login-emblem { width: 50px; margin: 0 auto 20px; }
+.an-login-emblem { 
+  width: 55px; 
+  margin: 0 auto 15px; 
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+}
 
-.an-login-heading { color: var(--dark-green); font-size: 24px; text-align: center; margin-bottom: 8px; }
+.an-login-heading { 
+  color: #ffffff; 
+  font-size: 26px; 
+  text-align: center; 
+  margin-bottom: 5px; 
+  letter-spacing: 1px;
+}
 
-.an-login-subheading { color: var(--deep-brown); opacity: 0.7; text-align: center; margin-bottom: 30px; }
+.an-login-wordmark {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 0.25em;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
 
-.an-field { position: relative; margin-bottom: 20px; }
+.an-login-subheading { 
+  color: #e0e0e0; 
+  font-size: 14px;
+  text-align: center; 
+  margin-bottom: 30px; 
+}
+
+.an-field { 
+  position: relative; 
+  margin-bottom: 20px; 
+}
 
 .an-field input {
   width: 100%;
-  padding: 14px;
-  border: 2px solid #e0e0e0;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.4s ease;
+  font-size: 15px;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.an-field input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .an-field input:focus {
-  border-color: var(--dark-green);
+  border-color: var(--gold-light);
+  background: rgba(255, 255, 255, 0.15);
   outline: none;
-  box-shadow: 0 0 8px rgba(45, 70, 43, 0.2);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.an-field input.error {
+  border-color: #ff4d4d;
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
 }
 
 .an-toggle {
   position: absolute;
   right: 15px;
-  top: 14px;
+  top: 28px;
   background: none;
   border: none;
-  color: var(--dark-yellow);
+  bottom: 9px;
+  color: var(--gold-light);
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .an-submit {
   width: 100%;
-  padding: 14px;
-  background: var(--dark-yellow);
-  color: #fff;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--dark-yellow), var(--gold-light));
+  color: #1a1a1a;
   border: none;
   border-radius: 8px;
-  font-weight: bold;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .an-submit:hover {
-  background: var(--dark-green);
-  box-shadow: 0 10px 20px rgba(45, 70, 43, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(184, 134, 11, 0.4);
 }
 
-.an-login-footer { text-align: center; margin-top: 20px; color: var(--deep-brown); }
+.an-submit:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.an-label {
+  display: block;
+  text-align: left;
+  color: #e0e0e0;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+/* SweetAlert2 Sleek Dark & Green Accent Theme */
+.swal-dark-popup {
+  border: 1px solid rgba(16, 185, 129, 0.2) !important; /* Subtle green border glow */
+  border-radius: 16px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.1) !important;
+  font-family: 'Segoe UI', sans-serif !important;
+}
 
-.an-login-footer a { color: var(--dark-yellow); text-decoration: none; font-weight: bold; }
+/* Green gradient button with hover effects */
+.swal-green-button {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.swal-green-button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
+}
+
+.swal-green-button:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Green timer progress bar */
+.swal-dark-popup .swal2-timer-progress-bar {
+  background: #10b981 !important;
+}
+
+/* Custom styling for SweetAlert2 Backdrop Blur */
+.swal2-backdrop-show {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Premium Popup Box Styling */
+.swal-premium-popup {
+  border: 1px solid rgba(255, 215, 0, 0.2) !important; /* Subtle gold border to match the emblem */
+  border-radius: 16px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.1) !important;
+  padding: 2.5rem 1.5rem !important;
+}
+
+/* Premium Animated Emerald Button */
+.swal-premium-button {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 28px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+  transition: all 0.25s ease-in-out !important;
+}
+
+.swal-premium-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.swal-premium-button:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Progress bar color matching your gold branding */
+.swal-premium-progress {
+  background: #ffd700 !important; 
+}

@@ -1,130 +1,445 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* Custom variables balanced precisely between Red, Yellow, and White */
+:root {
+  --red: #b91c1c;            /* Cosmic Vermillion Red (Headers, main filters, primary buttons) */
+  --yellow: #eab308;         /* Bright Sacred Yellow/Gold (Borders, shipping tags, price highlight) */
+  --white: #ffffff;          /* Pure White (Card backgrounds, inner panel blocks) */
+  
+  /* Accent blending colors */
+  --pale-red: #fff5f5;       /* Off-white light red/rose page background */
+  --text-dark: #3b0707;      /* Deep dark red-charcoal for strong readability text */
+  --gray: #6b7280;           /* Soft slate gray */
+  --border: rgba(185, 28, 28, 0.08); /* Soft red border */
+  --green-success: #15803d;  /* Success green for delivery */
 }
 
-.orders-page{
-    background:#f8f6ff;
-    min-height:100vh;
-    padding:30px;
+/* Base Page Wrapper */
+.orders-page {
+  margin-left: 20px;         /* Standard offset margin for routing alignment */
+  padding: 30px;
+  background-color: rgb(245, 245, 240);
+  color: var(--text-dark);
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
 }
 
-.orders-header{
-    margin-bottom:30px;
+/* Header */
+.orders-header {
+  margin-bottom: 30px;
+  text-align: left;
 }
 
-.orders-header h2{
-    color:#4c1d95;
-    margin-bottom:8px;
+.orders-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  background: linear-gradient(120deg, var(--text-dark) 50%, var(--red) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
 }
 
-.orders-header p{
-    color:#777;
+.orders-header p {
+  color: var(--gray);
+  font-size: 14px;
+  margin-top: 6px;
 }
 
-.order-card{
-    background:#fff;
-    border:1px solid #facc15;
-    border-radius:16px;
-    padding:20px;
-    margin-bottom:25px;
-    box-shadow:0 6px 18px rgba(0,0,0,.08);
+/* ==========================================
+   METRICS PIPELINES SECTION
+   ========================================== */
+.logistics-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
-.order-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
+.metric-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 15px rgba(185, 28, 28, 0.02);
 }
 
-.order-top h3{
-    color:#4c1d95;
+.metric-card p {
+  font-size: 11px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-.delivered,
-.shipping{
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:600;
+.metric-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
 }
 
-.delivered{
-    background:#dcfce7;
-    color:#15803d;
+.metric-card span {
+  font-size: 11px;
+  color: var(--gray);
 }
 
-.shipping{
-    background:#fef3c7;
-    color:#ca8a04;
+.text-red { color: var(--red) !important; }
+.text-gold { color: var(--yellow) !important; }
+.text-green { color: var(--green-success) !important; }
+
+/* ==========================================
+   LIVE LOGISTICS FILTER TABS
+   ========================================== */
+.logistics-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 25px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
-.order-body{
-    display:flex;
-    gap:18px;
-    align-items:center;
+.logistics-tab-btn {
+  padding: 8px 18px;
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.order-body img{
-    width:90px;
-    height:90px;
-    border-radius:12px;
-    object-fit:cover;
+.logistics-tab-btn:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
 }
 
-.order-info{
-    flex:1;
+.logistics-tab-btn.active {
+  background: var(--text-dark);
+  color: var(--white);
+  border-color: var(--text-dark);
 }
 
-.order-info h4{
-    color:#4c1d95;
-    margin-bottom:8px;
+/* ==========================================
+   ORDER WORKFLOW CARDS
+   ========================================== */
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 850px;
 }
 
-.order-info p{
-    color:#666;
-    margin-bottom:6px;
+.order-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--yellow); /* Yellow indicator alignment */
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(185, 28, 28, 0.02);
+  display: flex;
+  flex-direction: column;
 }
 
-.order-info strong{
-    color:#ca8a04;
-    font-size:18px;
+/* Top Section with Status */
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  width: 100%;
 }
 
-.order-card button{
-    width:100%;
-    margin-top:20px;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#4c1d95;
-    color:#fff;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
+.order-title-meta {
+  text-align: left;
 }
 
-.order-card button:hover{
-    background:#5b21b6;
+.order-top h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
 }
 
-@media(max-width:768px){
-
-.orders-page{
-    padding:20px;
+.customer-name {
+  font-size: 12px;
+  color: var(--gray);
 }
 
-.order-top{
-    flex-direction:column;
-    gap:10px;
-    align-items:flex-start;
+.customer-name strong {
+  color: var(--text-dark);
 }
 
-.order-body{
-    flex-direction:column;
-    text-align:center;
+/* Status Badges */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
+.status-badge.delivered {
+  background: rgba(21, 128, 61, 0.08);
+  color: var(--green-success);
+  border: 1px solid rgba(21, 128, 61, 0.15);
+}
+
+.status-badge.shipping {
+  background: rgba(234, 179, 8, 0.08);
+  color: var(--yellow);
+  border: 1px solid rgba(234, 179, 8, 0.15);
+}
+
+/* Card Body (Img, specs, and referral) */
+.order-body {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.order-body img {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.order-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.info-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.order-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.referral-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--red);
+  background: rgba(185, 28, 28, 0.06);
+  padding: 2px 10px;
+  border-radius: 30px;
+}
+
+.qty-date {
+  color: var(--gray);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.qty-date strong {
+  color: var(--text-dark);
+}
+
+.order-price {
+  color: var(--yellow);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Admin Action CTAs */
+.order-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: auto;
+}
+
+.btn-view-invoice,
+.btn-update-dispatch {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Secondary Button: Red Outline */
+.btn-view-invoice {
+  background: var(--white);
+  color: var(--red);
+  border: 2px solid var(--red);
+}
+
+.btn-view-invoice:hover {
+  background-color: var(--pale-red);
+}
+
+/* Primary Button: Solid Red with Gold Hover */
+.btn-update-dispatch {
+  background: linear-gradient(135deg, var(--red) 0%, #801010 100%);
+  color: var(--white);
+}
+
+.btn-update-dispatch:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2);
+}
+
+.logistics-success {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-success);
+  background: rgba(21, 128, 61, 0.08);
+  border: 1px solid rgba(21, 128, 61, 0.15);
+  padding: 11px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* ==========================================
+   ANIMATIONS & RESPONSIVE
+   ========================================== */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .orders-page {
+    padding: 16px;
+  }
+
+  .order-top {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .order-body {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+  
+  .info-row-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .order-actions {
+    flex-direction: column;
+  }
+}
+
+.invoice-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.invoice-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+.invoice-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.invoice-modal-header h3 {
+  margin: 0;
+  color: #b91c1c; /* matches your text-red theme */
+}
+
+.invoice-modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666;
+}
+
+.invoice-modal-body {
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+}
+
+.invoice-modal-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.invoice-modal-details p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.invoice-modal-price {
+  font-size: 16px;
+  margin-top: 10px !important;
+  color: #b91c1c;
+}
+
+.invoice-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

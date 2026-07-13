@@ -13,9 +13,7 @@
   box-sizing:border-box;
 }
 
-/* ==========================
-   SIDEBAR
-========================== */
+
 
 .an-sidebar{
   position: fixed;
@@ -24,7 +22,7 @@
   width: 270px;
   height: 100vh;
   overflow-y: auto;
-
+ overflow-x: hidden;
   display:flex;
   flex-direction:column;
 
@@ -88,16 +86,14 @@
 
     color:var(--gold);
 
-    font-size:20px;
+    font-size:15px;
 
     font-weight:700;
 
-    letter-spacing:4px;
+    letter-spacing:3.5px;
 }
 
-/* ==========================
-NAVIGATION
-========================== */
+
 
 .an-sidebar-nav{
 
@@ -255,7 +251,7 @@ FOOTER
 
     align-items:center;
 
-    gap:14px;
+    gap:6px;
 
     margin-top:25px;
 
