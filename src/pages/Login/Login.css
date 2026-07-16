@@ -17,17 +17,21 @@
 .an-login::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: var(--bg-image); 
+  top: 50%;
+  left: 50%;
+  width: 200vmax;
+  height: 200vmax;
+  transform: translate(-50%, -50%) rotate(0deg);
+  background-image: var(--bg-image);
   background-size: cover;
   background-position: center;
-  z-index: -1; 
-  animation: bgZoom 15s ease-in-out infinite alternate; 
+  z-index: -1;
+  animation: bgZoom 19s linear infinite;
 }
 
 @keyframes bgZoom {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.15); }
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .an-login-card {

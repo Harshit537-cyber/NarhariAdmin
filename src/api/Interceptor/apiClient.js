@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "https://astrology-narhari.onrender.com",
+  baseURL: "https://astrologynarhari-1.onrender.com/api",
   timeout: 30000,
 });
 

@@ -1,20 +1,18 @@
 /* Custom variables tailored for an Off-White/Light Pale spiritual theme */
 :root {
-  --gold: #b38c1b;             /* Deep warm gold for proper contrast on white background */
-  --green: #204132;            /* Matching sidebar dark green accents */
-  --brown: #4b3526;            /* Accent brown */
-  --black: #2a231d;            /* Rich dark charcoal-brown for high readability text */
-  --white: #ffffff;            /* Pure white for card background */
-  --pale-bg: #faf8f4;          /* Soft pale off-white background (Sandalwood/Clay vibes) */
-  --gray: #7a7065;             /* Muted text color */
+  --gold: #b38c1b;            
+  --green: #204132;            
+  --brown: #4b3526;           
+  --black: #2a231d;        
+  --white: #ffffff;            
+  --pale-bg: #faf8f4;         
+  --gray: #7a7065;           
   --border: rgba(75, 53, 38, 0.08); /* Warm, very subtle border */
   
-  /* Traditional vermillion red accents for important elements */
   --red: #b91c1c; 
   --red-hover: #991b1b;
 }
 
-/* Page container (Adjusted margin-left to offset your 270px sidebar) */
 .an-dashboard-container {
   margin-left: 10px; 
   padding: 40px;
@@ -25,10 +23,41 @@
   transition: margin-left 0.3s ease;
   overflow-x: hidden;
 }
+/* Role Badges (replaces status-badge) */
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  text-transform: capitalize;
+}
+.sidebar-feed .table-responsive {
+  max-height: 500px;       
+  overflow-y: auto;
+  scrollbar-width: none;  
+}
 
-/* ==========================================
-   HEADER SECTION
-   ========================================== */
+.sidebar-feed .table-responsive::-webkit-scrollbar {
+  display: none;          
+}
+.role-badge.role-admin {
+  background: rgba(185, 28, 28, 0.08);
+  color: var(--red);
+  border: 1px solid rgba(185, 28, 28, 0.15);
+}
+
+.role-badge.role-partner {
+  background: rgba(179, 140, 27, 0.08);
+  color: var(--gold);
+  border: 1px solid rgba(179, 140, 27, 0.15);
+}
+
+.role-badge.role-user {
+  background: rgba(32, 65, 50, 0.08);
+  color: #2e7d32;
+  border: 1px solid rgba(82, 196, 26, 0.15);
+}
 .db-header {
   display: flex;
   justify-content: space-between;
@@ -183,12 +212,9 @@
   animation: pulse 1s infinite;
 }
 
-/* ==========================================
-   DASHBOARD CONTENT GRID
-   ========================================== */
 .db-content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
 }
 
@@ -576,4 +602,69 @@
     flex-direction: column;
     gap: 5px;
   }
+}
+
+.btn-block {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid rgba(185, 28, 28, 0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-block:hover {
+  background: rgba(185, 28, 28, 0.05);
+  border-color: var(--red);
+}
+
+/* Delete Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.modal-box {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 28px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.modal-box h3 {
+  color: var(--black);
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.modal-box p {
+  color: var(--gray);
+  font-size: 14px;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-actions button {
+  flex: 1;
 }

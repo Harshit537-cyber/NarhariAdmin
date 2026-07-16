@@ -1,74 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
-
+import { getAllUsers, getDashboardStats, getRecentUsers ,deleteUser} from "../../api/Controller/authController"; // apna actual path daal dena
+import { toast } from "react-toastify";
+import UserViewModal from "../../components/UserModule/UserViewModal";
 export default function Dashboard() {
-  // Pandit List Data State
-  const [pandits, setPandits] = useState([
-    {
-      id: 1,
-      name: "Acharya Rahul Shastri",
-      specialty: "Kundli, Vastu",
-      rating: "4.9",
-      status: "Active",
-      experience: "12 Yrs",
-    },
-    {
-      id: 2,
-      name: "Pandit Kamlesh Dev",
-      specialty: "Palmistry, Puja",
-      rating: "4.8",
-      status: "Pending Approval",
-      experience: "8 Yrs",
-    },
-    {
-      id: 3,
-      name: "Dr. Ananya Ved",
-      specialty: "Numerology, Horoscopes",
-      rating: "4.7",
-      status: "Active",
-      experience: "10 Yrs",
-    },
-    {
-      id: 4,
-      name: "Shastri Hari Om",
-      specialty: "Vedic Astrology",
-      rating: "New",
-      status: "Pending Approval",
-      experience: "5 Yrs",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [selectedUser, setSelectedUser] = useState(null);
+const [showViewModal, setShowViewModal] = useState(false);
+const [viewUser, setViewUser] = useState(null);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPartners: 0,
+    totalAdmins: 0,
+    newUsersToday: 0,
+    newPartnersToday: 0,
+  });
 
-  // Live Users Data State
-  const [users, setUsers] = useState([
-    {
-      id: 101,
-      name: "Aman Sharma",
-      activity: "Booked Mahamrityunjay Puja",
-      time: "2 mins ago",
-    },
-    {
-      id: 102,
-      name: "Priya Patel",
-      activity: "In Live Chat with Acharya Rahul",
-      time: "5 mins ago",
-    },
-    {
-      id: 103,
-      name: "Rajesh Kumar",
-      activity: "Generated Kundli PDF",
-      time: "15 mins ago",
-    },
-  ]);
+ const [recentUsers, setRecentUsers] = useState([]);
 
-  const handleApprove = (id) => {
-    setPandits(
-      pandits.map((p) => (p.id === id ? { ...p, status: "Active" } : p)),
+  useEffect(() => {
+    fetchUsers();
+    fetchStats();
+    fetchRecentUsers();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await getDashboardStats();
+      setStats(res.data || {});
+    } catch (err) {
+      console.error("Failed to load stats:", err.message || err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllUsers();
+      // response.data me users array
+      setUsers(res.data || []);
+    } catch (err) {
+      setError(err.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRecentUsers = async () => {
+    try {
+      const res = await getRecentUsers();
+      setRecentUsers(res.data);
+    } catch (err) {
+      console.error("Failed to load recent users:", err);
+    }
+  };
+// Delete button click -> popup open karega
+const confirmDelete = (user) => {
+  setSelectedUser(user);
+  setShowDeleteModal(true);
+};
+const handleViewClick = (user) => {
+  setViewUser(user);
+  setShowViewModal(true);
+};
+
+const closeViewModal = () => {
+  setShowViewModal(false);
+  setViewUser(null);
+};
+const handleDeleteConfirmed = async () => {
+  try {
+    const res = await deleteUser(selectedUser._id);
+
+    toast.success(res.message);
+
+    setUsers((prevUsers) =>
+      prevUsers.filter((u) => u._id !== selectedUser._id)
     );
-  };
 
-  const handleBlock = (id) => {
-    setPandits(pandits.filter((p) => p.id !== id));
-  };
+    setShowDeleteModal(false);
+    setSelectedUser(null);
+  } catch (err) {
+    console.error("Delete failed:", err);
+    toast.error(err.message || "Something went wrong");
+  }
+};
+// Popup close/cancel
+const cancelDelete = () => {
+  setShowDeleteModal(false);
+  setSelectedUser(null);
+};
+
+  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
 
   return (
     <div className="an-dashboard-container">
@@ -86,18 +112,9 @@ export default function Dashboard() {
 
       {/* Grid Status Metrics */}
       <div className="db-metrics-grid">
-        <div
-          className="metric-card animate-slide-up"
-          style={{ animationDelay: "0.1s" }}
-        >
+        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="metric-icon users-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -105,145 +122,134 @@ export default function Dashboard() {
             </svg>
           </div>
           <div className="metric-data">
-            <h3>14,250</h3>
-            <p>Total Seekers (Users)</p>
+            <h3>{stats.totalUsers}</h3>
+            <p>Total Users</p>
           </div>
-          <span className="metric-trend up">+12.5%</span>
+          <span className="metric-trend up">+{stats.newUsersToday} Today</span>
         </div>
 
-        <div
-          className="metric-card animate-slide-up"
-          style={{ animationDelay: "0.2s" }}
-        >
+        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="metric-icon pandit-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
           </div>
           <div className="metric-data">
-            <h3>342</h3>
-            <p>Active Pandits</p>
+            <h3>{stats.totalAdmins}</h3>
+            <p>Total Admins</p>
           </div>
-          <span className="metric-trend up">+4.8%</span>
         </div>
 
-        <div
-          className="metric-card animate-slide-up"
-          style={{ animationDelay: "0.3s" }}
-        >
+        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="metric-icon chat-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
           <div className="metric-data">
-            <h3>48</h3>
-            <p>Ongoing Consultations</p>
+            <h3>{stats.totalPartners}</h3>
+            <p>Total Partners</p>
           </div>
-          <span className="metric-pulse-dot"></span>
+          <span className="metric-trend up">+{stats.newPartnersToday} Today</span>
         </div>
 
-        <div
-          className="metric-card animate-slide-up"
-          style={{ animationDelay: "0.4s" }}
-        >
+        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.4s" }}>
           <div className="metric-icon puja-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           </div>
           <div className="metric-data">
-            <h3>₹1.8L</h3>
-            <p>Puja Bookings Today</p>
+            <h3>{stats.newUsersToday + stats.newPartnersToday}</h3>
+            <p>New Signups Today</p>
           </div>
-          <span className="metric-trend up">+18.2%</span>
+          <span className="metric-pulse-dot"></span>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="db-content-grid">
-        {/* Left Side: Pandits Directory */}
+        {/* Left Side: All Users Management */}
         <div className="db-card main-table-card animate-fade-in-delayed">
           <div className="db-card-header">
-            <h2>Pandit & Astrologer Management</h2>
-            <span className="badge">Action Required</span>
+            <h2>All Users Management</h2>
+            <span className="badge">{users.length} Total</span>
+          </div>
+
+          <div className="table-responsive">
+            {loading ? (
+              <p style={{ padding: "20px", color: "var(--gray)" }}>Loading users...</p>
+            ) : error ? (
+              <p style={{ padding: "20px", color: "var(--red)" }}>{error}</p>
+            ) : (
+              <table className="db-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user._id}>
+                      <td>
+                        <div className="user-info">
+                          <div className="user-avatar">{getInitial(user.name)}</div>
+                          <div>
+                            <div className="user-name">{user.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{user.email}</td>
+                      <td>
+                        <span className={`role-badge role-${user.role}`}>
+                          {user.role}
+                        </span>
+                      </td>
+              <td>
+  <div className="action-buttons">
+    <button className="btn-chat" onClick={() => handleViewClick(user)}>View</button>    <button className="btn-block" onClick={() => confirmDelete(user)}>Delete</button>
+  </div>
+</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side: Recent Users */}
+        <div className="db-card sidebar-feed animate-fade-in-delayed">
+          <div className="db-card-header">
+            <h2>Recent Users</h2>
+            <span className="badge">{recentUsers.length} Users</span>
           </div>
           <div className="table-responsive">
             <table className="db-table">
               <thead>
                 <tr>
-                  <th>Pandit Details</th>
-                  <th>Specialty</th>
-                  <th>Rating / Exp</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Joined</th>
                 </tr>
               </thead>
+
               <tbody>
-                {pandits.map((pandit) => (
-                  <tr key={pandit.id}>
+                {recentUsers.map((user) => (
+                  <tr key={user._id}>
+                    <td>{user.name}</td>
+
                     <td>
-                      <div className="user-info">
-                        <div className="user-avatar">
-                          {pandit.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="user-name">{pandit.name}</div>
-                          <div className="user-subtext">ID: #P-{pandit.id}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{pandit.specialty}</td>
-                    <td>
-                      <div className="rating-tag">
-                        ⭐ {pandit.rating}{" "}
-                        <span className="exp">({pandit.experience})</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${pandit.status.toLowerCase().replace(" ", "-")}`}
-                      >
-                        {pandit.status}
+                      <span className={`role-badge role-${user.role}`}>
+                        {user.role}
                       </span>
                     </td>
+
                     <td>
-                      <div className="action-buttons">
-                        {pandit.status === "Pending Approval" ? (
-                          <button
-                            className="btn-approve"
-                            onClick={() => handleApprove(pandit.id)}
-                          >
-                            Approve
-                          </button>
-                        ) : (
-                          <button className="btn-chat">Message</button>
-                        )}
-                        <button
-                          className="btn-block"
-                          onClick={() => handleBlock(pandit.id)}
-                        >
-                          Disable
-                        </button>
-                      </div>
+                      {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
@@ -251,40 +257,30 @@ export default function Dashboard() {
             </table>
           </div>
         </div>
-
-        {/* Right Side: Live Activity Feed */}
-        <div className="db-card sidebar-feed animate-fade-in-delayed">
-          <div className="db-card-header">
-            <h2>Live Activity Feed</h2>
-            <div className="status-indicator">
-              <span className="blink-dot"></span>
-              Real-time
-            </div>
-          </div>
-
-          <div className="activity-list">
-            {users.map((user) => (
-              <div className="activity-item" key={user.id}>
-                <div className="activity-marker"></div>
-                <div className="activity-content">
-                  <p>
-                    <strong>{user.name}</strong> {user.activity}
-                  </p>
-                  <span className="activity-time">{user.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="quick-actions-box">
-            <h4>Quick Operations</h4>
-            <div className="quick-grid">
-              <button className="quick-btn-gold">Broadcast Message</button>
-              <button className="quick-btn-dark">Configure Puja Catalog</button>
-            </div>
-          </div>
-        </div>
       </div>
+      {showDeleteModal && (
+  <div className="modal-overlay">
+    <div className="modal-box">
+      <h3>Delete User?</h3>
+      <p>
+        Are you sure you want to delete <strong>{selectedUser?.name}</strong>?
+        This action cannot be undone.
+      </p>
+      <div className="modal-actions">
+        <button className="btn-block" onClick={handleDeleteConfirmed}>
+          Yes, Delete
+        </button>
+        <button className="btn-chat" onClick={cancelDelete}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{showViewModal && (
+  <UserViewModal user={viewUser} onClose={closeViewModal} />
+)}
     </div>
   );
 }

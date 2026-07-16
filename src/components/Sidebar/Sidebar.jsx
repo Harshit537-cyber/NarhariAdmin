@@ -5,7 +5,8 @@ import "./sidebar.css";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: <IconGrid /> },
-  { to: "/astrologer", label: "Astrologer", icon: <IconStar /> },
+  { to: "/partner", label: "Partner", icon: <IconPartner /> },
+  // { to: "/astrologer", label: "Astrologer", icon: <IconStar /> },
   { to: "/consultation", label: "Consultation", icon: <IconChat /> },
   { to: "/wallet", label: "Wallet", icon: <IconWallet /> },
   { to: "/shop", label: "Shop", icon: <IconStore /> },
@@ -127,6 +128,16 @@ function IconList() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 6h11M9 12h11M9 18h11M5 6v.01M5 12v.01M5 18v.01" />
+    </svg>
+  );
+}
+function IconPartner() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="10" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }

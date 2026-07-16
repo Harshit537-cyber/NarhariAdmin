@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import bgImage from "../../assets/austro.png";
-import { loginAdmin } from "../../api/authController";
+import { loginAdmin } from "../../api/Controller/authController";
 import Swal from "sweetalert2";
+
 export default function Login() {
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -14,8 +15,9 @@ export default function Login() {
 
   function validate() {
     const next = {};
-    if (!mobile.trim()) next.mobile = "Required";
-    else if (!/^[0-9]{10}$/.test(mobile)) next.mobile = "Invalid mobile number";
+    if (!email.trim()) next.email = "Required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      next.email = "Invalid email address";
     if (!password) next.password = "Required";
     return next;
   }
@@ -32,11 +34,11 @@ export default function Login() {
 
     try {
       const res = await loginAdmin({
-        mobile,
+        email,
         password,
       });
 
-      if (res.success) {
+      if (res.token) {
         await Swal.fire({
           icon: "success",
           title: "Access Granted",
@@ -45,9 +47,9 @@ export default function Login() {
               Welcome back to <span style="color: #ffd700; font-weight: 600; text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);">Austronarhari</span>
             </p>
           `,
-          background: "rgba(18, 18, 18, 0.95)", // Elegant dark theme
+          background: "rgba(18, 18, 18, 0.95)",
           color: "#ffffff",
-          iconColor: "#10b981", // Vibrant green icon
+          iconColor: "#10b981",
           confirmButtonText: "Continue to Dashboard",
           timer: 3000,
           timerProgressBar: true,
@@ -65,7 +67,7 @@ export default function Login() {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: error.message || "Invalid Mobile or Password",
+        text: error.message || "Invalid Email or Password",
         confirmButtonColor: "#d33",
       });
     } finally {
@@ -91,13 +93,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="an-field">
-            <label className="an-label">Enter Mobile no.</label>
+            <label className="an-label">Enter Email</label>
             <input
-              type="tel"
-              maxLength="10"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-              className={errors.mobile ? "error" : ""}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={errors.email ? "error" : ""}
+              placeholder="you@example.com"
             />
           </div>
 
