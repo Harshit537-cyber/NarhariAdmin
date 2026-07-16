@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Partner.css";
-import { getAllPartners, deletePartner } from "../../api/Controller/partner"; 
+import {
+  getAllPartners,
+  deletePartner,
+  activatePartner,
+  deactivatePartner,
+} from "../../api/Controller/partner";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import DeleteModal from "./DeleteModal";
 import EditPartnerModal from "./Editpartner";
 import { toast } from "react-toastify";
+
 export default function Partner() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
-
   const [error, setError] = useState(null);
-const [deleteOpen, setDeleteOpen] = useState(false);
-const [selectedPartner, setSelectedPartner] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
+
   useEffect(() => {
     fetchPartners();
   }, []);
@@ -28,21 +35,71 @@ const [selectedPartner, setSelectedPartner] = useState(null);
       setLoading(false);
     }
   };
-const handleEdit = (partner) => {
-  setSelectedPartner(partner);
-  setEditOpen(true);
-};
-const handleView = (partner) => {
-  setSelectedPartner(partner);
-  // apna view logic yaha daalo
-};
+
+  const handleEdit = (partner) => {
+    setSelectedPartner(partner);
+    setEditOpen(true);
+  };
+
+  const handleView = (partner) => {
+    setSelectedPartner(partner);
+    // apna view logic yaha daalo
+  };
+
+  // ==========================================
+  // TOGGLE ACTIVATE / DEACTIVATE (single switch)
+  // ==========================================
+  const handleToggleStatus = async (partner) => {
+    const isCurrentlyActive = !!partner.isActive;
+    setTogglingId(partner._id);
+
+    // optimistic UI update
+    setPartners((prev) =>
+      prev.map((p) =>
+        p._id === partner._id ? { ...p, isActive: !isCurrentlyActive } : p
+      )
+    );
+
+    try {
+      if (isCurrentlyActive) {
+        await deactivatePartner(
+          partner._id,
+          "Deactivated by admin",
+          "Deactivated by admin"
+        );
+        toast.success("Partner deactivated successfully");
+      } else {
+        await activatePartner(partner._id);
+        toast.success("Partner activated successfully");
+      }
+    } catch (err) {
+      console.error("Toggle status error:", err);
+
+      // Agar backend bole "already active/deactivated", UI already sahi state me hai — revert mat karo
+      const alreadyMsg = (err.message || "").toLowerCase();
+      if (alreadyMsg.includes("already")) {
+        toast.info(err.message);
+        return;
+      }
+
+      // Actual failure — revert UI
+      setPartners((prev) =>
+        prev.map((p) =>
+          p._id === partner._id ? { ...p, isActive: isCurrentlyActive } : p
+        )
+      );
+      toast.error(err.message || "Status update failed");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const recentPartners = useMemo(() => {
     return [...partners]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
   }, [partners]);
 
-  // Quick stats derived client-side from the partners list
   const stats = useMemo(() => {
     const today = new Date().toDateString();
     const totalPartners = partners.length;
@@ -56,24 +113,21 @@ const handleView = (partner) => {
     return { totalPartners, verifiedCount, kycPendingCount, newToday };
   }, [partners]);
 
-const confirmDelete = async () => {
-  try {
-    await deletePartner(selectedPartner._id);
-
-    setPartners((prev) =>
-      prev.filter((partner) => partner._id !== selectedPartner._id)
-    );
-  toast.success("Partner deleted successfully");
-
-    setDeleteOpen(false);
-    setSelectedPartner(null);
-
-  } catch (error) {
-    console.log(error);
+  const confirmDelete = async () => {
+    try {
+      await deletePartner(selectedPartner._id);
+      setPartners((prev) =>
+        prev.filter((partner) => partner._id !== selectedPartner._id)
+      );
+      toast.success("Partner deleted successfully");
+      setDeleteOpen(false);
+      setSelectedPartner(null);
+    } catch (error) {
+      console.log(error);
       toast.error(error.message || "Failed to delete partner");
+    }
+  };
 
-  }
-};
   return (
     <div className="an-partner-container">
       {/* Header */}
@@ -132,7 +186,6 @@ const confirmDelete = async () => {
 
       {/* Main Content Area */}
       <div className="pt-content-grid">
-        {/* Left Side: All Partners Management */}
         <div className="db-card main-table-card animate-fade-in-delayed">
           <div className="db-card-header">
             <h2>All Partners Management</h2>
@@ -152,7 +205,9 @@ const confirmDelete = async () => {
                     <th>Verified</th>
                     <th>Profile Complete</th>
                     <th>KYC Status</th>
-                    <th>Action</th>                  </tr>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {partners.map((partner) => (
@@ -169,55 +224,71 @@ const confirmDelete = async () => {
                         </span>
                       </td>
                       <td>{partner.kycStatus}</td>
-<td>
-  <div className="action-btns">
-    <button
-      className="action-btn view-btn"
-      onClick={() => handleView(partner)}
-    >
-      <FaEye />
-    </button>
 
-   <button className="action-btn edit-btn" onClick={() => handleEdit(partner)}>
-  <FaEdit />
-</button>
+                      {/* SINGLE TOGGLE SWITCH */}
+                      <td>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={!!partner.isActive}
+                            disabled={togglingId === partner._id}
+                            onChange={() => handleToggleStatus(partner)}
+                          />
+                          <span className="toggle-slider"></span>
+                        </label>
+                        <span
+                          className={`toggle-status-label ${
+                            partner.isActive ? "active" : "inactive"
+                          }`}
+                        >
+                          {partner.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
 
-    <button
-      className="action-btn delete-btn"
-   onClick={() => {
-  setSelectedPartner(partner);
-  setDeleteOpen(true);
-}}
-    >
-      <FaTrash />
-    </button>
-  </div>
-</td>                </tr>
+                      <td>
+                        <div className="action-btns">
+                          <button className="action-btn view-btn" onClick={() => handleView(partner)}>
+                            <FaEye />
+                          </button>
+                          <button className="action-btn edit-btn" onClick={() => handleEdit(partner)}>
+                            <FaEdit />
+                          </button>
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => {
+                              setSelectedPartner(partner);
+                              setDeleteOpen(true);
+                            }}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             )}
           </div>
         </div>
-
-      
       </div>
-      <DeleteModal
-  isOpen={deleteOpen}
-  onClose={() => setDeleteOpen(false)}
-  onConfirm={confirmDelete}
-/>
 
-<EditPartnerModal
-  isOpen={editOpen}
-  onClose={() => setEditOpen(false)}
-  partner={selectedPartner}
-  onUpdated={(updated) => {
-    setPartners((prev) =>
-      prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p))
-    );
-  }}
-/>
+      <DeleteModal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={confirmDelete}
+      />
+
+      <EditPartnerModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        partner={selectedPartner}
+        onUpdated={(updated) => {
+          setPartners((prev) =>
+            prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p))
+          );
+        }}
+      />
     </div>
   );
 }
