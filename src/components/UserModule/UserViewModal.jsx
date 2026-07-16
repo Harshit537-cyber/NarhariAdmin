@@ -1,18 +1,13 @@
 import React from "react";
 import "./UserViewModal.css";
 
-/**
- * Reusable "View User" modal.
- * Parent se `user` object aur `onClose` function pass karna hai.
- * Agar user null hai to kuch render nahi hoga.
- */
-export default function UserViewModal({ user, onClose }) {
-  if (!user) return null;
 
+export default function UserViewModal({ user, onClose, title  }) {
+  if (!user) return null;
   return (
     <div className="modal-overlay">
       <div className="modal-box view-modal-box">
-        <h3 className="view-modal-title">✦ User Details</h3>
+        <h3 className="view-modal-title">{title}</h3>
 
         <div className="view-details-list">
           <div className="view-row">

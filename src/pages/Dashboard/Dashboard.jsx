@@ -3,6 +3,7 @@ import "./Dashboard.css";
 import { getAllUsers, getDashboardStats, getRecentUsers ,deleteUser} from "../../api/Controller/authController"; // apna actual path daal dena
 import { toast } from "react-toastify";
 import UserViewModal from "../../components/UserModule/UserViewModal";
+import { FaEye } from "react-icons/fa";
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +12,7 @@ const [showDeleteModal, setShowDeleteModal] = useState(false);
 const [selectedUser, setSelectedUser] = useState(null);
 const [showViewModal, setShowViewModal] = useState(false);
 const [viewUser, setViewUser] = useState(null);
+const [modalTitle, setModalTitle] = useState("");
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalPartners: 0,
@@ -70,6 +72,16 @@ const handleViewClick = (user) => {
 const closeViewModal = () => {
   setShowViewModal(false);
   setViewUser(null);
+};
+const handleUserView = (user) => {
+  setViewUser(user);
+  setModalTitle("User Details");
+  setShowViewModal(true);
+};
+const handleRecentUserView = (user) => {
+  setViewUser(user);
+  setModalTitle("Recent User Details");
+  setShowViewModal(true);
 };
 const handleDeleteConfirmed = async () => {
   try {
@@ -210,7 +222,7 @@ const cancelDelete = () => {
                       </td>
               <td>
   <div className="action-buttons">
-    <button className="btn-chat" onClick={() => handleViewClick(user)}>View</button>    <button className="btn-block" onClick={() => confirmDelete(user)}>Delete</button>
+    <button className="btn-chat" onClick={() => handleUserView(user)}>View</button>    <button className="btn-block" onClick={() => confirmDelete(user)}>Delete</button>
   </div>
 </td>
                     </tr>
@@ -233,27 +245,37 @@ const cancelDelete = () => {
                 <tr>
                   <th>Name</th>
                   <th>Role</th>
-                  <th>Joined</th>
-                </tr>
+ <th>Mobile No.</th>
+    <th>Email</th>    
+        <th>Action</th>
+            </tr>
               </thead>
+<tbody>
+  {recentUsers.map((user) => (
+    <tr key={user._id}>
+      <td>{user.name || "-"}</td>
 
-              <tbody>
-                {recentUsers.map((user) => (
-                  <tr key={user._id}>
-                    <td>{user.name}</td>
+      <td>
+        <span className={`role-badge role-${user.role}`}>
+          {user.role}
+        </span>
+      </td>
 
-                    <td>
-                      <span className={`role-badge role-${user.role}`}>
-                        {user.role}
-                      </span>
-                    </td>
+      <td>{user.mobile || "-"}</td>
 
-                    <td>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+      <td>{user.email || "-"}</td>
+      <td>
+  <button
+    className="btn-chat"
+    onClick={() => handleRecentUserView(user)}
+  >
+    <FaEye style={{ marginRight: "5px" }} />
+   
+  </button>
+</td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
         </div>
@@ -279,8 +301,16 @@ const cancelDelete = () => {
 )}
 
 {showViewModal && (
-  <UserViewModal user={viewUser} onClose={closeViewModal} />
+  <UserViewModal
+    user={viewUser}
+    onClose={closeViewModal}
+    title={modalTitle}
+  />
 )}
+
+
+
+
     </div>
   );
 }

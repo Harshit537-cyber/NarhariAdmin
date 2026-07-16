@@ -83,3 +83,29 @@ export const deactivatePartner = async (
     );
   }
 };
+
+// Update Partner Document Status
+export const updatePartnerDocumentStatus = async (
+  partnerId,
+  document,
+  status
+) => {
+  try {
+    const response = await apiClient.put(
+      `/api/admin/dashboard/partners/${partnerId}/documents`,
+      {
+        partnerId,
+        document,
+        status,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        message: "Something went wrong",
+      }
+    );
+  }
+};
