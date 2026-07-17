@@ -13,43 +13,158 @@
   overflow: hidden;
   z-index: 1;
 }
-
-.an-login::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200vmax;
-  height: 200vmax;
-  transform: translate(-50%, -50%) rotate(0deg);
-  background-image: var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  z-index: -1;
-  animation: bgZoom 19s linear infinite;
-}
-
-@keyframes bgZoom {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-.an-login-card {
+.bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 380px;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.an-status-icon {
+  font-size: 18px;
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+}
+
+
+/* ---------------- WRAPPER (holds left + right) ---------------- */
+.an-login-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  min-height: 560px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(97, 92, 30, 0.5);
+}
+
+/* ---------------- LEFT PANEL ---------------- */
+.an-login-left {
+  flex: 1;
+  background: linear-gradient(160deg, rgba(15, 15, 15, 0.9), rgba(30, 24, 8, 0.9));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 215, 0, 0.15);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #ffffff;
+}
+
+.an-left-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.an-left-logo svg {
+  width: 30px;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+}
+
+.an-left-logo span {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--gold-light);
+}
+
+.an-status-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.an-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.an-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+  background: rgba(255, 215, 0, 0.12);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.an-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+}
+
+.an-status-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+
+
+.an-status-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.an-status-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.an-status-check {
+  margin-left: auto;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.an-left-bottom h2 {
+  font-size: 22px;
+  color: var(--gold-light);
+  margin-bottom: 10px;
+}
+
+.an-left-bottom p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---------------- RIGHT PANEL (existing login card, resized for split layout) ---------------- */
+.an-login-card {
+  flex: 1;
+  width: 100%;
+  max-width: none;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.an-login-card:hover { 
-  transform: translateY(-5px); 
-  box-shadow: 0 20px 40px rgba(184, 134, 11, 0.3); 
+  padding: 50px 45px;
+  box-shadow: none;
+  border: none;
+  transition: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .an-login-emblem { 
@@ -155,6 +270,7 @@
   transform: none;
   box-shadow: none;
 }
+
 .an-label {
   display: block;
   text-align: left;
@@ -164,56 +280,27 @@
   font-weight: 500;
   letter-spacing: 0.5px;
 }
-/* SweetAlert2 Sleek Dark & Green Accent Theme */
-.swal-dark-popup {
-  border: 1px solid rgba(16, 185, 129, 0.2) !important; /* Subtle green border glow */
-  border-radius: 16px !important;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.1) !important;
-  font-family: 'Segoe UI', sans-serif !important;
+
+/* Responsive - stack on mobile */
+@media (max-width: 768px) {
+  .an-login-wrapper {
+    flex-direction: column;
+    max-width: 420px;
+  }
+  .an-login-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  }
 }
 
-/* Green gradient button with hover effects */
-.swal-green-button {
-  background: linear-gradient(135deg, #059669, #10b981) !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-radius: 8px !important;
-  padding: 12px 28px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
-  transition: all 0.2s ease !important;
-}
-
-.swal-green-button:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
-}
-
-.swal-green-button:focus {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4) !important;
-}
-
-/* Green timer progress bar */
-.swal-dark-popup .swal2-timer-progress-bar {
-  background: #10b981 !important;
-}
-
-/* Custom styling for SweetAlert2 Backdrop Blur */
-.swal2-backdrop-show {
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
-/* Premium Popup Box Styling */
+/* ---- SweetAlert2 styles same as before ---- */
 .swal-premium-popup {
-  border: 1px solid rgba(255, 215, 0, 0.2) !important; /* Subtle gold border to match the emblem */
+  border: 1px solid rgba(255, 215, 0, 0.2) !important;
   border-radius: 16px !important;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.1) !important;
   padding: 2.5rem 1.5rem !important;
 }
 
-/* Premium Animated Emerald Button */
 .swal-premium-button {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   color: #ffffff !important;
@@ -233,11 +320,6 @@
   transform: translateY(-1px);
 }
 
-.swal-premium-button:focus {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4) !important;
-}
-
-/* Progress bar color matching your gold branding */
 .swal-premium-progress {
   background: #ffd700 !important; 
 }

@@ -279,16 +279,12 @@ export default function Partner() {
         onConfirm={confirmDelete}
       />
 
-      <EditPartnerModal
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-        partner={selectedPartner}
-        onUpdated={(updated) => {
-          setPartners((prev) =>
-            prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p))
-          );
-        }}
-      />
+    <EditPartnerModal
+  isOpen={editOpen}
+  onClose={() => setEditOpen(false)}
+  partner={selectedPartner}
+  onUpdated={fetchPartners}
+/>
     </div>
   );
 }

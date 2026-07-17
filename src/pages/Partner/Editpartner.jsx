@@ -27,8 +27,6 @@ const EMPTY_FORM = {
   qualification: "",
   expectedSalary: "",
   bio: "",
-  profilePic: "",
-  additionalPhotos: [],
   isVerified: false,
   isProfileComplete: false,
 };
@@ -36,7 +34,6 @@ const EMPTY_FORM = {
 export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }) {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
-  const [photoInput, setPhotoInput] = useState("");
 
   // Load partner data into the form whenever a new partner is passed in / modal opens
   useEffect(() => {
@@ -53,12 +50,9 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
         qualification: partner.qualification || "",
         expectedSalary: partner.expectedSalary ?? "",
         bio: partner.bio || "",
-        profilePic: partner.profilePic || "",
-        additionalPhotos: partner.additionalPhotos || [],
         isVerified: !!partner.isVerified,
         isProfileComplete: !!partner.isProfileComplete,
       });
-      setPhotoInput("");
     }
   }, [partner, isOpen]);
 
@@ -66,6 +60,7 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -84,38 +79,32 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
     });
   };
 
-  const addPhoto = () => {
-    if (!photoInput.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      additionalPhotos: [...prev.additionalPhotos, photoInput.trim()],
-    }));
-    setPhotoInput("");
-  };
-
-  const removePhoto = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      additionalPhotos: prev.additionalPhotos.filter((_, i) => i !== index),
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setSaving(true);
 
       const payload = {
-        ...formData,
-        experience: formData.experience === "" ? 0 : Number(formData.experience),
-        expectedSalary: formData.expectedSalary === "" ? 0 : Number(formData.expectedSalary),
+        fullName: formData.fullName,
+        mobile: formData.mobile,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        city: formData.city,
+        qualification: formData.qualification,
+        experience: Number(formData.experience),
+        expectedSalary: Number(formData.expectedSalary),
+        bio: formData.bio,
+        isVerified: formData.isVerified,
+        isProfileComplete: formData.isProfileComplete,
+        specialties: formData.specialties,
+        languages: formData.languages,
       };
 
-      const res = await updatePartner(partner._id, payload);
+      await updatePartner(partner._id, payload);
+
       toast.success("Partner updated successfully");
 
-      // Bubble the updated partner up so the parent list can refresh without a refetch
-      onUpdated?.(res?.data || { ...partner, ...payload });
+      onUpdated?.();
       onClose();
     } catch (err) {
       toast.error(err.message || "Failed to update partner");
@@ -276,50 +265,6 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
               onChange={handleChange}
               placeholder="Professional astrologer with 5 years of experience."
             />
-          </div>
-
-          {/* Media */}
-          <div className="epm-section">
-            <h3>Media</h3>
-            <div className="epm-field">
-              <label>Profile Picture URL</label>
-              <input
-                type="text"
-                name="profilePic"
-                value={formData.profilePic}
-                onChange={handleChange}
-                placeholder="https://example.com/profile.jpg"
-              />
-              {formData.profilePic && (
-                <img src={formData.profilePic} alt="Profile Preview" className="epm-preview-img" />
-              )}
-            </div>
-
-            <div className="epm-field">
-              <label>Additional Photos</label>
-              <div className="epm-photo-add">
-                <input
-                  type="text"
-                  value={photoInput}
-                  onChange={(e) => setPhotoInput(e.target.value)}
-                  placeholder="https://example.com/photo1.jpg"
-                />
-                <button type="button" className="epm-btn epm-btn-secondary" onClick={addPhoto}>
-                  Add
-                </button>
-              </div>
-
-              <div className="epm-photo-list">
-                {formData.additionalPhotos.map((photo, index) => (
-                  <div className="epm-photo-item" key={index}>
-                    <img src={photo} alt={`Additional ${index + 1}`} />
-                    <button type="button" onClick={() => removePhoto(index)}>
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Status */}

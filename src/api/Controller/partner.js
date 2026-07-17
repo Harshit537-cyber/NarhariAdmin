@@ -15,16 +15,30 @@ export const getAllPartners = async () => {
 };
 
 // Update Partner
-export const updatePartner = async (partnerId, data) => {
+export const updatePartner = async (partnerId, data) => 
+  {
   try {
+
     const response = await apiClient.put(
-      `/admin/dashboard/partner/${partnerId}`,
-      data
+
+      `/admin/dashboard/partners/${partnerId}`,
+
+      data,
+      {
+        headers: {
+
+          "Content-Type": "application/json",
+        },
+      }
     );
     return response.data;
-  } catch (error) {
+
+  } 
+  catch (error) {
     throw (
+
       error.response?.data || {
+
         message: "Something went wrong",
       }
     );
@@ -92,7 +106,7 @@ export const updatePartnerDocumentStatus = async (
 ) => {
   try {
     const response = await apiClient.put(
-      `/api/admin/dashboard/partners/${partnerId}/documents`,
+      `/admin/dashboard/partners/${partnerId}/documents`,
       {
         partnerId,
         document,

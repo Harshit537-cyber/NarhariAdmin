@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./sidebar.css";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: <IconGrid /> },
-  { to: "/partner", label: "Partner", icon: <IconPartner /> },
-  // { to: "/astrologer", label: "Astrologer", icon: <IconStar /> },
   { to: "/consultation", label: "Consultation", icon: <IconChat /> },
   { to: "/wallet", label: "Wallet", icon: <IconWallet /> },
   { to: "/shop", label: "Shop", icon: <IconStore /> },
@@ -17,49 +15,81 @@ const navItems = [
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showModal, setShowModal] = useState(false);
+  const [partnerOpen, setPartnerOpen] = useState(
+    location.pathname.startsWith("/partner")
+  );
 
   return (
     <aside className="an-sidebar">
       <div className="an-sidebar-brand">
         <div style={{ transform: "rotate(-10deg)" }}>
-          <svg
-            width="35"
-            height="35"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M62 20C44 20 30 34 30 52C30 70 44 84 62 84C68 84 73.5 82.5 78 79.8C68.4 76.7 61.5 67.8 61.5 57.2C61.5 43.6 71 32.4 84 29.6C78.2 23.6 70.5 20 62 20Z"
               fill="#c9a227"
             />
           </svg>
         </div>
-        <span className="an-sidebar-brand-text">AUSTRONARHARI</span>
+        <span className="an-sidebar-brand-text">ASTRONARHARI</span>
       </div>
 
       <nav className="an-sidebar-nav">
-        {navItems.map((item) => (
+        {/* Dashboard */}
+        <NavLink to="/dashboard" className={({ isActive }) => `an-nav-item ${isActive ? "is-active" : ""}`}>
+          <IconGrid />
+          <span>Dashboard</span>
+        </NavLink>
+
+        {/* Partner with submenu */}
+        <div className="an-nav-group">
+          <button
+            className={`an-nav-item an-nav-parent ${partnerOpen ? "is-open" : ""}`}
+            onClick={() => setPartnerOpen((prev) => !prev)}
+          >
+            <IconPartner />
+            <span>Partner</span>
+            <IconChevron className="an-nav-chevron" />
+          </button>
+
+          {partnerOpen && (
+            <div className="an-nav-submenu">
+              <NavLink
+                to="/partner"
+                end
+                className={({ isActive }) => `an-nav-subitem ${isActive ? "is-active" : ""}`}
+              >
+                <span>All Partners</span>
+              </NavLink>
+              <NavLink
+                to="/partner/profile-approval"
+                className={({ isActive }) => `an-nav-subitem ${isActive ? "is-active" : ""}`}
+              >
+                <span>Profile Approval</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
+
+        {/* Remaining items */}
+        {navItems.slice(1).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) =>
-              `an-nav-item ${isActive ? "is-active" : ""}`
-            }
+            className={({ isActive }) => `an-nav-item ${isActive ? "is-active" : ""}`}
           >
             {item.icon}
             <span>{item.label}</span>
           </NavLink>
         ))}
-       
       </nav>
-<button
-          className="an-nav-item logout-btn"
-          onClick={() => setShowModal(true)}
-        >
-          <IconLogout />
-          <span>Logout</span>
-        </button>
+
+      <button className="an-nav-item logout-btn" onClick={() => setShowModal(true)}>
+        <IconLogout />
+        <span>Logout</span>
+      </button>
+
       <LogoutModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -138,6 +168,13 @@ function IconPartner() {
       <circle cx="10" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+function IconChevron({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 9l6 6 6-6" />
     </svg>
   );
 }

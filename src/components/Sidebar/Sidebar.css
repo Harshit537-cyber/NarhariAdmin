@@ -13,8 +13,6 @@
   box-sizing:border-box;
 }
 
-
-
 .an-sidebar{
   position: fixed;
   top: 0;
@@ -22,7 +20,7 @@
   width: 270px;
   height: 100vh;
   overflow-y: auto;
- overflow-x: hidden;
+  overflow-x: hidden;
   display:flex;
   flex-direction:column;
 
@@ -66,7 +64,6 @@
 ========================== */
 
 .an-sidebar-brand{
-
     display:flex;
     align-items:center;
     gap:14px;
@@ -78,25 +75,21 @@
 }
 
 .an-sidebar-brand svg{
-
     filter:drop-shadow(0 0 10px rgba(212,175,55,.6));
 }
 
 .an-sidebar-brand-text{
-
     color:var(--gold);
-
     font-size:15px;
-
     font-weight:700;
-
     letter-spacing:3.5px;
 }
 
-
+/* ==========================
+   NAV
+========================== */
 
 .an-sidebar-nav{
-
     display:flex;
     flex-direction:column;
     gap:10px;
@@ -105,7 +98,6 @@
 }
 
 .an-nav-item{
-
     display:flex;
     align-items:center;
     gap:15px;
@@ -132,40 +124,27 @@
 /* Left Active Border */
 
 .an-nav-item::before{
-
     content:"";
-
     position:absolute;
-
     left:0;
-
     top:10%;
-
     width:4px;
-
     height:80%;
-
     border-radius:10px;
-
     background:transparent;
-
     transition:.35s;
 }
 
 .an-nav-item svg{
-
     width:22px;
     height:22px;
-
     transition:.35s;
 }
 
 /* Hover */
 
 .an-nav-item:hover{
-
     background:
-
     linear-gradient(
     90deg,
     rgba(212,175,55,.12),
@@ -180,23 +159,18 @@
 }
 
 .an-nav-item:hover svg{
-
     color:var(--gold);
-
     transform:scale(1.12) rotate(-8deg);
 }
 
 .an-nav-item:hover::before{
-
     background:var(--gold);
 }
 
 /* ACTIVE */
 
 .an-nav-item.is-active{
-
     background:
-
     linear-gradient(
     90deg,
     rgba(212,175,55,.20),
@@ -208,20 +182,87 @@
     border:1px solid rgba(212,175,55,.35);
 
     box-shadow:
-
     0 8px 25px rgba(0,0,0,.35),
-
     inset 0 0 12px rgba(255,255,255,.05);
 }
 
 .an-nav-item.is-active svg{
-
     color:var(--gold);
 }
 
 .an-nav-item.is-active::before{
-
     background:var(--gold);
+}
+
+/* ==========================
+PARTNER SUBMENU
+========================== */
+
+.an-nav-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.an-nav-parent{
+    width:100%;
+    border:none;
+    background:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:inherit;
+    justify-content:flex-start;
+    text-align:left;
+}
+
+.an-nav-chevron{
+    width:16px !important;
+    height:16px !important;
+    margin-left:auto;
+    transition:.3s;
+}
+
+.an-nav-parent.is-open .an-nav-chevron{
+    transform:rotate(180deg);
+    color:var(--gold);
+}
+
+.an-nav-submenu{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+
+    margin:4px 0 4px 18px;
+    padding-left:18px;
+
+    border-left:1px solid rgba(212,175,55,.25);
+}
+
+.an-nav-subitem{
+    display:flex;
+    align-items:center;
+
+    text-decoration:none;
+
+    color:#b5b5b5;
+
+    padding:10px 14px;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    transition:.25s;
+}
+
+.an-nav-subitem:hover{
+    background:rgba(212,175,55,.10);
+    color:#fff;
+}
+
+.an-nav-subitem.is-active{
+    background:rgba(212,175,55,.18);
+    color:var(--gold);
+    font-weight:600;
 }
 
 /* ==========================
@@ -229,7 +270,6 @@ LOGOUT
 ========================== */
 
 .logout-btn{
-
     width:100%;
 
     border:none;
@@ -239,6 +279,8 @@ LOGOUT
     cursor:pointer;
 
     font-size:15px;
+
+    margin-top:auto;
 }
 
 /* ==========================
@@ -246,7 +288,6 @@ FOOTER
 ========================== */
 
 .an-sidebar-footer{
-
     display:flex;
 
     align-items:center;
@@ -261,14 +302,12 @@ FOOTER
 }
 
 .an-sidebar-avatar{
-
     width:52px;
     height:52px;
 
     border-radius:16px;
 
     background:
-
     linear-gradient(
     135deg,
     var(--gold),
@@ -288,23 +327,17 @@ FOOTER
     font-weight:bold;
 
     box-shadow:
-
     0 0 20px rgba(212,175,55,.35);
 }
 
 .an-sidebar-user-name{
-
     color:white;
-
     margin:0;
-
     font-weight:600;
-
     font-size:15px;
 }
 
 .an-sidebar-user-role{
-
     margin-top:4px;
 
     color:#d4af37;
@@ -323,14 +356,11 @@ Responsive
 @media(max-width:860px){
 
 .an-sidebar{
-
     width:84px;
-
     padding:24px 12px;
 }
 
 .an-sidebar-brand{
-
     justify-content:center;
 }
 
@@ -338,27 +368,20 @@ Responsive
 .an-nav-item span,
 .an-sidebar-user-name,
 .an-sidebar-user-role{
-
     display:none;
 }
 
 .an-nav-item{
-
     justify-content:center;
     padding:15px;
 }
 
 .an-sidebar-footer{
-
     justify-content:center;
 }
 
-}.logout-btn{
-    width:100%;
-    border:none;
-    background:none;
-    cursor:pointer;
-    font-size:15px;
+.an-nav-submenu{
+    display:none;
+}
 
-    margin-top:auto;
 }
