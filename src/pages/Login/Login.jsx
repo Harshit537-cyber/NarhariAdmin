@@ -1,74 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
-import { loginAdmin } from "../../api/Controller/authController";
 import Swal from "sweetalert2";
-import { FaShieldAlt } from "react-icons/fa";
+import { FaShieldAlt, FaPhoneAlt, FaUser, FaLock } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 import bgVideo from "../../assets/bgVideo.mp4";
+
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState("send");
+  const [action, setAction] = useState("login");
+  const [mobile, setMobile] = useState("");
+  const [name, setName] = useState("");
+  const [otp, setOtp] = useState("");
+  const [timer, setTimer] = useState(120);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  function validate() {
+  useEffect(() => {
+    let interval = null;
+    if (step === "verify" && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
+
+  function validateSend() {
     const next = {};
-    if (!email.trim()) next.email = "Required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      next.email = "Invalid email address";
-    if (!password) next.password = "Required";
+    if (!mobile.trim()) {
+      next.mobile = "Mobile number is required";
+    } else if (!/^[0-9]{10}$/.test(mobile.trim())) {
+      next.mobile = "Enter a valid 10-digit mobile number";
+    }
     return next;
   }
 
-  async function handleSubmit(e) {
+  function validateVerify() {
+    const next = {};
+    if (!name.trim()) {
+      next.name = "Name is required";
+    }
+    if (!otp.trim()) {
+      next.otp = "OTP is required";
+    } else if (!/^[0-9]{4,6}$/.test(otp.trim())) {
+      next.otp = "Enter a valid OTP";
+    }
+    return next;
+  }
+
+  async function handleSendOTP(e) {
     e.preventDefault();
-
-    const next = validate();
+    const next = validateSend();
     setErrors(next);
-
     if (Object.keys(next).length > 0) return;
 
     setSubmitting(true);
-
     try {
-      const res = await loginAdmin({
-        email,
-        password,
+      setTimer(120);
+      setStep("verify");
+      await Swal.fire({
+        icon: "info",
+        title: "OTP Sent",
+        text: `A verification code has been dispatched to your mobile number for ${action === "login" ? "Login" : "Registration"}.`,
+        background: "rgba(18, 18, 18, 0.95)",
+        color: "#ffffff",
+        confirmButtonColor: "#b8860b",
+        timer: 2000,
       });
-
-      if (res.token) {
-        await Swal.fire({
-          icon: "success",
-          title: "Access Granted",
-          html: `
-            <p style="font-size: 1.1rem; color: #cbd5e1; margin-top: 8px; margin-bottom: 0;">
-              Welcome back to <span style="color: #ffd700; font-weight: 600; text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);">Astronarhari</span>
-            </p>
-          `,
-          background: "rgba(18, 18, 18, 0.95)",
-          color: "#ffffff",
-          iconColor: "#10b981",
-          confirmButtonText: "Continue to Dashboard",
-          timer: 3000,
-          timerProgressBar: true,
-          backdrop: "rgba(0, 0, 0, 0.75)",
-          customClass: {
-            popup: "swal-premium-popup",
-            confirmButton: "swal-premium-button",
-            timerProgressBar: "swal-premium-progress",
-          },
-        });
-
-        navigate("/dashboard");
-      }
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Login Failed",
-        text: error.message || "Invalid Email or Password",
+        title: "Request Failed",
+        text: error.message || "Failed to send OTP. Please try again.",
         confirmButtonColor: "#d33",
       });
     } finally {
@@ -76,17 +83,84 @@ export default function Login() {
     }
   }
 
+  async function handleVerifyOTP(e) {
+    e.preventDefault();
+    const next = validateVerify();
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      await Swal.fire({
+        icon: "success",
+        title: action === "login" ? "Access Granted" : "Registration Successful",
+        html: `
+          <p style="font-size: 1.1rem; color: #cbd5e1; margin-top: 8px; margin-bottom: 0;">
+            Welcome to <span style="color: #ffd700; font-weight: 600; text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);">Astronarhari</span>
+          </p>
+        `,
+        background: "rgba(18, 18, 18, 0.95)",
+        color: "#ffffff",
+        iconColor: "#10b981",
+        confirmButtonText: "Continue to Dashboard",
+        timer: 3000,
+        timerProgressBar: true,
+        backdrop: "rgba(0, 0, 0, 0.75)",
+        customClass: {
+          popup: "swal-premium-popup",
+          confirmButton: "swal-premium-button",
+          timerProgressBar: "swal-premium-progress",
+        },
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Verification Failed",
+        text: error.message || "Invalid OTP, please try again.",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    if (timer > 0) return;
+    setSubmitting(true);
+    try {
+      setTimer(120);
+      await Swal.fire({
+        icon: "success",
+        title: "OTP Resent",
+        background: "rgba(18, 18, 18, 0.95)",
+        color: "#ffffff",
+        confirmButtonColor: "#b8860b",
+        timer: 2000,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Could not resend OTP.",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
   return (
     <div className="an-login">
-       <video
-    className="bg-video"
-    autoPlay
-    loop
-    muted
-    playsInline
-  >
-    <source src={bgVideo} type="video/mp4" />
-  </video>
+      <video className="bg-video" autoPlay loop muted playsInline>
+        <source src={bgVideo} type="video/mp4" />
+      </video>
       <div className="an-login-wrapper">
         <div className="an-login-left">
           <div className="an-left-top">
@@ -107,7 +181,9 @@ export default function Login() {
               </div>
 
               <div className="an-status-item">
-<div className="an-status-icon"><FaShieldAlt /></div>
+                <div className="an-status-icon">
+                  <FaShieldAlt />
+                </div>
                 <div>
                   <p className="an-status-title">Secure Access</p>
                   <p className="an-status-sub">Active &amp; Encrypted</p>
@@ -116,7 +192,9 @@ export default function Login() {
               </div>
 
               <div className="an-status-item">
-<div className="an-status-icon"><HiSparkles /></div>
+                <div className="an-status-icon">
+                  <HiSparkles />
+                </div>
                 <div>
                   <p className="an-status-title">Live Sync</p>
                   <p className="an-status-sub">Optimized Nodes</p>
@@ -129,13 +207,12 @@ export default function Login() {
           <div className="an-left-bottom">
             <h2>Admin Console</h2>
             <p>
-              Access the unified control center. Monitor stock levels,
-              logistic flows, and live operational metrics.
+              Access the unified control center. Monitor stock levels, logistic
+              flows, and live operational metrics.
             </p>
           </div>
         </div>
 
-        {/* ---------------- RIGHT PANEL (existing login card) ---------------- */}
         <div className="an-login-card">
           <div className="an-login-emblem">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -148,41 +225,153 @@ export default function Login() {
 
           <h1 className="an-login-heading">Welcome Back</h1>
           <p className="an-login-wordmark">Astronarhari</p>
-          <p className="an-login-subheading">Sign in to your account</p>
+          <p className="an-login-subheading">Sign in securely using OTP</p>
 
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="an-field">
-              <label className="an-label">Enter Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? "error" : ""}
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div className="an-field">
-              <label className="an-label">Password</label>
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={errors.password ? "error" : ""}
-              />
-              <button
-                type="button"
-                className="an-toggle"
-                onClick={() => setShowPassword(!showPassword)}
+          <div className="an-animated-container">
+            {step === "send" ? (
+              <form
+                onSubmit={handleSendOTP}
+                noValidate
+                className="an-fade-in"
+                key="send-form"
               >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+                <div className="an-field">
+                  <label className="an-label">Choose Action</label>
+                  <div className="an-action-toggle-group">
+                    <button
+                      type="button"
+                      className={`an-action-btn ${action === "login" ? "active" : ""}`}
+                      onClick={() => setAction("login")}
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      className={`an-action-btn ${action === "register" ? "active" : ""}`}
+                      onClick={() => setAction("register")}
+                    >
+                      Register
+                    </button>
+                  </div>
+                </div>
 
-            <button type="submit" className="an-submit" disabled={submitting}>
-              {submitting ? "Processing..." : "Sign In"}
-            </button>
-          </form>
+                <div className="an-field">
+                  <label className="an-label">Mobile Number</label>
+                  <div className="an-input-wrapper">
+                    <FaPhoneAlt className="an-input-icon" />
+                    <input
+                      type="tel"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value)}
+                      className={errors.mobile ? "error" : ""}
+                      placeholder="Enter 10-digit number"
+                      maxLength={10}
+                    />
+                  </div>
+                  {errors.mobile && (
+                    <span className="an-error-text">{errors.mobile}</span>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="an-submit"
+                  disabled={submitting}
+                >
+                  {submitting ? "Sending..." : "Send OTP"}
+                </button>
+              </form>
+            ) : (
+              <form
+                onSubmit={handleVerifyOTP}
+                noValidate
+                className="an-fade-in"
+                key="verify-form"
+              >
+                <div className="an-user-summary">
+                  <p>
+                    <strong>Action:</strong> {action === "login" ? "Login" : "Registration"}
+                  </p>
+                  <p>
+                    <strong>Sent to Mobile:</strong> {mobile}
+                  </p>
+                </div>
+
+                <div className="an-field">
+                  <label className="an-label">Full Name</label>
+                  <div className="an-input-wrapper">
+                    <FaUser className="an-input-icon" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className={errors.name ? "error" : ""}
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  {errors.name && (
+                    <span className="an-error-text">{errors.name}</span>
+                  )}
+                </div>
+
+                <div className="an-field">
+                  <label className="an-label">Verification Code (OTP)</label>
+                  <div className="an-input-wrapper">
+                    <FaLock className="an-input-icon" />
+                    <input
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      className={errors.otp ? "error" : ""}
+                      placeholder="Enter security code"
+                      maxLength={6}
+                    />
+                  </div>
+                  {errors.otp && (
+                    <span className="an-error-text">{errors.otp}</span>
+                  )}
+                </div>
+
+                <div className="an-timer-container">
+                  {timer > 0 ? (
+                    <p className="an-timer-text">
+                      Resend available in:{" "}
+                      <span className="an-timer-countdown">
+                        {formatTime(timer)}
+                      </span>
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      className="an-resend-button"
+                      onClick={handleResend}
+                      disabled={submitting}
+                    >
+                      Resend Security Code
+                    </button>
+                  )}
+                </div>
+
+                <div className="an-button-group">
+                  <button
+                    type="submit"
+                    className="an-submit"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Verifying..." : "Confirm & Authorize"}
+                  </button>
+                  <button
+                    type="button"
+                    className="an-back-button"
+                    onClick={() => setStep("send")}
+                    disabled={submitting}
+                  >
+                    Go Back
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
