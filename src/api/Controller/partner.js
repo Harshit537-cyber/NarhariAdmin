@@ -123,3 +123,29 @@ export const updatePartnerDocumentStatus = async (
     );
   }
 };
+
+
+
+export const getPendingPartners = async () =>
+   {
+  try {
+
+    const response = await apiClient.get(
+
+      "/admin/dashboard/all-partners?profileApprovalStatus=Pending"
+
+    );
+
+    return response.data;
+
+  } catch (error) {
+
+    throw (
+
+      error.response?.data || {
+
+        message: "Something went wrong",
+      }
+    );
+  }
+};

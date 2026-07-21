@@ -11,6 +11,7 @@ import Product from "./pages/Product/Product";
 import Shopping from "./pages/Shopping/Shopping";
 import Orders from "./pages/Orders/Orders";
 import Partner from "./pages/Partner/Partner";
+import ProfileApproval from "./pages/Partner/Approval/ApprovalModal";
 import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 
@@ -32,6 +33,7 @@ const AppRoutes = () => {
           <Route path="/shopping" element={<Shopping />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/partner" element={<Partner />} />
+          <Route path="/partner/profile-approval" element={<ProfileApproval />} />
         </Route>
       </Routes>
     </BrowserRouter>

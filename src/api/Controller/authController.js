@@ -1,17 +1,24 @@
 import apiClient from "../Interceptor/apiClient";
 
-  export const loginAdmin = async (data) => {
+ export const loginAdmin = async (data) => {
   try {
     const response = await apiClient.post("/admin/login", data);
 
-    // Save token and admin details
     localStorage.setItem("token", response.data.token);
+
     localStorage.setItem("admin", JSON.stringify(response.data.admin));
-   localStorage.setItem("role", response.data.admin?.role || "");
+
+    localStorage.setItem("role", response.data.admin?.role || "");
+
     return response.data;
-  } catch (error) {
+
+  } 
+  catch (error) {
+
     throw (
+
       error.response?.data || {
+        
         message: "Something went wrong",
       }
     );
@@ -93,6 +100,27 @@ export const deleteUser = async (userId) => {
     throw (
 
       error.response?.data || {
+
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const sendOtp = async (data) => 
+  {
+  try  {
+    const response = await apiClient.post("/admin/send-otp", data);
+
+    return response.data;
+
+  } 
+  catch (error)
+   {
+    throw (
+
+
+     error.response?.data || {
 
         message: "Something went wrong",
       }

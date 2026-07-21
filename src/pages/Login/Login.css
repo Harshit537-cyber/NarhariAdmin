@@ -447,3 +447,90 @@
 .swal-premium-progress {
   background: #ffd700 !important; 
 }
+
+.otp-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.otp-modal{
+  width:420px;
+  background:#111827;
+  border:1px solid rgba(255,215,0,.25);
+  border-radius:18px;
+  padding:30px;
+  text-align:center;
+  box-shadow:0 0 35px rgba(255,215,0,.15);
+}
+
+.otp-modal h2{
+  color:#FFD700;
+  margin-bottom:10px;
+}
+
+.otp-modal p{
+  color:#cbd5e1;
+  margin-bottom:20px;
+}
+
+.otp-modal input{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #444;
+  background:#1f2937;
+  color:#fff;
+  text-align:center;
+  font-size:22px;
+  letter-spacing:8px;
+  margin-bottom:20px;
+}
+
+.otp-modal-buttons{
+  display:flex;
+  gap:15px;
+}
+
+.otp-modal-buttons button{
+  flex:1;
+}
+
+.otp-cancel{
+  background:#374151;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+.otp-success-popup{
+  border: 2px solid #b8860b !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg,#0d0d0d,#1b1b1b) !important;
+  box-shadow:
+      0 0 15px rgba(34,197,94,.35),
+      0 0 35px rgba(184,134,11,.25) !important;
+}
+
+.otp-success-title{
+  color:#FFD700 !important;
+  letter-spacing:1px;
+}
+
+.otp-success-btn{
+  background:linear-gradient(135deg,#22c55e,#16a34a) !important;
+  color:#fff !important;
+  border:none !important;
+  border-radius:8px !important;
+  padding:12px 28px !important;
+  font-weight:700 !important;
+  box-shadow:0 5px 15px rgba(34,197,94,.35) !important;
+}
+
+.otp-success-btn:hover{
+  background:linear-gradient(135deg,#16a34a,#15803d) !important;
+}

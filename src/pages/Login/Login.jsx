@@ -1,161 +1,86 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
+import { loginAdmin ,sendOtp } from "../../api/Controller/authController";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { FaShieldAlt, FaPhoneAlt, FaUser, FaLock } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 import bgVideo from "../../assets/bgVideo.mp4";
-
+import { sendFirebaseOtp, verifyFirebaseOtp } from "../../firebase/firebaseAuth";
 export default function Login() {
-  const [step, setStep] = useState("send");
-  const [action, setAction] = useState("login");
-  const [mobile, setMobile] = useState("");
-  const [name, setName] = useState("");
-  const [otp, setOtp] = useState("");
-  const [timer, setTimer] = useState(120);
+const [mobile, setMobile] = useState("");
+const [otp, setOtp] = useState("");
+const [otpSent, setOtpSent] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let interval = null;
-    if (step === "verify" && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [step, timer]);
-
-  function validateSend() {
-    const next = {};
-    if (!mobile.trim()) {
-      next.mobile = "Mobile number is required";
-    } else if (!/^[0-9]{10}$/.test(mobile.trim())) {
-      next.mobile = "Enter a valid 10-digit mobile number";
-    }
-    return next;
+  
+async function handleSendOtp() {
+  if (!/^\d{10}$/.test(mobile)) {
+    setErrors({ mobile: "Enter a valid 10-digit mobile number" });
+    return;
   }
 
-  function validateVerify() {
-    const next = {};
-    if (!name.trim()) {
-      next.name = "Name is required";
-    }
-    if (!otp.trim()) {
-      next.otp = "OTP is required";
-    } else if (!/^[0-9]{4,6}$/.test(otp.trim())) {
-      next.otp = "Enter a valid OTP";
-    }
-    return next;
+  try {
+    await sendFirebaseOtp(mobile);
+    toast.success("OTP has been sent successfully.");
+    setOtpSent(true);
+    setShowOtpModal(true);
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Failed",
+      text: error.message || "Unable to send OTP",
+    });
+  }
+}
+ function validate() {
+  const next = {};
+
+  if (!mobile.trim()) {
+    next.mobile = "Required";
+  } else if (!/^\d{10}$/.test(mobile)) {
+    next.mobile = "Enter a valid 10-digit mobile number";
   }
 
-  async function handleSendOTP(e) {
-    e.preventDefault();
-    const next = validateSend();
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-
-    setSubmitting(true);
-    try {
-      setTimer(120);
-      setStep("verify");
-      await Swal.fire({
-        icon: "info",
-        title: "OTP Sent",
-        text: `A verification code has been dispatched to your mobile number for ${action === "login" ? "Login" : "Registration"}.`,
-        background: "rgba(18, 18, 18, 0.95)",
-        color: "#ffffff",
-        confirmButtonColor: "#b8860b",
-        timer: 2000,
-      });
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Request Failed",
-        text: error.message || "Failed to send OTP. Please try again.",
-        confirmButtonColor: "#d33",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  if (!otp.trim()) {
+    next.otp = "Required";
+  } else if (!/^\d+$/.test(otp)) {
+    next.otp = "OTP must contain only digits";
   }
 
-  async function handleVerifyOTP(e) {
-    e.preventDefault();
-    const next = validateVerify();
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
+  return next;
+}
 
-    setSubmitting(true);
-    try {
-      await Swal.fire({
-        icon: "success",
-        title: action === "login" ? "Access Granted" : "Registration Successful",
-        html: `
-          <p style="font-size: 1.1rem; color: #cbd5e1; margin-top: 8px; margin-bottom: 0;">
-            Welcome to <span style="color: #ffd700; font-weight: 600; text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);">Astronarhari</span>
-          </p>
-        `,
-        background: "rgba(18, 18, 18, 0.95)",
-        color: "#ffffff",
-        iconColor: "#10b981",
-        confirmButtonText: "Continue to Dashboard",
-        timer: 3000,
-        timerProgressBar: true,
-        backdrop: "rgba(0, 0, 0, 0.75)",
-        customClass: {
-          popup: "swal-premium-popup",
-          confirmButton: "swal-premium-button",
-          timerProgressBar: "swal-premium-progress",
-        },
-      });
+ async function handleSubmit(e) {
+  e.preventDefault();
+
+  const next = validate();
+  setErrors(next);
+  if (Object.keys(next).length > 0) return;
+
+  setSubmitting(true);
+
+  try {
+    const firebaseUser = await verifyFirebaseOtp(otp);
+    const idToken = await firebaseUser.getIdToken();
+
+    // idToken apne backend ko bhejo
+    const res = await loginAdmin({ idToken });
+
+    if (res.token) {
+      toast.success("Login Successfully");
+      setShowOtpModal(false);
       navigate("/dashboard");
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Verification Failed",
-        text: error.message || "Invalid OTP, please try again.",
-        confirmButtonColor: "#d33",
-      });
-    } finally {
-      setSubmitting(false);
     }
+  } catch (error) {
+    toast.error(error.message || "Invalid OTP");
+  } finally {
+    setSubmitting(false);
   }
-
-  async function handleResend() {
-    if (timer > 0) return;
-    setSubmitting(true);
-    try {
-      setTimer(120);
-      await Swal.fire({
-        icon: "success",
-        title: "OTP Resent",
-        background: "rgba(18, 18, 18, 0.95)",
-        color: "#ffffff",
-        confirmButtonColor: "#b8860b",
-        timer: 2000,
-      });
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Could not resend OTP.",
-        confirmButtonColor: "#d33",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
-
+}
   return (
     <div className="an-login">
       <video className="bg-video" autoPlay loop muted playsInline>
@@ -227,153 +152,76 @@ export default function Login() {
           <p className="an-login-wordmark">Astronarhari</p>
           <p className="an-login-subheading">Sign in securely using OTP</p>
 
-          <div className="an-animated-container">
-            {step === "send" ? (
-              <form
-                onSubmit={handleSendOTP}
-                noValidate
-                className="an-fade-in"
-                key="send-form"
-              >
-                <div className="an-field">
-                  <label className="an-label">Choose Action</label>
-                  <div className="an-action-toggle-group">
-                    <button
-                      type="button"
-                      className={`an-action-btn ${action === "login" ? "active" : ""}`}
-                      onClick={() => setAction("login")}
-                    >
-                      Login
-                    </button>
-                    <button
-                      type="button"
-                      className={`an-action-btn ${action === "register" ? "active" : ""}`}
-                      onClick={() => setAction("register")}
-                    >
-                      Register
-                    </button>
-                  </div>
-                </div>
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="an-field">
+             <label className="an-label">Mobile Number</label>
 
-                <div className="an-field">
-                  <label className="an-label">Mobile Number</label>
-                  <div className="an-input-wrapper">
-                    <FaPhoneAlt className="an-input-icon" />
-                    <input
-                      type="tel"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      className={errors.mobile ? "error" : ""}
-                      placeholder="Enter 10-digit number"
-                      maxLength={10}
-                    />
-                  </div>
-                  {errors.mobile && (
-                    <span className="an-error-text">{errors.mobile}</span>
-                  )}
-                </div>
+<input
+  type="tel"
+  value={mobile}
+  maxLength={10}
+  onChange={(e) =>
+    setMobile(e.target.value.replace(/\D/g, ""))
+  }
+  className={errors.mobile ? "error" : ""}
+  placeholder="Enter Mobile Number"
+/>
+            </div>
 
-                <button
-                  type="submit"
-                  className="an-submit"
-                  disabled={submitting}
-                >
-                  {submitting ? "Sending..." : "Send OTP"}
-                </button>
-              </form>
-            ) : (
-              <form
-                onSubmit={handleVerifyOTP}
-                noValidate
-                className="an-fade-in"
-                key="verify-form"
-              >
-                <div className="an-user-summary">
-                  <p>
-                    <strong>Action:</strong> {action === "login" ? "Login" : "Registration"}
-                  </p>
-                  <p>
-                    <strong>Sent to Mobile:</strong> {mobile}
-                  </p>
-                </div>
+            <button
+  type="button"
+  className="an-submit"
+  onClick={handleSendOtp}
+>
+  Send OTP
+</button>
 
-                <div className="an-field">
-                  <label className="an-label">Full Name</label>
-                  <div className="an-input-wrapper">
-                    <FaUser className="an-input-icon" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className={errors.name ? "error" : ""}
-                      placeholder="Enter your name"
-                    />
-                  </div>
-                  {errors.name && (
-                    <span className="an-error-text">{errors.name}</span>
-                  )}
-                </div>
-
-                <div className="an-field">
-                  <label className="an-label">Verification Code (OTP)</label>
-                  <div className="an-input-wrapper">
-                    <FaLock className="an-input-icon" />
-                    <input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className={errors.otp ? "error" : ""}
-                      placeholder="Enter security code"
-                      maxLength={6}
-                    />
-                  </div>
-                  {errors.otp && (
-                    <span className="an-error-text">{errors.otp}</span>
-                  )}
-                </div>
-
-                <div className="an-timer-container">
-                  {timer > 0 ? (
-                    <p className="an-timer-text">
-                      Resend available in:{" "}
-                      <span className="an-timer-countdown">
-                        {formatTime(timer)}
-                      </span>
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      className="an-resend-button"
-                      onClick={handleResend}
-                      disabled={submitting}
-                    >
-                      Resend Security Code
-                    </button>
-                  )}
-                </div>
-
-                <div className="an-button-group">
-                  <button
-                    type="submit"
-                    className="an-submit"
-                    disabled={submitting}
-                  >
-                    {submitting ? "Verifying..." : "Confirm & Authorize"}
-                  </button>
-                  <button
-                    type="button"
-                    className="an-back-button"
-                    onClick={() => setStep("send")}
-                    disabled={submitting}
-                  >
-                    Go Back
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+           
+          </form>
         </div>
       </div>
+   <div id="recaptcha-container"></div>
+   {showOtpModal && (
+  <div className="otp-modal-overlay">
+    <div className="otp-modal">
+
+      <h2>Verify OTP</h2>
+
+      <p>Enter the 6-digit OTP sent to your mobile number.</p>
+
+      <input
+        type="text"
+        maxLength={6}
+        value={otp}
+        onChange={(e) =>
+          setOtp(e.target.value.replace(/\D/g, ""))
+        }
+        placeholder="Enter OTP"
+      />
+
+      <div className="otp-modal-buttons">
+
+       <button
+  type="button"
+  onClick={handleSubmit}
+  className="an-submit"
+  disabled={submitting}
+>
+  {submitting ? "Verifying..." : "Verify OTP"}
+</button>
+
+        <button
+          onClick={() => setShowOtpModal(false)}
+          className="otp-cancel"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }
