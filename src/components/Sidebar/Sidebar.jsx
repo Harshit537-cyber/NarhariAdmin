@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
-import "./sidebar.css";
+import "./Sidebar.css";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: <IconGrid /> },
