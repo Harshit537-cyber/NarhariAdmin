@@ -81,16 +81,16 @@ function ApprovalModal({ isOpen, onClose, partner, onApprove, approving }) {
 
           <div className="approval-row">
             <label>Profile approval status</label>
-            <button
-              type="button"
-              className={`status-action-btn ${statusClass(
-                partner.profileApprovalStatus
-              )}`}
-              onClick={() => onApprove(partner._id)}
-              disabled={approving}
-            >
-              {approving ? "Approving..." : partner.profileApprovalStatus || "Pending"}
-            </button>
+           <button
+  type="button"
+  className={`status-action-btn ${statusClass(
+    partner.profileApprovalStatus
+  )}`}
+  onClick={() => onApprove(partner._id, document)}
+  disabled={approving}
+>
+  {approving ? "Approving..." : partner.profileApprovalStatus || "Pending"}
+</button>
           </div>
         </div>
 
@@ -134,29 +134,29 @@ export default function ProfileApproval() {
       setLoading(false);
     }
   };
+const handleApprove = async (partnerId, documentType) => {
+  console.log("Sending partnerId:", partnerId, "| type:", documentType);  try {
+    setApprovingId(partnerId);
 
-  const handleApprove = async (partnerId) => {
-    try {
-      setApprovingId(partnerId);
+    const response = await updatePartnerDocumentStatus(partnerId, {
+      document: documentType,
+      status: "Approved",
+    });
 
-      const response = await updatePartnerDocumentStatus(partnerId, {
-        status: "Approved",
-      });
-
-      if (response.success) {
-        setToast("Status approved successfully");
-        setPartners((prev) => prev.filter((p) => p._id !== partnerId));
-        closeModal();
-      } else {
-        setToast(response.message || "Something went wrong");
-      }
-    } catch (error) {
-      setToast(error.message || "Something went wrong");
-    } finally {
-      setApprovingId(null);
-      setTimeout(() => setToast(null), 2500);
+    if (response.success) {
+      setToast(response.message || "Status approved successfully");
+      setPartners((prev) => prev.filter((p) => p._id !== partnerId));
+      closeModal();
+    } else {
+      setToast(response.message || "Something went wrong");
     }
-  };
+  } catch (error) {
+    setToast(error.message || "Something went wrong");
+  } finally {
+    setApprovingId(null);
+    setTimeout(() => setToast(null), 2500);
+  }
+};
 
   return (
     <div className="profile-approval-page">

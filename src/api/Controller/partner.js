@@ -100,16 +100,24 @@ export const deactivatePartner = async (
 
 // Update Partner Document Status
 export const updatePartnerDocumentStatus = async (partnerId, data) => {
+
   try {
+
     const response = await apiClient.put(
+
       `/admin/dashboard/partners/${partnerId}/documents`,
       data
+
     );
 
     return response.data;
-  } catch (error) {
+
+  } 
+  catch (error) {
     throw (
+
       error.response?.data || {
+        
         message: "Something went wrong",
       }
     );
@@ -124,7 +132,7 @@ export const getPendingPartners = async () =>
 
     const response = await apiClient.get(
 
-      "/admin/dashboard/all-partners?profileApprovalStatus=Pending"
+      "/admin/dashboard/all-partners?status=Pending"
 
     );
 
