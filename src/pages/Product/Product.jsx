@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getProductCategories } from "../../api/Controller/product";
 import "./Product.css";
 
 export default function Product() {
@@ -8,8 +9,7 @@ export default function Product() {
   const [originalPrice, setOriginalPrice] = useState("999");
   const [showEditModal, setShowEditModal] = useState(false);
   const [productName, setProductName] = useState("Healing Crystal");
-  const [category, setCategory] = useState("Gemstone");
-
+const [categories, setCategories] = useState([]);
   // Temp form state (so edits only apply on Save)
   const [formData, setFormData] = useState(null);
   const handleSaveSpecs = () => {
@@ -20,6 +20,18 @@ export default function Product() {
     setStockCount(Number(formData.stockCount));
     setShowEditModal(false);
   };
+  useEffect(() => {
+  fetchCategories();
+}, []);
+
+const fetchCategories = async () => {
+  try {
+    const response = await getProductCategories();
+    setCategories(response.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
   return (
     <div className="product-page animate-fade-in">
       <header className="catalog-header">
@@ -30,93 +42,58 @@ export default function Product() {
         </p>
       </header>
 
-      <div className="product-card">
-        <div className="product-image-section">
-          <div className="product-image">
-            <img
-              src="https://images.unsplash.com/photo-1616628182509-6c0b5d0f4a55?w=600"
-              alt="Healing Crystal"
-            />
-          </div>
+     
 
-          {/* Quick Stats for Admin */}
-          <div className="admin-quick-stats">
-            <div className="stat-row">
-              <span>Total Revenue</span>
-              <strong>₹ 1,13,458</strong>
-            </div>
-            <div className="stat-row">
-              <span>30-Day Sales</span>
-              <strong>142 Units</strong>
-            </div>
-          </div>
-        </div>
+      <div className="category-table-wrapper">
 
-        <div className="product-details-section">
-          <div className="tag-row">
-            <span className="badge-tag">Best Seller</span>
-            <span className="recommendation-badge">
-              ✨ Recommended by 14 Pandits
-            </span>
-          </div>
+  <div className="table-header">
+    <h3>Category Management</h3>
+<span>{categories.length} Categories</span>  </div>
 
-          <h2>{productName}</h2>
+  <table className="category-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Category Name</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-          <div className="price-row">
-            <p className="price-value">
-              ₹{productPrice}{" "}
-              <span className="slashed-price">₹{originalPrice}</span>
-            </p>
-            <span className="margin-tag">20% Margin</span>
-          </div>
+ <tbody>
+  {categories.map((item) => (
+    <tr key={item._id}>
+      <td>
+        <img
+          className="category-img"
+          src={item.image}
+          alt={item.name}
+        />
+      </td>
 
-          <p className="desc-text">
-            Natural healing crystal recommended by Vedic experts to promote
-            positivity, peace, and spiritual growth. Ideal for seekers looking
-            to balance cosmic energy during meditation.
-          </p>
+      <td>
+        <h4>{item.name}</h4>
+      </td>
 
-          {/* Core Specifications Grid */}
-          <div className="info-grid">
-            <div className="info-box">
-              <h4>Category</h4>
-              <p>{category}</p>
-            </div>
+      <td>{item.description}</td>
 
-            <div className="info-box">
-              <h4>Rating</h4>
-              <p>⭐ 4.9 / 5.0</p>
-            </div>
+      <td>
+        <span className={`status ${item.isActive ? "active" : "inactive"}`}>
+          {item.isActive ? "Active" : "Inactive"}
+        </span>
+      </td>
 
-            <div className="info-box">
-              <h4>Stock Status</h4>
-              <p className={stockCount > 5 ? "status-green" : "status-red"}>
-                {stockCount > 0 ? `In Stock (${stockCount})` : "Out of Stock"}
-              </p>
-            </div>
-          </div>
+      <td>
+        <button className="table-btn">Edit</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
 
-          {/* Admin Action Operations */}
-          <div className="admin-actions">
-            <button
-              className="btn-edit-specs"
-              onClick={() => {
-                setFormData({
-                  productName,
-                  category,
-                  productPrice,
-                  originalPrice,
-                  stockCount,
-                });
-                setShowEditModal(true);
-              }}
-            >
-              Edit Product Specifications
-            </button>
+  </table>
 
-            <button className="btn-manage-stock">Update Stock & Pricing</button>
-          </div>
-        </div>
+
       </div>
       {showEditModal && (
         <div

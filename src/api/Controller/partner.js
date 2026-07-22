@@ -99,19 +99,11 @@ export const deactivatePartner = async (
 };
 
 // Update Partner Document Status
-export const updatePartnerDocumentStatus = async (
-  partnerId,
-  document,
-  status
-) => {
+export const updatePartnerDocumentStatus = async (partnerId, data) => {
   try {
     const response = await apiClient.put(
       `/admin/dashboard/partners/${partnerId}/documents`,
-      {
-        partnerId,
-        document,
-        status,
-      }
+      data
     );
 
     return response.data;
@@ -149,3 +141,5 @@ export const getPendingPartners = async () =>
     );
   }
 };
+
+

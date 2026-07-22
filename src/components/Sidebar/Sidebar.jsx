@@ -6,9 +6,9 @@ import "./sidebar.css";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: <IconGrid /> },
   { to: "/consultation", label: "Consultation", icon: <IconChat /> },
+   { to: "/product", label: "Product", icon: <IconBox /> },
   { to: "/wallet", label: "Wallet", icon: <IconWallet /> },
   { to: "/shop", label: "Shop", icon: <IconStore /> },
-  { to: "/product", label: "Product", icon: <IconBox /> },
   { to: "/shopping", label: "Shopping", icon: <IconBag /> },
   { to: "/orders", label: "Orders", icon: <IconList /> },
 ];
