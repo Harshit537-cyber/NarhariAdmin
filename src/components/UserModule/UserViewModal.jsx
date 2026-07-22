@@ -1,6 +1,5 @@
 import React from "react";
-import "./UserViewModal.css";
-
+import "./Userviewmodal.css";
 
 export default function UserViewModal({ user, onClose, title  }) {
   if (!user) return null;
