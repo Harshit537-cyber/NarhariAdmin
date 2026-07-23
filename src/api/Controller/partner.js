@@ -106,7 +106,10 @@ export const updatePartnerDocumentStatus = async (partnerId, data) => {
     const response = await apiClient.put(
 
       `/admin/dashboard/partners/${partnerId}/documents`,
-      data
+      {
+        partnerId,
+        ...data,
+      }
 
     );
 
@@ -149,5 +152,3 @@ export const getPendingPartners = async () =>
     );
   }
 };
-
-
