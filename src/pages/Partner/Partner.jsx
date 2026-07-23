@@ -10,7 +10,7 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import DeleteModal from "./DeleteModal";
 import EditPartnerModal from "./Editpartner";
 import { toast } from "react-toastify";
-
+import ViewPartnerModal from "./ViewPartnerModal";
 export default function Partner() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export default function Partner() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
-
+const [viewOpen, setViewOpen] = useState(false);
   useEffect(() => {
     fetchPartners();
   }, []);
@@ -41,14 +41,12 @@ export default function Partner() {
     setEditOpen(true);
   };
 
-  const handleView = (partner) => {
-    setSelectedPartner(partner);
-    // apna view logic yaha daalo
-  };
+ const handleView = (partner) => {
+  setSelectedPartner(partner);
+  setViewOpen(true);
+};
 
-  // ==========================================
-  // TOGGLE ACTIVATE / DEACTIVATE (single switch)
-  // ==========================================
+  
   const handleToggleStatus = async (partner) => {
     const isCurrentlyActive = !!partner.isActive;
     setTogglingId(partner._id);
@@ -284,6 +282,11 @@ export default function Partner() {
   onClose={() => setEditOpen(false)}
   partner={selectedPartner}
   onUpdated={fetchPartners}
+/>
+<ViewPartnerModal
+  isOpen={viewOpen}
+  onClose={() => setViewOpen(false)}
+  partner={selectedPartner}
 />
     </div>
   );
