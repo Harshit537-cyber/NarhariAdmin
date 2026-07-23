@@ -102,19 +102,6 @@
   box-shadow: 0 10px 20px rgba(179, 140, 27, 0.25);
 }
 
-/* ===== Toast ===== */
-.toast {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-background: #16a34a;  color: var(--white);
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  z-index: 10000;
-}
-
 /* ===== Modal Overlay ===== */
 .modal-overlay {
   position: fixed;
