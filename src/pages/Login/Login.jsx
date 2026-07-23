@@ -17,25 +17,30 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSendOtp() {
-    if (!/^\d{10}$/.test(mobile)) {
-      setErrors({ mobile: "Enter a valid 10-digit mobile number" });
-      return;
+ async function handleSendOtp() {
+  if (!/^\d{10}$/.test(mobile)) {
+    setErrors({ mobile: "Enter a valid 10-digit mobile number" });
+    return;
+  }
+
+  try {
+    const res = await sendOtp({ mobile, action: "login" }); // backend API call
+    toast.success("OTP has been sent successfully.");
+
+    if (res.otp) {
+      setOtp(res.otp); // 👈 auto-fill OTP from response
     }
 
-    try {
-      await sendOtp({ mobile }); // backend API call
-      toast.success("OTP has been sent successfully.");
-      setOtpSent(true);
-      setShowOtpModal(true);
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: error.message || "Unable to send OTP",
-      });
-    }
+    setOtpSent(true);
+    setShowOtpModal(true);
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Failed",
+      text: error.message || "Unable to send OTP",
+    });
   }
+}
 
   function validate() {
     const next = {};
