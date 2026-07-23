@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { getProductCategories } from "../../api/Controller/product";
+import { getProductCategories ,createProductCategory } from "../../api/Controller/product";
 import "./Product.css";
-
+import AddProductModal from "./AddProductModal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function Product() {
   // Admin Product Live Stats
   const [stockCount, setStockCount] = useState(45);
@@ -10,7 +12,7 @@ export default function Product() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [productName, setProductName] = useState("Healing Crystal");
 const [categories, setCategories] = useState([]);
-  // Temp form state (so edits only apply on Save)
+const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState(null);
   const handleSaveSpecs = () => {
     setProductName(formData.productName);
@@ -32,15 +34,45 @@ const fetchCategories = async () => {
     console.log(error);
   }
 };
+
+const handleAddProduct = async (formData) => {
+   try {
+     const data = new FormData();
+     data.append("name", formData.name);
+     data.append("description", formData.description);
+     data.append("image", formData.image);
+
+     const response = await createProductCategory(data);
+   console.log(response);
+
+    setCategories((prev) => [...prev, response.data]);
+    setShowAddModal(false);
+    toast.success("Product added successfully!");
+  } catch (error) {
+     console.log(error);
+ toast.error(error.message || "Failed to add product"); }
+ };
+
   return (
     <div className="product-page animate-fade-in">
       <header className="catalog-header">
-        <h2>Product Specification & Inventory Manager</h2>
-        <p>
-          Monitor sales velocity, manage specs, and review Astrologer
-          endorsements.
-        </p>
-      </header>
+  <div className="catalog-header-top">
+    <div>
+      <h2>Product Specification & Inventory Manager</h2>
+      <p>
+        Monitor sales velocity, manage specs, and review Astrologer
+        endorsements.
+      </p>
+    </div>
+
+   <button
+  className="add-product-btn"
+  onClick={() => setShowAddModal(true)}
+>
+  + Add Product
+</button>
+  </div>
+</header>
 
      
 
@@ -182,6 +214,11 @@ const fetchCategories = async () => {
           </div>
         </div>
       )}
+  <AddProductModal
+  open={showAddModal}
+  onClose={() => setShowAddModal(false)}
+  onSubmit={handleAddProduct}
+/>
     </div>
   );
 }

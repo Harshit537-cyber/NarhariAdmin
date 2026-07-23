@@ -27,6 +27,7 @@ const EMPTY_FORM = {
   qualification: "",
   expectedSalary: "",
   bio: "",
+ profilePic: null,
   isVerified: false,
   isProfileComplete: false,
 };
@@ -50,6 +51,7 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
         qualification: partner.qualification || "",
         expectedSalary: partner.expectedSalary ?? "",
         bio: partner.bio || "",
+          profilePic: null,
         isVerified: !!partner.isVerified,
         isProfileComplete: !!partner.isProfileComplete,
       });
@@ -66,7 +68,9 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
+ const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, profilePic: e.target.files[0] }));
+  };
   const toggleMultiSelect = (field, value) => {
     setFormData((prev) => {
       const exists = prev[field].includes(value);
@@ -84,21 +88,23 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
     try {
       setSaving(true);
 
-      const payload = {
-        fullName: formData.fullName,
-        mobile: formData.mobile,
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender,
-        city: formData.city,
-        qualification: formData.qualification,
-        experience: Number(formData.experience),
-        expectedSalary: Number(formData.expectedSalary),
-        bio: formData.bio,
-        isVerified: formData.isVerified,
-        isProfileComplete: formData.isProfileComplete,
-        specialties: formData.specialties,
-        languages: formData.languages,
-      };
+const payload = new FormData();
+      payload.append("fullName", formData.fullName);
+      payload.append("mobile", formData.mobile);
+      payload.append("dateOfBirth", formData.dateOfBirth);
+      payload.append("gender", formData.gender);
+      payload.append("city", formData.city);
+      payload.append("qualification", formData.qualification);
+      payload.append("experience", Number(formData.experience));
+      payload.append("expectedSalary", Number(formData.expectedSalary));
+      payload.append("bio", formData.bio);
+      payload.append("isVerified", formData.isVerified);
+      payload.append("isProfileComplete", formData.isProfileComplete);
+      payload.append("specialties", JSON.stringify(formData.specialties));
+      payload.append("languages", JSON.stringify(formData.languages));
+      if (formData.profilePic) {
+        payload.append("profilePic", formData.profilePic);
+      }
 
       await updatePartner(partner._id, payload);
 
@@ -254,7 +260,25 @@ export default function EditPartnerModal({ isOpen, onClose, partner, onUpdated }
               ))}
             </div>
           </div>
-
+  <div className="epm-section">
+            <h3>Profile Image</h3>
+            {partner?.profilePic && !formData.profilePic && (
+              <img
+                src={partner.profilePic}
+                alt="Current profile"
+                style={{ width: 80, height: 80, borderRadius: "50%", marginBottom: 8 }}
+              />
+            )}
+            <div className="epm-field">
+              <label>Upload New Image</label>
+              <input
+                type="file"
+                name="profilePic"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
           {/* Bio */}
           <div className="epm-section">
             <h3>Bio</h3>

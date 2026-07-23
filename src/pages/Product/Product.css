@@ -201,7 +201,12 @@ transform:translateX(0);
   margin-bottom: 30px;
   text-align: left;
 }
-
+.catalog-header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+}
 .catalog-header h2 {
   font-size: 26px;
   font-weight: 700;
@@ -578,7 +583,23 @@ transform:translateX(0);
   justify-content: flex-end;
   gap: 10px;
 }
+.add-product-btn{
+  background:linear-gradient(135deg,#b91c1c,#871313);
+  color:#fff;
+  border:none;
+  padding:12px 22px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+  white-space:nowrap;
+}
 
+.add-product-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(185,28,28,.3);
+}
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

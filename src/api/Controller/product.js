@@ -21,3 +21,32 @@ export const getProductCategories = async () => {
     );
   }
 };
+
+export const createProductCategory = async (formData) => {
+
+  try {
+    const response = await apiClient.post(
+
+      "/admin/product-category",
+
+      formData,
+      {
+        headers: {
+
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+
+  } catch (error) {
+
+    throw (
+
+      error.response?.data || {
+        message: "Something went wrong",
+      }
+    );
+  }
+};
