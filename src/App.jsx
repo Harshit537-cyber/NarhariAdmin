@@ -14,6 +14,7 @@ import Partner from "./pages/Partner/Partner";
 import ProfileApproval from "./pages/Partner/Approval/ApprovalModal";
 import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
+import KycVerification from "./pages/KycVerification/KycVerification";
 
 <Toaster position="top-right" />
 const AppRoutes = () => {
@@ -33,6 +34,7 @@ const AppRoutes = () => {
           <Route path="/shopping" element={<Shopping />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/partner" element={<Partner />} />
+          <Route path="/partner/kyc-verification" element={<KycVerification />} />
           <Route path="/partner/profile-approval" element={<ProfileApproval />} />
         </Route>
       </Routes>

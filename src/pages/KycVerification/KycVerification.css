@@ -1,0 +1,237 @@
+:root {
+  --bg-dark-mesh: #f1f4f9;
+  --black-title: #0b0f19;
+  --text-muted: #526075;
+  --neon-cyan: #06b6d4;
+  --neon-purple: #8b5cf6;
+  --neon-emerald: #10b981;
+  --neon-gold: #b38c1b;
+  --danger-red: #ef4444;
+}
+
+.kyc-container .db-content-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
+.giant-avatar-img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--neon-gold);
+}
+
+.doc-tabs-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.doc-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.doc-tab-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+/* Green Approved Styling for Tabs */
+.doc-tab-btn.doc-approved {
+  border-color: var(--neon-emerald);
+  background: rgba(16, 185, 129, 0.08);
+  color: #047857;
+}
+
+.doc-tab-btn.doc-approved.active {
+  background: #065f46;
+  color: #ffffff;
+  border-color: #065f46;
+}
+
+.approved-icon {
+  color: var(--neon-emerald);
+  font-size: 14px;
+}
+
+.doc-tab-btn.active .approved-icon {
+  color: #a7f3d0;
+}
+
+.ultra-modal-box.doc-modal {
+  max-width: 750px;
+  padding: 30px;
+}
+
+.modal-header-accent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-top-icon {
+  font-size: 28px;
+  color: var(--neon-gold);
+}
+
+.modal-header-accent h3 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0f172a, var(--neon-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.doc-info-bar {
+  display: flex;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 12px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.doc-info-bar p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.doc-info-bar strong {
+  color: var(--black-title);
+}
+
+.document-image-frame {
+  width: 100%;
+  height: 380px;
+  background: #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.img-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.img-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.doc-status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.doc-status-badge.approved {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.doc-status-badge.pending {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.doc-status-badge.rejected {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Modal Actions Buttons */
+.btn-modal-pro.reject {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-modal-pro.reject:hover:not(:disabled) {
+  background: var(--danger-red);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+}
+
+.btn-modal-pro.approve {
+  background: var(--neon-emerald);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-modal-pro.approve:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+/* Disabled State Logic */
+.btn-modal-pro:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-modal-pro.already-approved {
+  background: #059669 !important;
+  color: #ffffff !important;
+  opacity: 0.85;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
