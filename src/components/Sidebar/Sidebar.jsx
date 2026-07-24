@@ -19,7 +19,7 @@ export default function Sidebar() {
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(
-    location.pathname.startsWith("/partner")
+    location.pathname.startsWith("/partner"),
   );
 
   return (
@@ -33,7 +33,13 @@ export default function Sidebar() {
               fill="url(#brandGradient)"
             />
             <defs>
-              <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient
+                id="brandGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
                 <stop offset="0%" stopColor="#f0abfc" />
                 <stop offset="100%" stopColor="#c084fc" />
               </linearGradient>
@@ -87,6 +93,15 @@ export default function Sidebar() {
               >
                 <span>Profile Approval</span>
               </NavLink>
+              {/* NEW KYC MENU ITEM */}
+              <NavLink
+                to="/partner/kyc-verification"
+                className={({ isActive }) =>
+                  `an-nav-subitem ${isActive ? "is-active" : ""}`
+                }
+              >
+                <span>KYC Document Verify</span>
+              </NavLink>
             </div>
           )}
         </div>
@@ -107,7 +122,10 @@ export default function Sidebar() {
       </nav>
 
       {/* Logout Button */}
-      <button className="an-nav-item logout-btn" onClick={() => setShowModal(true)}>
+      <button
+        className="an-nav-item logout-btn"
+        onClick={() => setShowModal(true)}
+      >
         <IconLogout />
         <span className="an-nav-text">Logout</span>
       </button>
@@ -130,7 +148,14 @@ export default function Sidebar() {
    ========================================== */
 function IconGrid() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="3" width="7" height="7" rx="2" />
       <rect x="14" y="3" width="7" height="7" rx="2" />
       <rect x="3" y="14" width="7" height="7" rx="2" />
@@ -151,7 +176,14 @@ function IconBanner() {
 
 function IconChat() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M8 9h8m-8 4h6m4-9H4a2 2 0 0 0-2 2v15l4-4h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
     </svg>
   );
@@ -159,7 +191,14 @@ function IconChat() {
 
 function IconWallet() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3m6 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
     </svg>
   );
@@ -167,7 +206,14 @@ function IconWallet() {
 
 function IconStore() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 21h18M3 7v14M21 7v14M3 7l9-4 9 4M12 21V7" />
     </svg>
   );
@@ -175,7 +221,14 @@ function IconStore() {
 
 function IconBox() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 3L2 8l10 5 10-5-10-5zM2 12l10 5 10-5M12 3v18" />
     </svg>
   );
@@ -183,7 +236,14 @@ function IconBox() {
 
 function IconBag() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M6 5h12l2 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10l2-5zM10 5a2 2 0 1 0 4 0" />
     </svg>
   );
@@ -191,7 +251,14 @@ function IconBag() {
 
 function IconList() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 6h11M9 12h11M9 18h11M5 6v.01M5 12v.01M5 18v.01" />
     </svg>
   );
@@ -199,7 +266,14 @@ function IconList() {
 
 function IconPartner() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="10" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -210,7 +284,13 @@ function IconPartner() {
 
 function IconChevron({ className }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+    >
       <path d="M6 9l6 6 6-6" />
     </svg>
   );
@@ -218,7 +298,14 @@ function IconChevron({ className }) {
 
 function IconLogout() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
     </svg>
   );

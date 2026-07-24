@@ -58,8 +58,8 @@ const handleSubmit = () => {
         }
 
         .add-modal-header{
-          background:linear-gradient(135deg,#b91c1c,#871313);
-          color:#fff;
+background: linear-gradient(15deg, #000000, #3b2600, #b8860b); 
+      color:#fff;
           padding:18px 24px;
           display:flex;
           justify-content:space-between;
@@ -178,8 +178,7 @@ const handleSubmit = () => {
 
         .save-btn{
           border:none;
-          background:linear-gradient(135deg,#b91c1c,#871313);
-          color:#fff;
+background: linear-gradient(135deg, #000000, #3b2600, #b8860b);          color:#fff;
         }
 
         .cancel-btn:hover{

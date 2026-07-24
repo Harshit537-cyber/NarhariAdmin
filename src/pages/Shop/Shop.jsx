@@ -1,8 +1,21 @@
 import React, { useState } from "react";
 import "./Shop.css";
+import {
+  FaCrown,
+  FaBolt,
+  FaRupeeSign,
+  FaBoxes,
+  FaExclamationTriangle,
+  FaClock,
+  FaEdit,
+  FaTrashAlt,
+  FaPlusCircle,
+  FaShippingFast,
+  FaCheckCircle,
+  FaStore,
+} from "react-icons/fa";
 
 export default function Shop() {
-  // 1. Initial Products State (Admin Inventory)
   const [products, setProducts] = useState([
     {
       id: "PROD-101",
@@ -20,7 +33,7 @@ export default function Shop() {
       category: "Mala",
       description: "Original 5 Mukhi",
       price: "599",
-      stock: 4, // Low Stock
+      stock: 4,
       sales: 238,
       img: "https://images.unsplash.com/photo-1605106702734-205df224ecce?w=500",
     },
@@ -30,7 +43,7 @@ export default function Shop() {
       category: "Ring",
       description: "Astrology Recommended",
       price: "1299",
-      stock: 0, // Out of Stock
+      stock: 0,
       sales: 89,
       img: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=500",
     },
@@ -46,7 +59,6 @@ export default function Shop() {
     },
   ]);
 
-  // 2. Cosmic Shop Orders (Connecting User and Pandit recommendations)
   const [orders, setOrders] = useState([
     {
       id: "ORD-9901",
@@ -71,7 +83,6 @@ export default function Shop() {
     },
   ]);
 
-  // 3. Form States for Adding New Product
   const [newProdName, setNewProdName] = useState("");
   const [newProdCategory, setNewProdCategory] = useState("Gemstone");
   const [newProdDesc, setNewProdDesc] = useState("");
@@ -98,7 +109,6 @@ export default function Shop() {
 
     setProducts([...products, newProduct]);
 
-    // Reset Form fields
     setNewProdName("");
     setNewProdDesc("");
     setNewProdPrice("");
@@ -112,11 +122,10 @@ export default function Shop() {
 
   const handleUpdateOrderStatus = (id, newStatus) => {
     setOrders(
-      orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o)),
+      orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
     );
   };
 
-  // Stock status helper
   const getStockStatus = (stock) => {
     if (stock === 0) return { text: "Out of Stock", class: "out-of-stock" };
     if (stock <= 5) return { text: "Low Stock", class: "low-stock" };
@@ -124,64 +133,148 @@ export default function Shop() {
   };
 
   return (
-    <div className="shop-page animate-fade-in">
-      {/* Header */}
-      <header className="page-header">
-        <h2>Cosmic Shop & Inventory Hub</h2>
-        <p>
-          Monitor product demand, manage spiritual inventory, and dispatch
-          seeker orders.
-        </p>
+    <div className="an-shop-container">
+      <div className="ambient-orb orb-1"></div>
+      <div className="ambient-orb orb-2"></div>
+      <div className="ambient-orb orb-3"></div>
+
+      <header className="db-header animate-fade-in">
+        <div className="db-header-left">
+          <div className="header-title-container">
+            <span className="enterprise-badge">
+              <FaCrown className="crown-icon" /> COSMIC SHOP HUB
+            </span>
+            <h1 className="wrapped-header-title">Shop & Inventory Hub</h1>
+          </div>
+          <p className="header-subtitle">
+            Monitor product demand, manage spiritual inventory & dispatch
+            seeker orders.
+          </p>
+        </div>
+
+        <div className="db-header-right">
+          <div className="system-status-card">
+            <div className="pulse-ring"></div>
+            <span className="status-text">
+              <FaBolt /> STORE LIVE
+            </span>
+          </div>
+        </div>
       </header>
 
-      {/* Admin Shop Metrics Grid */}
-      <div className="shop-metrics-grid">
-        <div className="metric-card">
-          <p>Total Shop Revenue</p>
-          <h2 className="text-gold">₹ 3,45,200.00</h2>
-          <span>Direct & recommended sales</span>
+      <div className="db-metrics-grid">
+        <div
+          className="khatarnak-card gold-theme animate-slide-up"
+          style={{ animationDelay: "0.1s" }}
+        >
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box gold-glow">
+              <FaRupeeSign />
+            </div>
+            <span className="trend-badge gold-pill">REVENUE</span>
+          </div>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">₹3.45L</h2>
+            <p className="giant-stat-label">Total Shop Revenue</p>
+          </div>
+          <div className="card-bottom-accent">
+            <div className="glow-bar gold-bar"></div>
+          </div>
         </div>
-        <div className="metric-card">
-          <p>Active Inventory Items</p>
-          <h2>{products.length} Products</h2>
-          <span>Listed in cosmic store</span>
+
+        <div
+          className="khatarnak-card cyan-theme animate-slide-up"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box cyan-glow">
+              <FaBoxes />
+            </div>
+            <span className="trend-badge cyan-pill">LISTED</span>
+          </div>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">{products.length}</h2>
+            <p className="giant-stat-label">Active Inventory Items</p>
+          </div>
+          <div className="card-bottom-accent">
+            <div className="glow-bar cyan-bar"></div>
+          </div>
         </div>
-        <div className="metric-card">
-          <p>Low / Out of Stock</p>
-          <h2 className="text-red">
-            {products.filter((p) => p.stock <= 5).length} Items
-          </h2>
-          <span>Action recommended</span>
+
+        <div
+          className="khatarnak-card danger-theme animate-slide-up"
+          style={{ animationDelay: "0.3s" }}
+        >
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box danger-glow">
+              <FaExclamationTriangle />
+            </div>
+            <span className="trend-badge danger-pill">ACTION NEEDED</span>
+          </div>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">
+              {products.filter((p) => p.stock <= 5).length}
+            </h2>
+            <p className="giant-stat-label">Low / Out of Stock</p>
+          </div>
+          <div className="card-bottom-accent">
+            <div className="glow-bar danger-bar"></div>
+          </div>
         </div>
-        <div className="metric-card">
-          <p>Pending Dispatch</p>
-          <h2 className="text-green-dark">
-            {orders.filter((o) => o.status === "Processing").length} Orders
-          </h2>
-          <span>Awaiting shipment</span>
+
+        <div
+          className="khatarnak-card purple-theme animate-slide-up"
+          style={{ animationDelay: "0.4s" }}
+        >
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box purple-glow">
+              <FaClock />
+            </div>
+            <span className="trend-badge purple-pill">PENDING</span>
+          </div>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">
+              {orders.filter((o) => o.status === "Processing").length}
+            </h2>
+            <p className="giant-stat-label">Pending Dispatch</p>
+          </div>
+          <div className="card-bottom-accent">
+            <div className="glow-bar purple-bar"></div>
+          </div>
         </div>
       </div>
 
-      {/* Main Two-Column Layout */}
       <div className="shop-layout-grid">
-        {/* Left Column: Product Management Grid */}
         <div className="layout-left-col">
-          <div className="panel-card">
-            <div className="panel-header">
-              <h3>Inventory Products</h3>
-              <span className="badge-inventory">Active Store</span>
+          <div className="super-card animate-fade-in-delayed">
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar"></div>
+                <h2>
+                  <FaStore style={{ marginRight: 8 }} />
+                  Inventory Products
+                </h2>
+              </div>
+              <span className="giant-badge">Active Store</span>
             </div>
 
             <div className="inventory-grid">
-              {products.map((prod) => {
+              {products.map((prod, idx) => {
                 const stockStatus = getStockStatus(prod.stock);
                 return (
-                  <div className="inventory-card" key={prod.id}>
-                    <img
-                      src={prod.img}
-                      alt={prod.name}
-                      className="inventory-img"
-                    />
+                  <div
+                    className="inventory-card animate-slide-up"
+                    style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
+                    key={prod.id}
+                  >
+                    <div className="card-glass-shine"></div>
+                    <div className="inventory-img-wrap">
+                      <img src={prod.img} alt={prod.name} />
+                    </div>
 
                     <div className="inventory-body">
                       <div className="category-and-id">
@@ -207,12 +300,14 @@ export default function Shop() {
                     </div>
 
                     <div className="inventory-actions">
-                      <button className="btn-edit">Edit Details</button>
+                      <button className="btn-edit">
+                        <FaEdit /> Edit
+                      </button>
                       <button
                         className="btn-delete"
                         onClick={() => handleDeleteProduct(prod.id)}
                       >
-                        Remove
+                        <FaTrashAlt /> Remove
                       </button>
                     </div>
                   </div>
@@ -222,12 +317,19 @@ export default function Shop() {
           </div>
         </div>
 
-        {/* Right Column: Add Product & Orders Tracking */}
         <div className="layout-right-col">
-          {/* Section: Add New Product Form */}
-          <div className="panel-card">
-            <div className="panel-header">
-              <h3>Add Cosmic Product</h3>
+          <div
+            className="super-card animate-fade-in-delayed"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar gold"></div>
+                <h2>
+                  <FaPlusCircle style={{ marginRight: 8 }} />
+                  Add Cosmic Product
+                </h2>
+              </div>
             </div>
 
             <form onSubmit={handleAddProduct} className="add-product-form">
@@ -301,20 +403,32 @@ export default function Shop() {
               </div>
 
               <button type="submit" className="add-product-submit-btn">
-                Publish to Shop Catalog
+                <FaPlusCircle /> Publish to Shop Catalog
               </button>
             </form>
           </div>
 
-          {/* Section: Recent Orders & Pandit Recs Tracker */}
-          <div className="panel-card">
-            <div className="panel-header">
-              <h3>Incoming Cosmic Orders</h3>
+          <div
+            className="super-card animate-fade-in-delayed"
+            style={{ animationDelay: "0.2s" }}
+          >
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar purple"></div>
+                <h2>
+                  <FaShippingFast style={{ marginRight: 8 }} />
+                  Incoming Cosmic Orders
+                </h2>
+              </div>
             </div>
 
             <div className="orders-list">
-              {orders.map((ord) => (
-                <div className="order-item" key={ord.id}>
+              {orders.map((ord, idx) => (
+                <div
+                  className="order-item animate-slide-up"
+                  style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
+                  key={ord.id}
+                >
                   <div className="order-meta">
                     <span className="order-id">{ord.id}</span>
                     <span
@@ -343,7 +457,7 @@ export default function Shop() {
                           handleUpdateOrderStatus(ord.id, "Shipped")
                         }
                       >
-                        Mark Shipped
+                        <FaShippingFast /> Mark Shipped
                       </button>
                     )}
                     {ord.status === "Shipped" && (
@@ -353,12 +467,12 @@ export default function Shop() {
                           handleUpdateOrderStatus(ord.id, "Delivered")
                         }
                       >
-                        Mark Delivered
+                        <FaCheckCircle /> Mark Delivered
                       </button>
                     )}
                     {ord.status === "Delivered" && (
                       <span className="dispatch-success">
-                        ✓ Dispatched & Delivered
+                        <FaCheckCircle /> Dispatched & Delivered
                       </span>
                     )}
                   </div>

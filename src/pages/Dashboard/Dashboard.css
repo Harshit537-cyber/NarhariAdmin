@@ -140,6 +140,76 @@
 }
 
 /* ==========================================
+   RECENT PROFILE APPROVALS CARD
+   ========================================== */
+.approval-card {
+  margin-top: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.title-vertical-bar.purple { background: var(--neon-purple); }
+
+.giant-badge.purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--neon-purple);
+}
+
+.purple-avatar {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 6px 15px rgba(139, 92, 246, 0.3);
+}
+
+.pending-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: rgba(179, 140, 27, 0.12);
+  color: var(--neon-gold);
+  letter-spacing: 0.5px;
+}
+
+.btn-pro-approve {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+.btn-pro-approve:hover {
+  background: var(--neon-emerald);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+}
+
+.btn-pro-reject {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-red);
+}
+.btn-pro-reject:hover {
+  background: var(--danger-red);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.3);
+}
+
+.no-approvals-box {
+  padding: 50px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.no-approval-icon {
+  font-size: 32px;
+  color: var(--neon-emerald);
+  margin-bottom: 12px;
+}
+
+.approval-row {
+  animation-fill-mode: forwards;
+}
+
+/* ==========================================
    KHATARNAK METRIC CARDS (SUPER-SIZED)
    ========================================== */
 .db-metrics-grid {
@@ -556,6 +626,85 @@
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ==========================================
+   FORCE TABLE DISPLAY (fix broken column layout)
+   Needed in case a global CSS reset (Bootstrap/
+   Tailwind preflight etc.) overrides table display.
+   ========================================== */
+.khatarnak-table {
+  display: table !important;
+  table-layout: auto;
+}
+
+.khatarnak-table thead {
+  display: table-header-group !important;
+}
+
+.khatarnak-table tbody {
+  display: table-row-group !important;
+}
+
+.khatarnak-table tr {
+  display: table-row !important;
+}
+
+.khatarnak-table th,
+.khatarnak-table td {
+  display: table-cell !important;
+}
+.table-pagination-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: none;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.pagination-btn.active {
+  background: var(--neon-gold);
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.recent-signups-scroll {
+  max-height: 520px; 
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.recent-signups-scroll::-webkit-scrollbar {
+  display: none; /* Chrome */
+}
 /* Responsive */
 @media (max-width: 1100px) {
   .db-content-grid { grid-template-columns: 1fr; }
