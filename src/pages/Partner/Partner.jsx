@@ -21,6 +21,8 @@ import {
   FaBolt,
   FaUsers,
   FaArrowUp,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import DeleteModal from "./DeleteModal";
 import EditPartnerModal from "./Editpartner";
@@ -40,6 +42,8 @@ export default function Partner() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 8;
 
   useEffect(() => {
     fetchPartners();
@@ -157,7 +161,24 @@ export default function Partner() {
       return true;
     });
   }, [partners, searchTerm, filterType]);
+const totalPages = Math.max(
+  1,
+  Math.ceil(filteredPartners.length / itemsPerPage)
+);
 
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+const currentPartners = filteredPartners.slice(
+  indexOfFirstItem,
+  indexOfLastItem
+);
+
+const handlePageChange = (pageNumber) => {
+  if (pageNumber >= 1 && pageNumber <= totalPages) {
+    setCurrentPage(pageNumber);
+  }
+};
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
 
   return (
@@ -303,7 +324,7 @@ export default function Partner() {
           <div className="table-error-box">No partners found matching your search criteria.</div>
         ) : (
           <div className="partner-cards-grid">
-            {filteredPartners.map((partner) => (
+            {currentPartners.map((partner) => (
               <div className="khatarnak-card partner-card-item" key={partner._id}>
                 <div className="card-glass-shine"></div>
                 
@@ -432,8 +453,45 @@ export default function Partner() {
             ))}
           </div>
         )}
+        
       </div>
+ <div className="table-pagination-footer">
+        <div className="pagination-container">
 
+          <button
+            className="pagination-btn arrow-btn"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <FaChevronLeft />
+          </button>
+
+
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+            (page) => (
+              <button
+                key={page}
+                className={`pagination-btn ${
+                  currentPage === page ? "active" : ""
+                }`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            )
+          )}
+
+
+          <button
+            className="pagination-btn arrow-btn"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <FaChevronRight />
+          </button>
+
+        </div>
+      </div>
       <DeleteModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}

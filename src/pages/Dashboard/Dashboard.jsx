@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "./Dashboard.css";
 import {
   getAllUsers,
@@ -19,6 +20,9 @@ import {
   FaCrown,
   FaBolt,
   FaCheckCircle,
+  FaUserCheck,
+  FaUserTimes,
+  FaClock,
 } from "react-icons/fa";
 
 export default function Dashboard() {
@@ -29,8 +33,15 @@ export default function Dashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewUser, setViewUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
   const [modalTitle, setModalTitle] = useState("");
-  
+  const [pendingApprovals, setPendingApprovals] = useState([
+  { _id: "1", name: "Rahul Sharma", email: "rahul.sharma@gmail.com", role: "partner" },
+  { _id: "2", name: "Priya Verma", email: "priya.verma@gmail.com", role: "user" },
+  { _id: "3", name: "Amit Singh", email: "amit.singh@gmail.com", role: "partner" },
+  { _id: "4", name: "Neha Gupta", email: "neha.gupta@gmail.com", role: "admin" },
+]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalPartners: 0,
@@ -41,11 +52,11 @@ export default function Dashboard() {
 
   const [recentUsers, setRecentUsers] = useState([]);
 
-  useEffect(() => {
-    fetchUsers();
-    fetchStats();
-    fetchRecentUsers();
-  }, []);
+useEffect(() => {
+  fetchUsers();
+  fetchStats();
+  fetchRecentUsers();
+}, []);
 
   const fetchStats = async () => {
     try {
@@ -77,6 +88,16 @@ export default function Dashboard() {
     }
   };
 
+
+const handleApprove = (userId) => {
+  toast.success("Profile approved successfully");
+  setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+};
+
+const handleReject = (userId) => {
+  toast.error("Profile rejected");
+  setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+};
   const confirmDelete = (user) => {
     setSelectedUser(user);
     setShowDeleteModal(true);
@@ -122,7 +143,18 @@ export default function Dashboard() {
   };
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
+const totalPages = Math.max(1, Math.ceil(users.length / itemsPerPage));
 
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+
+const handlePageChange = (pageNumber) => {
+  if (pageNumber >= 1 && pageNumber <= totalPages) {
+    setCurrentPage(pageNumber);
+  }
+};
   return (
     <div className="an-dashboard-container">
       {/* Background Ambient Orbs */}
@@ -276,7 +308,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {currentUsers.map((user) => (
                     <tr key={user._id}>
                       <td>
                         <div className="large-user-profile">
@@ -314,6 +346,35 @@ export default function Dashboard() {
               </table>
             )}
           </div>
+          <div className="table-pagination-footer">
+  <div className="pagination-container">
+    <button
+      className="pagination-btn arrow-btn"
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+    >
+      <FaChevronLeft />
+    </button>
+
+    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+      <button
+        key={page}
+        className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+        onClick={() => handlePageChange(page)}
+      >
+        {page}
+      </button>
+    ))}
+
+    <button
+      className="pagination-btn arrow-btn"
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+    >
+      <FaChevronRight />
+    </button>
+  </div>
+</div>
         </div>
 
         {/* Recent Users Sidebar Feed */}
@@ -326,8 +387,7 @@ export default function Dashboard() {
             <span className="giant-badge gold">{recentUsers.length} Users</span>
           </div>
 
-          <div className="table-responsive sidebar-scroll">
-            <table className="khatarnak-table compact">
+<div className="table-responsive sidebar-scroll recent-signups-scroll">            <table className="khatarnak-table compact">
               <thead>
                 <tr>
                   <th>NAME</th>
@@ -337,8 +397,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentUsers.map((user) => (
-                  <tr key={user._id}>
+{recentUsers.slice(0, 10).map((user) => (                  <tr key={user._id}>
                     <td>
                       <span className="recent-user-bold">{user.name || "—"}</span>
                     </td>
@@ -363,7 +422,115 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+ <div className="super-card approval-card animate-fade-in-delayed">
+        <div className="super-card-header">
+          <div className="header-accent-title">
+            <div className="title-vertical-bar purple"></div>
+            <h2>Recent Profile Approvals</h2>
+          </div>
+          <span className="giant-badge purple">
+            {pendingApprovals.length} Pending
+          </span>
+        </div>
 
+        <div className="table-responsive">
+          
+          {pendingApprovals.length === 0 ? (
+            <div className="no-approvals-box">
+              <FaCheckCircle className="no-approval-icon" />
+              <p>All caught up! No pending approvals.</p>
+            </div>
+          ) : (
+            <table className="khatarnak-table">
+              <thead>
+                <tr>
+                  <th>USER PROFILE</th>
+                  <th>EMAIL ADDRESS</th>
+                  <th>REQUESTED ROLE</th>
+                  <th>STATUS</th>
+                  <th style={{ textAlign: "right" }}>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingApprovals.map((user, idx) => (
+                  <tr
+                    key={user._id}
+                    className="approval-row animate-slide-up"
+                    style={{ animationDelay: `${idx * 0.08}s` }}
+                  >
+                    <td>
+                      <div className="large-user-profile">
+                        <div className="giant-avatar purple-avatar">
+                          {getInitial(user.name)}
+                        </div>
+                        <div className="profile-names">
+                          <span className="main-name">{user.name || "N/A"}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="bold-email">{user.email || "—"}</td>
+                    <td>
+                      <span className={`bold-role-tag role-${user.role}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="pending-status-pill">
+                        <FaClock /> Pending
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-button-group">
+                        <button
+                          className="btn-pro btn-pro-approve"
+                          onClick={() => handleApprove(user._id)}
+                        >
+                          <FaUserCheck /> Approve
+                        </button>
+                        <button
+                          className="btn-pro btn-pro-reject"
+                          onClick={() => handleReject(user._id)}
+                        >
+                          <FaUserTimes /> Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <div className="table-pagination-footer">
+  <div className="pagination-container">
+    <button
+      className="pagination-btn arrow-btn"
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+    >
+      <FaChevronLeft />
+    </button>
+
+    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+      <button
+        key={page}
+        className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+        onClick={() => handlePageChange(page)}
+      >
+        {page}
+      </button>
+    ))}
+
+    <button
+      className="pagination-btn arrow-btn"
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+    >
+      <FaChevronRight />
+    </button>
+  </div>
+</div>
+      </div>
       {/* Khatarnak Delete Modal */}
       {showDeleteModal && (
         <div className="ultra-modal-backdrop">

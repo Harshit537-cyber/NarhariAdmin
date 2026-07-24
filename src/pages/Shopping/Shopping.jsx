@@ -1,8 +1,19 @@
 import React, { useState } from "react";
 import "./Shopping.css";
+import {
+  FaCrown,
+  FaBolt,
+  FaUser,
+  FaShoppingCart,
+  FaTrashAlt,
+  FaMinus,
+  FaPlus,
+  FaTicketAlt,
+  FaLock,
+  FaFileInvoiceDollar,
+} from "react-icons/fa";
 
 export default function Shopping() {
-  // 1. Live Cart Items State
   const [cartItems, setCartItems] = useState([
     {
       id: "ITEM-01",
@@ -24,12 +35,10 @@ export default function Shopping() {
     },
   ]);
 
-  // 2. Billing Assignment States
   const [customerName, setCustomerName] = useState("Aman Sharma");
   const [customerId, setCustomerId] = useState("USR-8821");
   const [discountCode, setDiscountCode] = useState("ASTRO10");
 
-  // Quantity Handlers
   const handleQtyChange = (id, amount) => {
     setCartItems(
       cartItems.map((item) => {
@@ -38,7 +47,7 @@ export default function Shopping() {
           return { ...item, qty: newQty < 1 ? 1 : newQty };
         }
         return item;
-      }),
+      })
     );
   };
 
@@ -46,30 +55,56 @@ export default function Shopping() {
     setCartItems(cartItems.filter((item) => item.id !== id));
   };
 
-  // Calculations
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.qty,
-    0,
+    0
   );
   const deliveryFee = subtotal > 0 ? 100 : 0;
   const discountAmount = discountCode === "ASTRO10" && subtotal > 0 ? 150 : 0;
   const total = subtotal + deliveryFee - discountAmount;
 
   return (
-    <div className="shopping-page animate-fade-in">
-      {/* Header aligned to left */}
-      <header className="shopping-header">
-        <h2>POS Billing & Checkout Desk</h2>
-        <p>Draft order invoices and link purchases to Astrologer referrals.</p>
+    <div className="an-shopping-container">
+      <div className="ambient-orb orb-1"></div>
+      <div className="ambient-orb orb-2"></div>
+      <div className="ambient-orb orb-3"></div>
+
+      <header className="db-header animate-fade-in">
+        <div className="db-header-left">
+          <div className="header-title-container">
+            <span className="enterprise-badge">
+              <FaCrown className="crown-icon" /> COSMIC POS DESK
+            </span>
+            <h1 className="wrapped-header-title">Billing & Checkout Desk</h1>
+          </div>
+          <p className="header-subtitle">
+            Draft order invoices and link purchases to Astrologer referrals.
+          </p>
+        </div>
+
+        <div className="db-header-right">
+          <div className="system-status-card">
+            <div className="pulse-ring"></div>
+            <span className="status-text">
+              <FaBolt /> POS ACTIVE
+            </span>
+          </div>
+        </div>
       </header>
 
-      {/* Two Column POS Grid */}
       <div className="shopping-grid-layout">
-        {/* Left Column: Cart Items & Seeker Mapping */}
         <div className="cart-items-section">
-          {/* Seeker Assignment Header Card */}
-          <div className="billing-meta-card">
-            <h3>Customer & Referral Mapping</h3>
+          <div className="super-card billing-meta-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar"></div>
+                <h2>
+                  <FaUser style={{ marginRight: 8 }} />
+                  Customer & Referral Mapping
+                </h2>
+              </div>
+            </div>
+
             <div className="meta-inputs-grid">
               <div className="input-group">
                 <label>Seeker Name</label>
@@ -90,17 +125,34 @@ export default function Shopping() {
             </div>
           </div>
 
-          {/* Cart Items List */}
-          <div className="items-container-card">
-            <h3>Billing Cart Items ({cartItems.length})</h3>
+          <div className="super-card items-container-card animate-slide-up" style={{ animationDelay: "0.2s" }}>
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar gold"></div>
+                <h2>
+                  <FaShoppingCart style={{ marginRight: 8 }} />
+                  Billing Cart Items
+                </h2>
+              </div>
+              <span className="giant-badge gold">{cartItems.length} Items</span>
+            </div>
 
             {cartItems.length === 0 ? (
-              <p className="empty-cart-text">No items in checkout cart.</p>
+              <div className="empty-cart-box">
+                <FaShoppingCart className="empty-cart-icon" />
+                <p>No items in checkout cart.</p>
+              </div>
             ) : (
               <div className="cart-list">
-                {cartItems.map((item) => (
-                  <div className="cart-item-row" key={item.id}>
-                    <img src={item.img} alt={item.name} className="item-img" />
+                {cartItems.map((item, idx) => (
+                  <div
+                    className="cart-item-row animate-slide-up"
+                    style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
+                    key={item.id}
+                  >
+                    <div className="cart-item-img-wrap">
+                      <img src={item.img} alt={item.name} />
+                    </div>
 
                     <div className="item-details">
                       <div className="item-header-meta">
@@ -114,18 +166,18 @@ export default function Shopping() {
                       <div className="qty-controls-row">
                         <div className="qty-adjuster">
                           <button onClick={() => handleQtyChange(item.id, -1)}>
-                            −
+                            <FaMinus />
                           </button>
                           <span className="qty-num">{item.qty}</span>
                           <button onClick={() => handleQtyChange(item.id, 1)}>
-                            +
+                            <FaPlus />
                           </button>
                         </div>
                         <button
                           className="btn-delete-item"
                           onClick={() => handleRemoveItem(item.id)}
                         >
-                          Remove Item
+                          <FaTrashAlt /> Remove Item
                         </button>
                       </div>
                     </div>
@@ -140,10 +192,17 @@ export default function Shopping() {
           </div>
         </div>
 
-        {/* Right Column: Invoice and Checkout Summary */}
         <div className="billing-summary-section">
-          <div className="summary-card">
-            <h3>Billing Invoice Summary</h3>
+          <div className="super-card summary-card animate-slide-up" style={{ animationDelay: "0.3s" }}>
+            <div className="super-card-header">
+              <div className="header-accent-title">
+                <div className="title-vertical-bar purple"></div>
+                <h2>
+                  <FaFileInvoiceDollar style={{ marginRight: 8 }} />
+                  Billing Invoice Summary
+                </h2>
+              </div>
+            </div>
 
             <div className="invoice-row">
               <span>Subtotal</span>
@@ -158,7 +217,7 @@ export default function Shopping() {
             {discountAmount > 0 && (
               <div className="invoice-row discount-row">
                 <span>Referral Discount (ASTRO10)</span>
-                <span className="bold-red">- ₹{discountAmount}</span>
+                <span className="bold-emerald">- ₹{discountAmount}</span>
               </div>
             )}
 
@@ -169,10 +228,10 @@ export default function Shopping() {
               <span className="total-price">₹{total}</span>
             </div>
 
-            {/* Discount Code Input Box */}
             <div className="discount-input-box">
               <label>Apply Partner Coupon</label>
               <div className="coupon-row">
+                <FaTicketAlt className="coupon-icon" />
                 <input
                   type="text"
                   placeholder="Enter Code"
@@ -189,7 +248,7 @@ export default function Shopping() {
           </div>
 
           <div className="security-guarantee">
-            🔒 Audit Log Registered for Astrologer Commissions
+            <FaLock /> Audit Log Registered for Astrologer Commissions
           </div>
         </div>
       </div>
