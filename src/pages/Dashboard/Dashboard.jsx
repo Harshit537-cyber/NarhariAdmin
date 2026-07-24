@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
-import { getAllUsers, getDashboardStats, getRecentUsers ,deleteUser} from "../../api/Controller/authController"; // apna actual path daal dena
+import {
+  getAllUsers,
+  getDashboardStats,
+  getRecentUsers,
+  deleteUser,
+} from "../../api/Controller/authController";
 import { toast } from "react-toastify";
 import UserViewModal from "../../components/UserModule/UserViewModal";
-import { FaEye } from "react-icons/fa";
+import {
+  FaEye,
+  FaUsers,
+  FaUserShield,
+  FaHandshake,
+  FaUserPlus,
+  FaTrashAlt,
+  FaArrowUp,
+  FaCrown,
+  FaBolt,
+  FaCheckCircle,
+} from "react-icons/fa";
+
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [selectedUser, setSelectedUser] = useState(null);
-const [showViewModal, setShowViewModal] = useState(false);
-const [viewUser, setViewUser] = useState(null);
-const [modalTitle, setModalTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewUser, setViewUser] = useState(null);
+  const [modalTitle, setModalTitle] = useState("");
+  
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalPartners: 0,
@@ -21,7 +39,7 @@ const [modalTitle, setModalTitle] = useState("");
     newPartnersToday: 0,
   });
 
- const [recentUsers, setRecentUsers] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
 
   useEffect(() => {
     fetchUsers();
@@ -42,7 +60,6 @@ const [modalTitle, setModalTitle] = useState("");
     try {
       setLoading(true);
       const res = await getAllUsers();
-      // response.data me users array
       setUsers(res.data || []);
     } catch (err) {
       setError(err.message || "Failed to load users");
@@ -54,177 +71,243 @@ const [modalTitle, setModalTitle] = useState("");
   const fetchRecentUsers = async () => {
     try {
       const res = await getRecentUsers();
-      setRecentUsers(res.data);
+      setRecentUsers(res.data || []);
     } catch (err) {
       console.error("Failed to load recent users:", err);
     }
   };
-// Delete button click -> popup open karega
-const confirmDelete = (user) => {
-  setSelectedUser(user);
-  setShowDeleteModal(true);
-};
-const handleViewClick = (user) => {
-  setViewUser(user);
-  setShowViewModal(true);
-};
 
-const closeViewModal = () => {
-  setShowViewModal(false);
-  setViewUser(null);
-};
-const handleUserView = (user) => {
-  setViewUser(user);
-  setModalTitle("User Details");
-  setShowViewModal(true);
-};
-const handleRecentUserView = (user) => {
-  setViewUser(user);
-  setModalTitle("Recent User Details");
-  setShowViewModal(true);
-};
-const handleDeleteConfirmed = async () => {
-  try {
-    const res = await deleteUser(selectedUser._id);
+  const confirmDelete = (user) => {
+    setSelectedUser(user);
+    setShowDeleteModal(true);
+  };
 
-    toast.success(res.message);
+  const closeViewModal = () => {
+    setShowViewModal(false);
+    setViewUser(null);
+  };
 
-    setUsers((prevUsers) =>
-      prevUsers.filter((u) => u._id !== selectedUser._id)
-    );
+  const handleUserView = (user) => {
+    setViewUser(user);
+    setModalTitle("User Details");
+    setShowViewModal(true);
+  };
 
+  const handleRecentUserView = (user) => {
+    setViewUser(user);
+    setModalTitle("Recent User Details");
+    setShowViewModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    try {
+      const res = await deleteUser(selectedUser._id);
+      toast.success(res.message || "User deleted successfully");
+
+      setUsers((prevUsers) =>
+        prevUsers.filter((u) => u._id !== selectedUser._id)
+      );
+
+      setShowDeleteModal(false);
+      setSelectedUser(null);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error(err.message || "Something went wrong");
+    }
+  };
+
+  const cancelDelete = () => {
     setShowDeleteModal(false);
     setSelectedUser(null);
-  } catch (err) {
-    console.error("Delete failed:", err);
-    toast.error(err.message || "Something went wrong");
-  }
-};
-// Popup close/cancel
-const cancelDelete = () => {
-  setShowDeleteModal(false);
-  setSelectedUser(null);
-};
+  };
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
 
   return (
     <div className="an-dashboard-container">
-      {/* Welcome Header */}
+      {/* Background Ambient Orbs */}
+      <div className="ambient-orb orb-1"></div>
+      <div className="ambient-orb orb-2"></div>
+      <div className="ambient-orb orb-3"></div>
+
+      {/* Header Section with Wrapped Title & Background Container */}
       <header className="db-header animate-fade-in">
         <div className="db-header-left">
-          <h1>Cosmic Admin Hub</h1>
-          <p>Real-time overview of your sacred network & celestial guides.</p>
+          <div className="header-title-container">
+            <span className="enterprise-badge">
+              <FaCrown className="crown-icon" /> COSMIC ENTERPRISE HUB
+            </span>
+            <h1 className="wrapped-header-title">Cosmic Admin Hub</h1>
+          </div>
+          <p className="header-subtitle">
+            Real-time management, celestial telemetry & active guides network.
+          </p>
         </div>
+
         <div className="db-header-right">
-          <span className="live-pulse"></span>
-          <span className="system-status">System Live</span>
+          <div className="system-status-card">
+            <div className="pulse-ring"></div>
+            <span className="status-text"><FaBolt /> SYSTEM LIVE</span>
+          </div>
         </div>
       </header>
 
-      {/* Grid Status Metrics */}
+      {/* Extreme Metric Cards Grid */}
       <div className="db-metrics-grid">
-        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <div className="metric-icon users-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+        {/* Card 1: Total Users */}
+        <div className="khatarnak-card cyan-theme animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box cyan-glow">
+              <FaUsers />
+            </div>
+            <span className="trend-badge cyan-pill">
+              <FaArrowUp /> +{stats.newUsersToday || 0} TODAY
+            </span>
           </div>
-          <div className="metric-data">
-            <h3>{stats.totalUsers}</h3>
-            <p>Total Users</p>
-          </div>
-          <span className="metric-trend up">+{stats.newUsersToday} Today</span>
-        </div>
 
-        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <div className="metric-icon pandit-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-            </svg>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">{(stats.totalUsers || 0).toLocaleString()}</h2>
+            <p className="giant-stat-label">Total Registered Users</p>
           </div>
-          <div className="metric-data">
-            <h3>{stats.totalAdmins}</h3>
-            <p>Total Admins</p>
+
+          <div className="card-bottom-accent">
+            <div className="glow-bar cyan-bar"></div>
           </div>
         </div>
 
-        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.3s" }}>
-          <div className="metric-icon chat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+        {/* Card 2: Total Admins */}
+        <div className="khatarnak-card purple-theme animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box purple-glow">
+              <FaUserShield />
+            </div>
+            <span className="trend-badge purple-pill">
+              <FaCheckCircle /> VERIFIED
+            </span>
           </div>
-          <div className="metric-data">
-            <h3>{stats.totalPartners}</h3>
-            <p>Total Partners</p>
+
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">{(stats.totalAdmins || 0).toLocaleString()}</h2>
+            <p className="giant-stat-label">Total Admin Authorities</p>
           </div>
-          <span className="metric-trend up">+{stats.newPartnersToday} Today</span>
+
+          <div className="card-bottom-accent">
+            <div className="glow-bar purple-bar"></div>
+          </div>
         </div>
 
-        <div className="metric-card animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <div className="metric-icon puja-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+        {/* Card 3: Total Partners */}
+        <div className="khatarnak-card emerald-theme animate-slide-up" style={{ animationDelay: "0.3s" }}>
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box emerald-glow">
+              <FaHandshake />
+            </div>
+            <span className="trend-badge emerald-pill">
+              <FaArrowUp /> +{stats.newPartnersToday || 0} TODAY
+            </span>
           </div>
-          <div className="metric-data">
-            <h3>{stats.newUsersToday + stats.newPartnersToday}</h3>
-            <p>New Signups Today</p>
+
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">{(stats.totalPartners || 0).toLocaleString()}</h2>
+            <p className="giant-stat-label">Active Network Partners</p>
           </div>
-          <span className="metric-pulse-dot"></span>
+
+          <div className="card-bottom-accent">
+            <div className="glow-bar emerald-bar"></div>
+          </div>
+        </div>
+
+        {/* Card 4: New Signups Today */}
+        <div className="khatarnak-card gold-theme animate-slide-up" style={{ animationDelay: "0.4s" }}>
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box gold-glow">
+              <FaUserPlus />
+            </div>
+            <span className="trend-badge gold-pill">
+              <FaBolt /> LIVE SIGNUPS
+            </span>
+          </div>
+
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">
+              {((stats.newUsersToday || 0) + (stats.newPartnersToday || 0)).toLocaleString()}
+            </h2>
+            <p className="giant-stat-label">New Registrations Today</p>
+          </div>
+
+          <div className="card-bottom-accent">
+            <div className="glow-bar gold-bar"></div>
+          </div>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="db-content-grid">
-        {/* Left Side: All Users Management */}
-        <div className="db-card main-table-card animate-fade-in-delayed">
-          <div className="db-card-header">
-            <h2>All Users Management</h2>
-            <span className="badge">{users.length} Total</span>
+        {/* All Users Management */}
+        <div className="super-card main-table-card animate-fade-in-delayed">
+          <div className="super-card-header">
+            <div className="header-accent-title">
+              <div className="title-vertical-bar"></div>
+              <h2>All Users Management</h2>
+            </div>
+            <span className="giant-badge">{users.length} Users Total</span>
           </div>
 
           <div className="table-responsive">
             {loading ? (
-              <p style={{ padding: "20px", color: "var(--gray)" }}>Loading users...</p>
+              <div className="khatarnak-loader">
+                <div className="glowing-spinner"></div>
+                <p>Syncing Cosmic Network Database...</p>
+              </div>
             ) : error ? (
-              <p style={{ padding: "20px", color: "var(--red)" }}>{error}</p>
+              <div className="table-error-box">{error}</div>
             ) : (
-              <table className="db-table">
+              <table className="khatarnak-table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Action</th>
+                    <th>USER PROFILE</th>
+                    <th>EMAIL ADDRESS</th>
+                    <th>SYSTEM ROLE</th>
+                    <th style={{ textAlign: "right" }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
                     <tr key={user._id}>
                       <td>
-                        <div className="user-info">
-                          <div className="user-avatar">{getInitial(user.name)}</div>
-                          <div>
-                            <div className="user-name">{user.name}</div>
+                        <div className="large-user-profile">
+                          <div className="giant-avatar">{getInitial(user.name)}</div>
+                          <div className="profile-names">
+                            <span className="main-name">{user.name || "N/A"}</span>
                           </div>
                         </div>
                       </td>
-                      <td>{user.email}</td>
+                      <td className="bold-email">{user.email || "—"}</td>
                       <td>
-                        <span className={`role-badge role-${user.role}`}>
+                        <span className={`bold-role-tag role-${user.role}`}>
                           {user.role}
                         </span>
                       </td>
-              <td>
-  <div className="action-buttons">
-    <button className="btn-chat" onClick={() => handleUserView(user)}>View</button>    <button className="btn-block" onClick={() => confirmDelete(user)}>Delete</button>
-  </div>
-</td>
+                      <td>
+                        <div className="action-button-group">
+                          <button
+                            className="btn-pro btn-pro-view"
+                            onClick={() => handleUserView(user)}
+                          >
+                            <FaEye /> View
+                          </button>
+                          <button
+                            className="btn-pro btn-pro-delete"
+                            onClick={() => confirmDelete(user)}
+                          >
+                            <FaTrashAlt /> Delete
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -233,84 +316,85 @@ const cancelDelete = () => {
           </div>
         </div>
 
-        {/* Right Side: Recent Users */}
-        <div className="db-card sidebar-feed animate-fade-in-delayed">
-          <div className="db-card-header">
-            <h2>Recent Users</h2>
-            <span className="badge">{recentUsers.length} Users</span>
+        {/* Recent Users Sidebar Feed */}
+        <div className="super-card sidebar-feed animate-fade-in-delayed">
+          <div className="super-card-header">
+            <div className="header-accent-title">
+              <div className="title-vertical-bar gold"></div>
+              <h2>Recent Signups</h2>
+            </div>
+            <span className="giant-badge gold">{recentUsers.length} Users</span>
           </div>
-          <div className="table-responsive">
-            <table className="db-table">
+
+          <div className="table-responsive sidebar-scroll">
+            <table className="khatarnak-table compact">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Role</th>
- <th>Mobile No.</th>
-    <th>Email</th>    
-        <th>Action</th>
-            </tr>
+                  <th>NAME</th>
+                  <th>ROLE</th>
+                  <th>MOBILE</th>
+                  <th style={{ textAlign: "right" }}>ACTION</th>
+                </tr>
               </thead>
-<tbody>
-  {recentUsers.map((user) => (
-    <tr key={user._id}>
-      <td>{user.name || "-"}</td>
-
-      <td>
-        <span className={`role-badge role-${user.role}`}>
-          {user.role}
-        </span>
-      </td>
-
-      <td>{user.mobile || "-"}</td>
-
-      <td>{user.email || "-"}</td>
-      <td>
-  <button
-    className="btn-chat"
-    onClick={() => handleRecentUserView(user)}
-  >
-    <FaEye style={{ marginRight: "5px" }} />
-   
-  </button>
-</td>
-    </tr>
-  ))}
-</tbody>
+              <tbody>
+                {recentUsers.map((user) => (
+                  <tr key={user._id}>
+                    <td>
+                      <span className="recent-user-bold">{user.name || "—"}</span>
+                    </td>
+                    <td>
+                      <span className={`bold-role-tag role-${user.role}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="subtle-mobile">{user.mobile || "—"}</td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        className="btn-square-icon"
+                        onClick={() => handleRecentUserView(user)}
+                      >
+                        <FaEye />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* Khatarnak Delete Modal */}
       {showDeleteModal && (
-  <div className="modal-overlay">
-    <div className="modal-box">
-      <h3>Delete User?</h3>
-      <p>
-        Are you sure you want to delete <strong>{selectedUser?.name}</strong>?
-        This action cannot be undone.
-      </p>
-      <div className="modal-actions">
-        <button className="btn-block" onClick={handleDeleteConfirmed}>
-          Yes, Delete
-        </button>
-        <button className="btn-chat" onClick={cancelDelete}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        <div className="ultra-modal-backdrop">
+          <div className="ultra-modal-box">
+            <div className="danger-glow-icon">
+              <FaTrashAlt />
+            </div>
+            <h3>Delete User Account?</h3>
+            <p>
+              Are you sure you want to permanently delete <strong>{selectedUser?.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="modal-actions-row">
+              <button className="btn-modal-pro cancel" onClick={cancelDelete}>
+                Cancel
+              </button>
+              <button className="btn-modal-pro delete" onClick={handleDeleteConfirmed}>
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-{showViewModal && (
-  <UserViewModal
-    user={viewUser}
-    onClose={closeViewModal}
-    title={modalTitle}
-  />
-)}
-
-
-
-
+      {/* View Modal */}
+      {showViewModal && (
+        <UserViewModal
+          user={viewUser}
+          onClose={closeViewModal}
+          title={modalTitle}
+        />
+      )}
     </div>
   );
 }
