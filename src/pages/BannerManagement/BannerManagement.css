@@ -1,0 +1,844 @@
+/* ==========================================================================
+   Celestial Banner Management Stylesheet
+   ========================================================================== */
+
+.an-banner-container {
+  position: relative;
+  min-height: 100vh;
+  padding: 2.5rem;
+  background-color: var(--bg-dark-mesh);
+  color: #f1f1f6;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Ambient Background Orbs */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.orb-1 {
+  width: 450px;
+  height: 450px;
+  top: -10%;
+  right: 5%;
+  background: radial-gradient(circle, #c084fc 0%, rgba(192,132,252,0) 70%);
+}
+
+.orb-2 {
+  width: 550px;
+  height: 550px;
+  bottom: 10%;
+  left: -10%;
+  background: radial-gradient(circle, #38bdf8 0%, rgba(56,189,248,0) 70%);
+}
+
+.orb-3 {
+  width: 350px;
+  height: 350px;
+  top: 40%;
+  left: 45%;
+  background: radial-gradient(circle, #f472b6 0%, rgba(244,114,182,0) 70%);
+}
+
+/* Header Elements & Buttons */
+.btn-add-banner {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+}
+
+.btn-add-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(168, 85, 247, 0.6);
+}
+
+/* Banner Table Preview Graphic */
+.banner-profile-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.banner-mini-preview {
+  width: 90px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.20s ease;
+}
+
+.khatarnak-table tr:hover .banner-mini-preview {
+  transform: scale(1.05);
+  border-color: #c084fc;
+}
+
+/* Row Selected State */
+.khatarnak-table tr.row-selected {
+  background: rgba(192, 132, 252, 0.1) !important;
+  border-left: 3px solid #c084fc;
+}
+
+/* Status Badges */
+.status-pill {
+  border: none;
+  border-radius: 20px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.status-pill.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.status-pill.active:hover {
+  background: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+.status-pill.inactive {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.status-pill.inactive:hover {
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.4);
+}
+
+/* Sidebar Preview Components */
+.sidebar-preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cosmic-preview-box {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.preview-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cosmic-preview-box:hover .preview-image {
+  transform: scale(1.04);
+}
+
+.preview-category-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #000;
+  color: #fff;
+}
+
+.preview-category-tag.cat-dashboard { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+.preview-category-tag.cat-consultation { background: linear-gradient(135deg, #c084fc, #7c3aed); }
+.preview-category-tag.cat-shop { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.preview-category-tag.cat-wallet { background: linear-gradient(135deg, #34d399, #059669); }
+
+.preview-details {
+  padding: 1.25rem;
+}
+
+.preview-details h3 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.preview-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+.preview-info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.info-label {
+  color: #94a3b8;
+}
+
+.info-val {
+  color: #e2e8f0;
+  font-weight: 500;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.highlighting-text {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.status-text {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.status-text.status-active { color: #34d399; }
+.status-text.status-inactive { color: #f87171; }
+
+.no-preview-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  color: #64748b;
+  min-height: 250px;
+}
+
+.watermark-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.2;
+}
+
+/* Form Modals styling */
+.large-form-modal {
+  max-width: 580px !important;
+}
+
+.form-glow-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(192, 132, 252, 0.1);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  box-shadow: 0 0 15px rgba(192, 132, 252, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #c084fc;
+  margin: 0 auto 1.25rem auto;
+}
+
+.cosmic-form {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.cosmic-form .input-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cosmic-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.cosmic-form input,
+.cosmic-form select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.cosmic-form input:focus,
+.cosmic-form select:focus {
+  border-color: #c084fc;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.2);
+}
+
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.status-radio-group {
+  display: flex;
+  gap: 12px;
+}
+
+.radio-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.25s ease;
+}
+
+.radio-btn.active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #34d399;
+  color: #34d399;
+}
+
+.radio-btn.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.btn-modal-pro.deploy {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.btn-modal-pro.deploy:hover {
+  background: linear-gradient(135deg, #d8b4fe 0%, #c084fc 100%);
+  transform: translateY(-1px);
+}
+
+.bold-impressions {
+  font-weight: 700;
+  font-family: monospace;
+  color: #38bdf8;
+  font-size: 1rem;
+}
+
+/* ==========================================================================
+   Celestial Pagination Styles (With Solid Black Page Buttons)
+   ========================================================================== */
+
+.custom-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto; 
+  background: rgba(255, 255, 255, 0.015);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 10;
+  position: relative;
+}
+
+.pagination-btn {
+  background: #000000; /* Solid Black Background */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f1f6; 
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(192, 132, 252, 0.15); 
+  border-color: rgba(192, 132, 252, 0.4);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+/* Normal Page Buttons - Solid Black */
+.page-num-btn {
+  background: #000000; /* Solid Black Background */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Clean visible border */
+  color: #ffffff; /* Bright white text so numbers are clearly visible */
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.page-num-btn:hover {
+  background: rgba(192, 132, 252, 0.2); /* Soft purple glow on hover */
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Current Active Page - Highlighting with Purple Gradient */
+.page-num-btn.active-page {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); 
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.5); 
+}
+
+/* ==========================================================================
+   GENERAL MODAL STYLES (ADD, EDIT, DELETE POPUPS) - HIGH VISIBILITY
+   ========================================================================== */
+
+/* Light Overlay Backdrop with a soft violet tint and blur */
+.ultra-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 11, 28, 0.45); /* Soft dark violet-tinted backdrop */
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeInBackdrop 0.25s ease-out forwards;
+}
+
+/* Modal Box - Clean White background with Royal Purple accents */
+.ultra-modal-box {
+  background: #ffffff; /* Solid White Background */
+  border: 1px solid #d8b4fe; /* Soft lavender border */
+  box-shadow: 0 15px 30px -5px rgba(124, 58, 237, 0.15), 
+              0 10px 15px -5px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+  color: #1e1b4b; /* Deep Indigo-Black text color */
+  text-align: center;
+  animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal Title (Highly Visible Purple) */
+.ultra-modal-box h3 {
+  color: #3b0764; /* Deep, clear purple */
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.2px;
+}
+
+/* Modal Warning/Description text (For Delete Confirmation) */
+.ultra-modal-box p {
+  color: #475569; /* Clear charcoal text for high readability */
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+/* Highlighted Banner Name in the text */
+.ultra-modal-box p strong {
+  color: #7c3aed; /* Vibrant purple so the name of the banner stands out */
+  font-weight: 700;
+  background: rgba(124, 58, 237, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Danger Glow Icon (Garbage/Trash Icon box) */
+.danger-glow-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.08); /* Soft red tint */
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #ef4444; /* Bright Warning Red */
+  margin: 0 auto 15px auto;
+}
+
+/* Modal Buttons Layout alignment */
+.modal-actions-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+/* Standard Button styling */
+.btn-modal-pro {
+  padding: 0.65rem 1.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Cancel Button (Soft light-purple style) */
+.btn-modal-pro.cancel {
+  background: #f5f3ff !important;
+  color: #5b21b6 !important;
+  border: 1px solid #ddd6fe !important;
+}
+
+.btn-modal-pro.cancel:hover {
+  background: #ede9fe !important;
+  color: #4c1d95 !important;
+}
+
+/* Delete/Confirm Button (Vibrant Warning Red) */
+.btn-modal-pro.delete {
+  background: #ef4444 !important; /* Solid red */
+  color: #ffffff !important;
+  border: 1px solid #fca5a5 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.btn-modal-pro.delete:hover {
+  background: #dc2626 !important; /* Darker red on hover */
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Add/Edit Form Layout Compatibility inside White Modal */
+.ultra-modal-box .cosmic-form label {
+  color: #5b21b6; /* Purple headings inside the form labels */
+  font-weight: 600;
+}
+
+.ultra-modal-box .cosmic-form input,
+.ultra-modal-box .cosmic-form select {
+  background: #f8fafc; /* Soft white/gray field background */
+  border: 1px solid #cbd5e1;
+  color: #0f172a; /* Solid dark text when typing (highly visible) */
+}
+
+.ultra-modal-box .cosmic-form input:focus,
+.ultra-modal-box .cosmic-form select:focus {
+  border-color: #7c3aed;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.2);
+}
+
+/* ==========================================================================
+   ASTRAL INFO MODAL POPUP - PREMIUM WHITE & PURPLE THEME (HIGH VISIBILITY)
+   ========================================================================== */
+
+/* Modal Box - Clean White background with Royal Purple accents */
+.ultra-modal-box.info-portal-modal {
+  background: #ffffff; /* Crisp white background */
+  border: 1px solid #d8b4fe; /* Beautiful lavender border */
+  box-shadow: 0 15px 30px -5px rgba(124, 58, 237, 0.12), 
+              0 10px 15px -5px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 30px;
+  max-width: 660px;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+  color: #1e1b4b; /* Dark purple-black text for maximum readability */
+  animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Top Icon with a soft purple tint */
+.info-theme-icon {
+  background: rgba(124, 58, 237, 0.08) !important; /* Elegant lavender tint */
+  color: #7c3aed !important; /* Premium Violet/Purple */
+  box-shadow: none !important;
+  font-size: 1.6rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 12px auto;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+}
+
+/* Main Heading (Deep Royal Purple - Highly visible on White background) */
+.info-portal-modal h3 {
+  color: #3b0764; /* Deep, high-contrast dark purple */
+  font-size: 1.55rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+  text-shadow: none !important;
+}
+
+/* Modal Sub-heading Description */
+.modal-description-sub {
+  color: #5b21b6; /* Medium deep purple for perfect readability */
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 25px;
+  opacity: 0.85;
+}
+
+/* Two-column layout */
+.portal-info-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 24px;
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .portal-info-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+/* Left Column: Image Preview Block */
+.portal-info-media {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e9d5ff; /* Light lavender border */
+  background: #faf5ff; /* Soft lavender tint background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+}
+
+.portal-large-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #faf5ff;
+}
+
+/* Deep Purple Badge overlay on image */
+.portal-sector-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #4c1d95; /* Rich dark purple badge */
+  border: none;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+}
+
+/* Right Column: Specifications Details Grid */
+.portal-specifications-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spec-item-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Field Sub-Headings (Labels) - Vibrant & Highly Visible Purple */
+.spec-label {
+  font-size: 0.72rem;
+  letter-spacing: 1.2px;
+  color: #6d28d9; /* High-contrast Medium Purple */
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Field Values (Data) - Dark Indigo-Black for maximum legibility */
+.spec-value {
+  font-size: 0.92rem;
+  color: #1e1b4b; /* Extremely clear dark purple-black */
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* ID Field Style */
+.spec-value.code-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.82rem;
+  color: #4c1d95; /* Dark violet text */
+  background: #f5f3ff; /* Soft light lavender tag background */
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #e9d5ff;
+  width: fit-content;
+  font-weight: 600;
+}
+
+/* Title highlighting */
+.spec-value.highlight-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e1b4b; /* Bold dark violet-black */
+}
+
+/* Redirect Path URL Box */
+.spec-value.redirect-path {
+  color: #6d28d9; /* Deep violet-blue path color */
+  background: rgba(109, 40, 217, 0.05);
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  word-break: break-all;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(109, 40, 217, 0.1);
+  font-weight: 500;
+}
+
+/* Views/Impressions - Purple Highlight Style */
+.spec-value.impressions-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7c3aed; /* Vibrant Violet color for analytics */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Status badges inside modal */
+.inline-status {
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-block;
+  text-align: center;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+/* Separator before Close Button */
+.border-top-glow {
+  border-top: 1px solid #e9d5ff;
+  padding-top: 18px;
+  margin-top: 8px;
+}
+
+/* Close Button overrides for light purple theme compatibility */
+.ultra-modal-box.info-portal-modal .btn-modal-pro.cancel {
+  background: #f5f3ff !important; /* Soft lavender white */
+  color: #5b21b6 !important; /* Dark violet */
+  border: 1px solid #ddd6fe !important; /* Lavender border */
+}
+
+.ultra-modal-box.info-portal-modal .btn-modal-pro.cancel:hover {
+  background: #ede9fe !important;
+  color: #4c1d95 !important;
+}
+
+.full-width {
+  width: 100% !important;
+  justify-content: center;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

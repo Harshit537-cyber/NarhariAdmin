@@ -1,16 +1,36 @@
 import React from "react";
-import "./logoutModal.css";
+import { FiLogOut, FiX } from "react-icons/fi";
+import "./LogoutModal.css";
 
 export default function LogoutModal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <h3 className="modal-title">Ready to Leave?</h3>
-        <p className="modal-text">Are you sure you want to log out of Astronarhari?</p>
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="btn-confirm" onClick={onConfirm}>Logout</button>
+    <div className="logout-overlay" onClick={onClose}>
+      <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="close-btn" onClick={onClose}>
+          <FiX />
+        </button>
+
+        <div className="logout-icon">
+          <FiLogOut />
+        </div>
+
+        <h2>Logout</h2>
+
+        <p>
+          Are you sure you want to logout from
+          <strong> AstroNarhari Admin Panel</strong>?
+        </p>
+
+        <div className="logout-actions">
+          <button className="cancel-btn" onClick={onClose}>
+            Stay Here
+          </button>
+
+          <button className="logout-btn" onClick={onConfirm}>
+            Logout
+          </button>
         </div>
       </div>
     </div>

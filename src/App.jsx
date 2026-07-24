@@ -4,6 +4,7 @@ import Login from "./pages/Login/Login";
 import MainLayout from "./layouts/Mainlayout";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
+import BannerManagement from "./pages/BannerManagement/BannerManagement.jsx";
 import Consultation from "./pages/Consultation/Consultation";
 import Wallet from "./pages/Wallet/Wallet";
 import Shop from "./pages/Shop/Shop";
@@ -26,6 +27,7 @@ const AppRoutes = () => {
 
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/banners" element={<BannerManagement />} /> 
           <Route path="/consultation" element={<Consultation />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/shop" element={<Shop />} />
