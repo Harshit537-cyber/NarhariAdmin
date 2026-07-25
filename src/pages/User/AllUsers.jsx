@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./Users.css";
 import {
   FaEye,
@@ -18,93 +18,20 @@ import {
   FaWallet,
   FaUserShield,
   FaTimes,
+  FaCalendarAlt,
+  FaClock,
+  FaVenusMars,
+  FaStar,
 } from "react-icons/fa";
 
-// Rich mock database for local testing
-const INITIAL_USERS = [
-  {
-    _id: "u1",
-    fullName: "Aarav Sharma",
-    email: "aarav.sharma@example.com",
-    mobile: "9876543210",
-    city: "Mumbai",
-    walletBalance: 1250,
-    isActive: true,
-    isPremium: true,
-    isVerified: true,
-    profilePic: "",
-    createdAt: new Date().toISOString(), // Today
-  },
-  {
-    _id: "u2",
-    fullName: "Isha Patel",
-    email: "isha.patel@example.com",
-    mobile: "8765432109",
-    city: "Ahmedabad",
-    walletBalance: 450,
-    isActive: true,
-    isPremium: false,
-    isVerified: true,
-    profilePic: "",
-    createdAt: "2026-07-20T10:00:00.000Z",
-  },
-  {
-    _id: "u3",
-    fullName: "Shruti",
-    email: "shruti.@example.com",
-    mobile: "7654321098",
-    city: "Delhi",
-    walletBalance: 0,
-    isActive: false,
-    isPremium: false,
-    isVerified: false,
-    profilePic: "",
-    createdAt: "2026-07-18T12:30:00.000Z",
-  },
-  {
-    _id: "u4",
-    fullName: "Ananya Iyer",
-    email: "ananya.iyer@example.com",
-    mobile: "9123456789",
-    city: "Bangalore",
-    walletBalance: 3200,
-    isActive: true,
-    isPremium: true,
-    isVerified: true,
-    profilePic: "",
-    createdAt: new Date().toISOString(), // Today
-  },
-  {
-    _id: "u5",
-    fullName: "Kabir Singh",
-    email: "kabir.singh@example.com",
-    mobile: "8234567890",
-    city: "Chandigarh",
-    walletBalance: 150,
-    isActive: true,
-    isPremium: false,
-    isVerified: false,
-    profilePic: "",
-    createdAt: "2026-07-15T08:15:00.000Z",
-  },
-  {
-    _id: "u6",
-    fullName: "Meera Nair",
-    email: "meera.nair@example.com",
-    mobile: "7234567891",
-    city: "Kochi",
-    walletBalance: 850,
-    isActive: false,
-    isPremium: true,
-    isVerified: true,
-    profilePic: "",
-    createdAt: "2026-07-10T14:45:00.000Z",
-  },
-];
+// ⚠️ API path ko apne project structure ke hisab se change karein
+import { getAllUsers } from "../../api/Controller/authController"; 
 
 export default function Users() {
-  const [users, setUsers] = useState(INITIAL_USERS);
-  const [loading, setLoading] = useState(false); // Can trigger loading states locally
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,22 +43,59 @@ export default function Users() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Form states for local edit modal
-  const [editForm, setEditForm] = useState({ fullName: "", mobile: "", city: "", walletBalance: 0 });
+  // Form states for edit modal mapped with backend attributes
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    name: "",
+    email: "",
+    mobile: "",
+    gender: "",
+    zodiac: "",
+    placeOfBirth: "",
+    walletBalance: 0,
+  });
 
-  // 1. Dynamic Stats Calculation based on State
+  // ================= 1. FETCH USERS FROM API =================
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getAllUsers();
+      // Mapped according to response structure: { success: true, data: [...] }
+      if (response && response.data) {
+        setUsers(response.data);
+      } else if (Array.isArray(response)) {
+        setUsers(response);
+      } else {
+        setUsers([]);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError(err?.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // ================= 2. Dynamic Stats Calculation =================
   const stats = useMemo(() => {
     const today = new Date().toDateString();
     const totalUsers = users.length;
-    const premiumCount = users.filter((u) => u.isPremium).length;
-    const unverifiedCount = users.filter((u) => !u.isVerified).length;
-    const newToday = users.filter(
-      (u) => new Date(u.createdAt).toDateString() === today
-    ).length;
-    return { totalUsers, premiumCount, unverifiedCount, newToday };
+    const activeCount = users.filter((u) => u.isActive).length;
+    const inactiveCount = users.filter((u) => !u.isActive).length;
+    const newToday = users.filter((u) => {
+      if (!u.createdAt) return false;
+      return new Date(u.createdAt).toDateString() === today;
+    }).length;
+
+    return { totalUsers, activeCount, inactiveCount, newToday };
   }, [users]);
 
-  // 2. Local Action Handlers
+  // ================= 3. Handlers =================
   const handleToggleStatus = (user) => {
     setUsers((prev) =>
       prev.map((u) =>
@@ -148,10 +112,14 @@ export default function Users() {
   const handleEditInit = (user) => {
     setSelectedUser(user);
     setEditForm({
-      fullName: user.fullName,
-      mobile: user.mobile,
-      city: user.city,
-      walletBalance: user.walletBalance,
+      fullName: user.fullName || "",
+      name: user.name || "",
+      email: user.email || "",
+      mobile: user.mobile || "",
+      gender: user.gender || "",
+      zodiac: user.zodiac || "",
+      placeOfBirth: user.placeOfBirth || "",
+      walletBalance: user.walletBalance || 0,
     });
     setEditOpen(true);
   };
@@ -178,32 +146,33 @@ export default function Users() {
     setSelectedUser(null);
   };
 
-  // 3. Search and Filtering Logic
+  // ================= 4. Search and Filtering Logic =================
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      const name = (user.fullName || "").toLowerCase();
+      const displayName = (user.fullName || user.name || "").toLowerCase();
       const mobile = (user.mobile || "").toLowerCase();
-      const city = (user.city || "").toLowerCase();
+      const place = (user.placeOfBirth || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
+      const zodiac = (user.zodiac || "").toLowerCase();
       const query = searchTerm.toLowerCase();
 
       const matchesSearch =
-        name.includes(query) ||
+        displayName.includes(query) ||
         mobile.includes(query) ||
-        city.includes(query) ||
-        email.includes(query);
+        place.includes(query) ||
+        email.includes(query) ||
+        zodiac.includes(query);
 
       if (!matchesSearch) return false;
 
-      if (filterType === "active") return user.isActive;
-      if (filterType === "premium") return user.isPremium;
-      if (filterType === "unverified") return !user.isVerified;
+      if (filterType === "active") return user.isActive === true;
+      if (filterType === "inactive") return user.isActive === false;
 
       return true;
     });
   }, [users, searchTerm, filterType]);
 
-  // 4. Pagination
+  // ================= 5. Pagination =================
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -215,7 +184,24 @@ export default function Users() {
     }
   };
 
-  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "U");
+  // Helpers
+  const getInitial = (name, fallbackName) => {
+    const val = name || fallbackName;
+    return val ? val.trim().charAt(0).toUpperCase() : "U";
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      return new Date(dateStr).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <div className="an-user-container">
@@ -233,7 +219,7 @@ export default function Users() {
             <h1 className="wrapped-header-title">User Management</h1>
           </div>
           <p className="header-subtitle">
-            Admin console for managing galaxy explorers, wallets, and subscriptions.
+            Admin console for managing users, astrological profiles, and wallet balances.
           </p>
         </div>
 
@@ -247,7 +233,7 @@ export default function Users() {
         </div>
       </header>
 
-      {/* Stats Section */}
+      {/* Metrics Grid */}
       <div className="db-metrics-grid">
         <div className="khatarnak-card cyan-theme animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="card-glass-shine"></div>
@@ -272,13 +258,13 @@ export default function Users() {
           <div className="card-glass-shine"></div>
           <div className="card-top-bar">
             <div className="big-icon-box emerald-glow">
-              <FaCrown />
+              <FaCheckCircle />
             </div>
-            <span className="trend-badge emerald-pill">PREMIUM</span>
+            <span className="trend-badge emerald-pill">ACTIVE</span>
           </div>
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.premiumCount}</h2>
-            <p className="giant-stat-label">Premium Subscribers</p>
+            <h2 className="giant-stat-number">{stats.activeCount}</h2>
+            <p className="giant-stat-label">Active Profiles</p>
           </div>
           <div className="card-bottom-accent">
             <div className="glow-bar emerald-bar"></div>
@@ -291,11 +277,11 @@ export default function Users() {
             <div className="big-icon-box gold-glow">
               <FaUserShield />
             </div>
-            <span className="trend-badge gold-pill">PENDING</span>
+            <span className="trend-badge gold-pill">INACTIVE</span>
           </div>
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.unverifiedCount}</h2>
-            <p className="giant-stat-label">Unverified Profiles</p>
+            <h2 className="giant-stat-number">{stats.inactiveCount}</h2>
+            <p className="giant-stat-label">Deactivated / Suspended</p>
           </div>
           <div className="card-bottom-accent">
             <div className="glow-bar gold-bar"></div>
@@ -309,7 +295,7 @@ export default function Users() {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Search by name, email, mobile, or city..."
+            placeholder="Search by name, email, mobile, zodiac or place..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -329,22 +315,23 @@ export default function Users() {
             className={`filter-btn ${filterType === "active" ? "active" : ""}`}
             onClick={() => { setFilterType("active"); setCurrentPage(1); }}
           >
-            Active
+            Active ({stats.activeCount})
           </button>
           <button
-            className={`filter-btn ${filterType === "premium" ? "active" : ""}`}
-            onClick={() => { setFilterType("premium"); setCurrentPage(1); }}
+            className={`filter-btn ${filterType === "inactive" ? "active" : ""}`}
+            onClick={() => { setFilterType("inactive"); setCurrentPage(1); }}
           >
-            Premium
-          </button>
-          <button
-            className={`filter-btn ${filterType === "unverified" ? "active" : ""}`}
-            onClick={() => { setFilterType("unverified"); setCurrentPage(1); }}
-          >
-            Unverified
+            Inactive ({stats.inactiveCount})
           </button>
         </div>
       </div>
+
+      {/* Error Message Display */}
+      {error && (
+        <div className="table-error-box" style={{ marginBottom: "20px" }}>
+          Error: {error}
+        </div>
+      )}
 
       {/* Main Grid content */}
       <div className="pt-content-grid animate-fade-in-delayed">
@@ -357,166 +344,200 @@ export default function Users() {
           <div className="table-error-box">No users match your criteria.</div>
         ) : (
           <div className="user-cards-grid">
-            {currentUsers.map((user) => (
-              <div className="khatarnak-card user-card-item" key={user._id}>
-                <div className="card-glass-shine"></div>
+            {currentUsers.map((user) => {
+              const displayName = user.fullName || user.name || "Unnamed User";
 
-                <div className="user-card-header">
-                  <span className={`bold-role-tag ${user.isActive ? "role-user" : "role-inactive"}`}>
-                    {user.isActive ? "ACTIVE" : "SUSPENDED"}
-                  </span>
+              return (
+                <div className="khatarnak-card user-card-item" key={user._id}>
+                  <div className="card-glass-shine"></div>
 
-                  <div className="badges-group">
-                    {user.isPremium && (
-                      <span className="trend-badge emerald-pill">
-                        <FaCrown /> Premium
-                      </span>
-                    )}
-                    {user.isVerified && (
-                      <span className="trend-badge cyan-pill">
-                        <FaCheckCircle /> Verified
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="user-card-body">
-                  <div className="avatar-wrapper">
-                    {user.profilePic ? (
-                      <img
-                        src={user.profilePic}
-                        alt={user.fullName}
-                        className="user-avatar-img"
-                      />
-                    ) : (
-                      <div className="giant-avatar">
-                        {getInitial(user.fullName)}
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 className="user-name">{user.fullName || "Unnamed Explorer"}</h3>
-                  <p className="user-email">
-                    <FaEnvelope /> {user.email || "No Email"}
-                  </p>
-                  <p className="user-mobile">
-                    <FaPhoneAlt /> {user.mobile || "No Mobile"}
-                  </p>
-
-                  <div className="user-meta-row">
-                    {user.city && (
-                      <span className="meta-item">
-                        <FaMapMarkerAlt /> {user.city}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="user-card-footer">
-                  <div className="rate-info">
-                    <span className="rate-amount">
-                      <FaWallet style={{ fontSize: "14px", marginRight: "4px" }} />
-                      ₹{user.walletBalance}
+                  <div className="user-card-header">
+                    <span className={`bold-role-tag ${user.isActive ? "role-user" : "role-inactive"}`}>
+                      {user.isActive ? "ACTIVE" : "SUSPENDED"}
                     </span>
-                    <span className="rate-unit">bal</span>
+
+                    <div className="badges-group">
+                      {user.zodiac && user.zodiac !== "Auto-calculated" && (
+                        <span className="trend-badge emerald-pill">
+                          <FaStar /> {user.zodiac}
+                        </span>
+                      )}
+                      {user.gender && (
+                        <span className="trend-badge cyan-pill">
+                          <FaVenusMars /> {user.gender}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="card-right-controls">
-                    <label className="toggle-switch" title="Toggle Active Status">
-                      <input
-                        type="checkbox"
-                        checked={user.isActive}
-                        onChange={() => handleToggleStatus(user)}
-                      />
-                      <span className="toggle-slider"></span>
-                    </label>
+                  <div className="user-card-body">
+                    <div className="avatar-wrapper">
+                      {user.profilePic ? (
+                        <img
+                          src={user.profilePic}
+                          alt={displayName}
+                          className="user-avatar-img"
+                        />
+                      ) : (
+                        <div className="giant-avatar">
+                          {getInitial(user.fullName, user.name)}
+                        </div>
+                      )}
+                    </div>
 
-                    <div className="action-button-group">
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleView(user)}
-                        title="View Info"
-                      >
-                        <FaEye />
-                      </button>
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleEditInit(user)}
-                        title="Edit Details"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="btn-square-icon btn-delete-accent"
-                        onClick={() => handleDeleteInit(user)}
-                        title="Delete User"
-                      >
-                        <FaTrashAlt />
-                      </button>
+                    <h3 className="user-name">{displayName}</h3>
+
+                    <p className="user-email">
+                      <FaEnvelope /> {user.email || "No Email Provided"}
+                    </p>
+
+                    <p className="user-mobile">
+                      <FaPhoneAlt /> {user.mobile || "No Mobile"}
+                    </p>
+
+                    <div className="user-meta-row" style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+                      {user.placeOfBirth && (
+                        <span className="meta-item">
+                          <FaMapMarkerAlt /> {user.placeOfBirth}
+                        </span>
+                      )}
+                      {user.dateOfBirth && (
+                        <span className="meta-item">
+                          <FaCalendarAlt /> {formatDate(user.dateOfBirth)}
+                        </span>
+                      )}
+                      {user.timeOfBirth && (
+                        <span className="meta-item">
+                          <FaClock /> {user.timeOfBirth}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="user-card-footer">
+                    <div className="rate-info">
+                      <span className="rate-amount">
+                        <FaWallet style={{ fontSize: "14px", marginRight: "4px" }} />
+                        ₹{user.walletBalance ?? 0}
+                      </span>
+                      <span className="rate-unit">bal</span>
+                    </div>
+
+                    <div className="card-right-controls">
+                      <label className="toggle-switch" title="Toggle Active Status">
+                        <input
+                          type="checkbox"
+                          checked={user.isActive ?? false}
+                          onChange={() => handleToggleStatus(user)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+
+                      <div className="action-button-group">
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleView(user)}
+                          title="View Info"
+                        >
+                          <FaEye />
+                        </button>
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleEditInit(user)}
+                          title="Edit Details"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn-square-icon btn-delete-accent"
+                          onClick={() => handleDeleteInit(user)}
+                          title="Delete User"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Pagination Footer */}
-      <div className="table-pagination-footer">
-        <div className="pagination-container">
-          <button
-            className="pagination-btn arrow-btn"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <FaChevronLeft />
-          </button>
-
-          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+      {!loading && filteredUsers.length > 0 && (
+        <div className="table-pagination-footer">
+          <div className="pagination-container">
             <button
-              key={page}
-              className={`pagination-btn ${currentPage === page ? "active" : ""}`}
-              onClick={() => handlePageChange(page)}
+              className="pagination-btn arrow-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
             >
-              {page}
+              <FaChevronLeft />
             </button>
-          ))}
 
-          <button
-            className="pagination-btn arrow-btn"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            <FaChevronRight />
-          </button>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+              <button
+                key={page}
+                className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              className="pagination-btn arrow-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <FaChevronRight />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Simple Inline Local Modals */}
+      {/* View User Detail Modal */}
       {viewOpen && selectedUser && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content">
             <div className="modal-header">
-              <h2>User Telemetry Profile</h2>
+              <h2>User Details</h2>
               <button className="close-btn" onClick={() => setViewOpen(false)}>
                 <FaTimes />
               </button>
             </div>
             <div className="modal-body">
               <div className="profile-detail-card">
-                <div className="modal-avatar-section">
-                  <div className="giant-avatar">{getInitial(selectedUser.fullName)}</div>
-                  <h3>{selectedUser.fullName}</h3>
-                  <p>{selectedUser.email}</p>
+                <div className="modal-avatar-section" style={{ textAlign: "center", marginBottom: "16px" }}>
+                  {selectedUser.profilePic ? (
+                    <img
+                      src={selectedUser.profilePic}
+                      alt="Profile"
+                      style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div className="giant-avatar" style={{ margin: "0 auto" }}>
+                      {getInitial(selectedUser.fullName, selectedUser.name)}
+                    </div>
+                  )}
+                  <h3 style={{ marginTop: "10px" }}>{selectedUser.fullName || selectedUser.name || "N/A"}</h3>
+                  <p>{selectedUser.email || "No Email Mapped"}</p>
                 </div>
+
                 <div className="modal-details-grid">
-                  <div className="detail-item"><strong>Mobile:</strong> {selectedUser.mobile}</div>
-                  <div className="detail-item"><strong>Location:</strong> {selectedUser.city}</div>
-                  <div className="detail-item"><strong>Wallet Balance:</strong> ₹{selectedUser.walletBalance}</div>
-                  <div className="detail-item"><strong>Premium Tier:</strong> {selectedUser.isPremium ? "Active" : "Inactive"}</div>
-                  <div className="detail-item"><strong>Verification Status:</strong> {selectedUser.isVerified ? "Verified" : "Unverified"}</div>
-                  <div className="detail-item"><strong>Account Status:</strong> {selectedUser.isActive ? "Active" : "Banned"}</div>
+                  <div className="detail-item"><strong>User ID:</strong> {selectedUser._id}</div>
+                  <div className="detail-item"><strong>Mobile:</strong> {selectedUser.mobile || "N/A"}</div>
+                  <div className="detail-item"><strong>Gender:</strong> {selectedUser.gender || "N/A"}</div>
+                  <div className="detail-item"><strong>Zodiac Sign:</strong> {selectedUser.zodiac || "N/A"}</div>
+                  <div className="detail-item"><strong>Date of Birth:</strong> {formatDate(selectedUser.dateOfBirth)}</div>
+                  <div className="detail-item"><strong>Time of Birth:</strong> {selectedUser.timeOfBirth || "N/A"}</div>
+                  <div className="detail-item"><strong>Place of Birth:</strong> {selectedUser.placeOfBirth || "N/A"}</div>
+                  <div className="detail-item"><strong>Wallet Balance:</strong> ₹{selectedUser.walletBalance ?? 0}</div>
+                  <div className="detail-item"><strong>Account Status:</strong> {selectedUser.isActive ? "Active" : "Banned/Suspended"}</div>
+                  <div className="detail-item"><strong>Created At:</strong> {formatDate(selectedUser.createdAt)}</div>
+                  <div className="detail-item"><strong>Updated At:</strong> {formatDate(selectedUser.updatedAt)}</div>
                 </div>
               </div>
             </div>
@@ -524,6 +545,7 @@ export default function Users() {
         </div>
       )}
 
+      {/* Edit Modal */}
       {editOpen && selectedUser && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content">
@@ -534,14 +556,29 @@ export default function Users() {
               </button>
             </div>
             <form onSubmit={handleSaveEdit}>
-              <div className="modal-body">
+              <div className="modal-body" style={{ display: "grid", gap: "12px" }}>
                 <div className="form-group">
                   <label>Full Name</label>
                   <input
                     type="text"
                     value={editForm.fullName}
                     onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Display Name (Name)</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -553,11 +590,27 @@ export default function Users() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>City</label>
+                  <label>Gender</label>
                   <input
                     type="text"
-                    value={editForm.city}
-                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Zodiac</label>
+                  <input
+                    type="text"
+                    value={editForm.zodiac}
+                    onChange={(e) => setEditForm({ ...editForm, zodiac: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Place of Birth</label>
+                  <input
+                    type="text"
+                    value={editForm.placeOfBirth}
+                    onChange={(e) => setEditForm({ ...editForm, placeOfBirth: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -582,18 +635,22 @@ export default function Users() {
         </div>
       )}
 
+      {/* Delete Modal */}
       {deleteOpen && selectedUser && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content confirm-danger">
             <div className="modal-header">
-              <h2>Confirm Obliteration</h2>
+              <h2>Confirm Deletion</h2>
               <button className="close-btn" onClick={() => setDeleteOpen(false)}>
                 <FaTimes />
               </button>
             </div>
             <div className="modal-body text-center">
-              <p>Are you sure you want to remove <strong>{selectedUser.fullName}</strong> from the database?</p>
-              <p className="subtext">This action is irreversible in the current state.</p>
+              <p>
+                Are you sure you want to remove{" "}
+                <strong>{selectedUser.fullName || selectedUser.name || "this user"}</strong> from the database?
+              </p>
+              <p className="subtext">This action is permanent.</p>
             </div>
             <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setDeleteOpen(false)}>
