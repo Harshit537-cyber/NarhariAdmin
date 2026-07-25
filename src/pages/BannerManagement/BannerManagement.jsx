@@ -346,6 +346,7 @@ export default function BannerManagement() {
               <table className="khatarnak-table">
                 <thead>
                   <tr>
+                    <th style={{ width: "80px" }}>INDEX</th>
                     <th>PREVIEW & TITLE</th>
                     <th>TARGET LINK</th>
                     <th>STATUS</th>
@@ -354,72 +355,78 @@ export default function BannerManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentBanners.map((banner) => (
-                    <tr
-                      key={banner._id}
-                      className={previewBanner?._id === banner._id ? "row-selected" : ""}
-                      onClick={() => {
-                        setPreviewBanner(banner);
-                        handleOpenInfoModal(banner);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <td>
-                        <div className="banner-profile-wrapper">
-                          <img
-                            src={banner.imageUrl}
-                            alt={banner.title}
-                            className="banner-mini-preview"
-                            onError={(e) => {
-                              e.target.src = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=200";
-                            }}
-                          />
-                          <div className="profile-names">
-                            <span className="main-name">{banner.title}</span>
-                            <span className="sub-role" style={{ textTransform: "capitalize" }}>
-                              {banner.category}
-                            </span>
+                  {currentBanners.map((banner, index) => {
+                    const sequentialIndex = indexOfFirstBanner + index + 1;
+                    return (
+                      <tr
+                        key={banner._id}
+                        className={previewBanner?._id === banner._id ? "row-selected" : ""}
+                        onClick={() => {
+                          setPreviewBanner(banner);
+                          handleOpenInfoModal(banner);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <td className="table-index-number">
+                          {sequentialIndex}
+                        </td>
+                        <td>
+                          <div className="banner-profile-wrapper">
+                            <img
+                              src={banner.imageUrl}
+                              alt={banner.title}
+                              className="banner-mini-preview"
+                              onError={(e) => {
+                                e.target.src = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=200";
+                              }}
+                            />
+                            <div className="profile-names">
+                              <span className="main-name">{banner.title}</span>
+                              <span className="sub-role" style={{ textTransform: "capitalize" }}>
+                                {banner.category}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="bold-email">
-                        <FaLink style={{ marginRight: "6px", opacity: 0.7 }} />
-                        {banner.redirectUrl}
-                      </td>
-                      <td>
-                        <button
-                          className={`status-pill ${banner.status}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleStatus(banner._id);
-                          }}
-                          title="Click to toggle status"
-                        >
-                          {banner.status === "active" ? "ACTIVE" : "INACTIVE"}
-                        </button>
-                      </td>
-                      <td className="bold-impressions">
-                        {(banner.impressions || 0).toLocaleString()}
-                      </td>
-                      <td>
-                        {/* Event propagation रोक दी गई है ताकि Edit/Delete बटन दबाने पर Details Modal न खुले */}
-                        <div className="action-button-group" onClick={(e) => e.stopPropagation()}>
+                        </td>
+                        <td className="bold-email">
+                          <FaLink style={{ marginRight: "6px", opacity: 0.7 }} />
+                          {banner.redirectUrl}
+                        </td>
+                        <td>
                           <button
-                            className="btn-pro btn-pro-view"
-                            onClick={() => handleOpenEditModal(banner)}
+                            className={`status-pill ${banner.status}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleStatus(banner._id);
+                            }}
+                            title="Click to toggle status"
                           >
-                            <FaEdit /> Edit
+                            {banner.status === "active" ? "ACTIVE" : "INACTIVE"}
                           </button>
-                          <button
-                            className="btn-pro btn-pro-delete"
-                            onClick={() => confirmDelete(banner)}
-                          >
-                            <FaTrashAlt /> Remove
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="bold-impressions">
+                          {(banner.impressions || 0).toLocaleString()}
+                        </td>
+                        <td>
+                          {/* Event propagation रोक दी गई है ताकि Edit/Delete बटन दबाने पर Details Modal न खुले */}
+                          <div className="action-button-group" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              className="btn-pro btn-pro-view"
+                              onClick={() => handleOpenEditModal(banner)}
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                            <button
+                              className="btn-pro btn-pro-delete"
+                              onClick={() => confirmDelete(banner)}
+                            >
+                              <FaTrashAlt /> Remove
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

@@ -3,23 +3,20 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
 
-const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: <IconGrid /> },
-  { to: "/banners", label: "Banner Management", icon: <IconBanner /> }, // Added here
-  { to: "/consultation", label: "Consultation", icon: <IconChat /> },
-  { to: "/product", label: "Product", icon: <IconBox /> },
-  { to: "/wallet", label: "Wallet", icon: <IconWallet /> },
-  { to: "/shop", label: "Shop", icon: <IconStore /> },
-  { to: "/shopping", label: "Shopping", icon: <IconBag /> },
-  { to: "/orders", label: "Orders", icon: <IconList /> },
-];
-
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
+  
+  // States to keep groups open if the current path matches
   const [partnerOpen, setPartnerOpen] = useState(
-    location.pathname.startsWith("/partner"),
+    location.pathname.startsWith("/partner")
+  );
+  const [userOpen, setUserOpen] = useState(
+    location.pathname.startsWith("/user")
+  );
+  const [chatsOpen, setChatsOpen] = useState(
+    location.pathname.startsWith("/chats")
   );
 
   return (
@@ -51,6 +48,7 @@ export default function Sidebar() {
 
       {/* Navigation List */}
       <nav className="an-sidebar-nav">
+        {/* Dashboard */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
@@ -93,7 +91,6 @@ export default function Sidebar() {
               >
                 <span>Profile Approval</span>
               </NavLink>
-              {/* NEW KYC MENU ITEM */}
               <NavLink
                 to="/partner/kyc-verification"
                 className={({ isActive }) =>
@@ -106,19 +103,137 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Other Items */}
-        {navItems.slice(1).map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `an-nav-item ${isActive ? "is-active" : ""}`
-            }
+        {/* Collapsible User Menu */}
+        <div className="an-nav-group">
+          <button
+            className={`an-nav-item an-nav-parent ${
+              userOpen ? "is-open" : ""
+            }`}
+            onClick={() => setUserOpen((prev) => !prev)}
           >
-            {item.icon}
-            <span className="an-nav-text">{item.label}</span>
-          </NavLink>
-        ))}
+            <IconUser />
+            <span className="an-nav-text">User</span>
+            <IconChevron className="an-nav-chevron" />
+          </button>
+
+          {userOpen && (
+            <div className="an-nav-submenu">
+              <NavLink
+                to="/user"
+                end
+                className={({ isActive }) =>
+                  `an-nav-subitem ${isActive ? "is-active" : ""}`
+                }
+              >
+                <span>All Users</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
+
+        {/* Banner Management */}
+        <NavLink
+          to="/banners"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconBanner />
+          <span className="an-nav-text">Banner Management</span>
+        </NavLink>
+
+        {/* Collapsible Chats Menu (Banner ke niche) */}
+        <div className="an-nav-group">
+          <button
+            className={`an-nav-item an-nav-parent ${
+              chatsOpen ? "is-open" : ""
+            }`}
+            onClick={() => setChatsOpen((prev) => !prev)}
+          >
+            <IconChat />
+            <span className="an-nav-text">Chats</span>
+            <IconChevron className="an-nav-chevron" />
+          </button>
+
+          {chatsOpen && (
+            <div className="an-nav-submenu">
+              <NavLink
+                to="/chats/user-astro-chats"
+                className={({ isActive }) =>
+                  `an-nav-subitem ${isActive ? "is-active" : ""}`
+                }
+              >
+                <span>User Astro Chats</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
+
+        {/* Consultation */}
+        <NavLink
+          to="/consultation"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconConsultation />
+          <span className="an-nav-text">Consultation</span>
+        </NavLink>
+
+        {/* Product */}
+        <NavLink
+          to="/product"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconBox />
+          <span className="an-nav-text">Product</span>
+        </NavLink>
+
+        {/* Wallet */}
+        <NavLink
+          to="/wallet"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconWallet />
+          <span className="an-nav-text">Wallet</span>
+        </NavLink>
+
+        {/* Shop */}
+        <NavLink
+          to="/shop"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconStore />
+          <span className="an-nav-text">Shop</span>
+        </NavLink>
+
+        {/* Shopping */}
+        <NavLink
+          to="/shopping"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconBag />
+          <span className="an-nav-text">Shopping</span>
+        </NavLink>
+
+        {/* Orders */}
+        <NavLink
+          to="/orders"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconList />
+          <span className="an-nav-text">Orders</span>
+        </NavLink>
       </nav>
 
       {/* Logout Button */}
@@ -166,7 +281,14 @@ function IconGrid() {
 
 function IconBanner() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
@@ -185,6 +307,22 @@ function IconChat() {
       strokeLinejoin="round"
     >
       <path d="M8 9h8m-8 4h6m4-9H4a2 2 0 0 0-2 2v15l4-4h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
+    </svg>
+  );
+}
+
+function IconConsultation() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
     </svg>
   );
 }
@@ -278,6 +416,22 @@ function IconPartner() {
       <circle cx="10" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+function IconUser() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }

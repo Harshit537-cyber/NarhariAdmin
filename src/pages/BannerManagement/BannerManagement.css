@@ -826,7 +826,16 @@
   justify-content: center;
 }
 
-/* --- ANIMATIONS --- */
+/* High visibility Solid Black Index number styling */
+.table-index-number {
+  color: #000000 !important;      /* Core solid black for high contrast */
+  font-weight: 700 !important;    /* Heavy bold styling */
+  font-size: 1.1rem !important;   /* Easy-to-read sizing */
+  text-align: center;
+  width: 50px;
+}
+
+
 @keyframes fadeInBackdrop {
   from { opacity: 0; }
   to { opacity: 1; }
