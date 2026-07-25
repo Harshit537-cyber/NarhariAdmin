@@ -25,7 +25,7 @@ import {
 } from "react-icons/fa";
 
 // ⚠️ API path ko apne project structure ke hisab se change karein
-import { getAllUsers } from "../../api/Controller/authController"; 
+import { getAllUsers, deleteUser  } from "../../api/Controller/authController"; 
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -140,11 +140,19 @@ export default function Users() {
     setDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
+ const confirmDelete = async () => {
+  try {
+    await deleteUser(selectedUser._id);
+
     setUsers((prev) => prev.filter((u) => u._id !== selectedUser._id));
+
     setDeleteOpen(false);
     setSelectedUser(null);
-  };
+  } catch (err) {
+    console.error("Delete failed:", err);
+    alert(err?.message || "Failed to delete user");
+  }
+};
 
   // ================= 4. Search and Filtering Logic =================
   const filteredUsers = useMemo(() => {
