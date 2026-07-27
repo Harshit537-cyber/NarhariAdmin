@@ -127,3 +127,26 @@ export const sendOtp = async (data) =>
     );
   }
 };
+
+// Update User
+export const updateUser = async (userId, formData) => {
+  try {
+    const response = await apiClient.put(
+      `/admin/dashboard/users/${userId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        message: "Something went wrong",
+      }
+    );
+  }
+};

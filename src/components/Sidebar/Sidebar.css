@@ -82,7 +82,7 @@
 
 .an-sidebar-brand-text {
   color: var(--white-bright);
-  font-size: 17px; /* Size bada kiya */
+  font-size: 17px; 
   font-weight: 800;
   letter-spacing: 2px;
   background: linear-gradient(135deg, #ffffff 0%, #f0abfc 100%);
@@ -90,9 +90,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ==========================================
-   NAVIGATION LIST
-   ========================================== */
+
 .an-sidebar-nav {
   display: flex;
   flex-direction: column;

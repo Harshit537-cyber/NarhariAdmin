@@ -20,7 +20,8 @@ import UserAstroChat from "./pages/Chats/UserAstroChat";
 
 import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
-
+import Complaints from "./pages/Complaints/Complaints";
+import Tickets from "./pages/Tickets/Tickets";
 const AppRoutes = () => {
   return (
     <>
@@ -46,6 +47,8 @@ const AppRoutes = () => {
             <Route path="/partner/kyc-verification" element={<KycVerification />} />
             <Route path="/partner/profile-approval" element={<ProfileApproval />} />
             <Route path="/user" element={<AllUsers />} />
+            <Route path="/complaints" element={<Complaints />} />
+<Route path="/tickets" element={<Tickets />} />
           </Route>
         </Routes>
       </BrowserRouter>

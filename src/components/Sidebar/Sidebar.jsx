@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
-
+import { AlertCircle, Ticket } from "lucide-react";
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -235,7 +235,25 @@ export default function Sidebar() {
           <span className="an-nav-text">Orders</span>
         </NavLink>
       </nav>
+<NavLink
+  to="/complaints"
+  className={({ isActive }) =>
+    `an-nav-item ${isActive ? "is-active" : ""}`
+  }
+>
+  <AlertCircle />
+  <span className="an-nav-text">Complaints</span>
+</NavLink>
 
+<NavLink
+  to="/tickets"
+  className={({ isActive }) =>
+    `an-nav-item ${isActive ? "is-active" : ""}`
+  }
+>
+  <Ticket />
+  <span className="an-nav-text">Tickets</span>
+</NavLink>
       {/* Logout Button */}
       <button
         className="an-nav-item logout-btn"

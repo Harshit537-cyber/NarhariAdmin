@@ -4,23 +4,23 @@
   --bg-dark-mesh: #f1f4f9;
   --black-title: #0b0f19;
   --text-muted: #526075;
-  
+
   --neon-cyan: #06b6d4;
   --neon-cyan-glow: rgba(6, 182, 212, 0.35);
-  
+
   --neon-purple: #8b5cf6;
   --neon-purple-glow: rgba(139, 92, 246, 0.35);
-  
+
   --neon-emerald: #10b981;
   --neon-emerald-glow: rgba(16, 185, 129, 0.35);
-  
+
   --neon-gold: #b38c1b;
   --neon-gold-glow: rgba(179, 140, 27, 0.35);
 
   --danger-red: #ef4444;
 }
 
-.an-user-container {
+.an-complaint-container {
   position: relative;
   padding: 40px 50px;
   background-color: var(--bg-dark-mesh);
@@ -304,6 +304,7 @@
   border-radius: 50px;
   border: 1.5px solid rgba(255, 255, 255, 1);
   box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+  flex-wrap: wrap;
 }
 
 .filter-btn {
@@ -316,6 +317,7 @@
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .filter-btn.active {
@@ -329,21 +331,21 @@
   z-index: 2;
 }
 
-.user-cards-grid {
+.complaint-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 28px;
 }
 
-.user-card-item {
+.complaint-card-item {
   padding: 26px;
 }
 
-.user-card-header {
+.complaint-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .bold-role-tag {
@@ -355,8 +357,10 @@
   letter-spacing: 0.8px;
 }
 
-.bold-role-tag.role-inactive { background: rgba(239, 68, 68, 0.12); color: var(--danger-red); }
-.bold-role-tag.role-user { background: rgba(16, 185, 129, 0.12); color: #047857; }
+.bold-role-tag.role-pending { background: rgba(179, 140, 27, 0.12); color: var(--neon-gold); }
+.bold-role-tag.role-review { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
+.bold-role-tag.role-resolved { background: rgba(16, 185, 129, 0.12); color: #047857; }
+.bold-role-tag.role-rejected { background: rgba(239, 68, 68, 0.12); color: var(--danger-red); }
 
 .badges-group {
   display: flex;
@@ -364,80 +368,60 @@
   gap: 8px;
 }
 
-.user-card-body {
-  text-align: center;
-  margin-bottom: 22px;
-}
-
-.avatar-wrapper {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-}
-
-.user-avatar-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 24px;
-  object-fit: cover;
-  border: 3px solid #ffffff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.giant-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #b38c1b, #d97706);
-  color: #ffffff;
-  display: flex;
+.severity-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 28px;
-  box-shadow: 0 10px 25px rgba(179, 140, 27, 0.3);
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.user-name {
-  font-size: 20px;
+.severity-low { background: rgba(16, 185, 129, 0.12); color: #047857; }
+.severity-medium { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
+.severity-high { background: rgba(179, 140, 27, 0.12); color: #b38c1b; }
+.severity-critical { background: rgba(239, 68, 68, 0.12); color: var(--danger-red); }
+
+.complaint-card-body {
+  margin-bottom: 20px;
+}
+
+.complaint-id-tag {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.complaint-subject {
+  font-size: 19px;
   font-weight: 800;
   color: var(--black-title);
-  margin: 0 0 6px 0;
-  letter-spacing: -0.5px;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
 }
 
-.user-email {
-  font-size: 13px;
+.complaint-description {
+  font-size: 13.5px;
   color: var(--text-muted);
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 0 0 6px 0;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
 }
 
-.user-mobile {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 600;
+.complaint-meta-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 0 0 14px 0;
-}
-
-.user-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
   gap: 16px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--black-title);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .meta-item {
@@ -447,16 +431,22 @@
   color: var(--text-muted);
 }
 
-.user-card-footer {
+.complaint-card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding-top: 18px;
   border-top: 1.5px solid rgba(226, 232, 240, 0.8);
 }
 
+.card-right-controls.full-width {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ==========================================================================
-   UPDATED PAGINATION STYLES (HIGH VISIBILITY BLACK)
+   PAGINATION STYLES (HIGH VISIBILITY BLACK)
    ========================================================================== */
 
 .table-pagination-footer {
@@ -475,11 +465,9 @@
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  /* विजिबिलिटी के लिए हल्का बॉर्डर जोड़ा गया है */
-  border: 1.5px solid rgba(11, 15, 25, 0.15); 
+  border: 1.5px solid rgba(11, 15, 25, 0.15);
   background: #ffffff;
-  /* नंबरों को पूरी तरह से काला (Black) किया गया है ताकि वे स्पष्ट दिखें */
-  color: #000000 !important; 
+  color: #000000 !important;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -489,10 +477,9 @@
   transition: all 0.2s ease;
 }
 
-/* एक्टिव (Active) बटन का स्टाइल */
 .pagination-btn.active {
-  background: #b38c1b; /* कॉस्मिक गोल्ड बैकग्राउंड */
-  color: #ffffff !important; /* व्हाइट टेक्स्ट ताकि गोल्ड पर साफ दिखे */
+  background: #b38c1b;
+  color: #ffffff !important;
   border-color: #b38c1b;
   box-shadow: 0 4px 12px rgba(179, 140, 27, 0.3);
 }
@@ -503,81 +490,11 @@
   border-color: #000000;
 }
 
-/* डिसेबल्ड बटन्स (जैसे पहले पेज पर 'Prev' बटन) */
 .pagination-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
   color: #94a3b8 !important;
   border-color: rgba(11, 15, 25, 0.08);
-}
-
-.rate-info {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.rate-amount {
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--black-title);
-  display: flex;
-  align-items: center;
-}
-
-.rate-unit {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.card-right-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(239, 68, 68, 0.2);
-  border-radius: 30px;
-  transition: all 0.3s ease;
-}
-
-.toggle-slider::before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: var(--danger-red);
-  border-radius: 50%;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: rgba(16, 185, 129, 0.2);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(20px);
-  background-color: var(--neon-emerald);
 }
 
 .action-button-group {
@@ -659,10 +576,10 @@
   -webkit-backdrop-filter: blur(25px);
   width: 100%;
   max-width: 750px;
-
-  max-height: 85vh;   
-  overflow-y: auto;  
-
+  max-height: 85vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   border-radius: 28px;
   padding: 24px;
   border: 1.5px solid rgba(255, 255, 255, 0.6);
@@ -672,41 +589,9 @@
     0 0 40px rgba(179, 140, 27, 0.08);
   animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.form-group {
-  width: 100%;
-}
-
-.form-group input {
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1.5px solid rgba(226, 232, 240, 0.8);
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(6px);
-  outline: none;
-  font-weight: 600;
-  transition: all 0.25s ease;
-}
-
-.form-group input:hover {
-  border-color: rgba(179, 140, 27, 0.4);
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.form-group input:focus {
-  border-color: var(--neon-gold);
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(179, 140, 27, 0.15), 0 4px 12px rgba(179, 140, 27, 0.1);
-  transform: translateY(-1px);
-}
-.custom-modal-content {
-  max-height: 85vh;
-  overflow-y: auto;
-  scrollbar-width: none;     
-  -ms-overflow-style: none;  
-}
 
 .custom-modal-content::-webkit-scrollbar {
-  display: none;             
+  display: none;
 }
 
 .modal-header {
@@ -716,7 +601,7 @@
   border-bottom: 1.5px solid rgba(226, 232, 240, 0.8);
   padding-bottom: 18px;
   margin-bottom: 22px;
-  position: relative; 
+  position: relative;
 }
 .modal-header h2 {
   font-size: 24px;
@@ -747,17 +632,14 @@
   position: absolute;
   top: -8px;
   right: -8px;
-
   width: 36px;
   height: 36px;
   border-radius: 50%;
   border: none;
-
   background: #ef4444;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -772,8 +654,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-    width: 100%;
-
+  width: 100%;
 }
 
 .form-group label {
@@ -782,19 +663,40 @@
   color: var(--text-muted);
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
   padding: 12px 16px;
   border-radius: 12px;
   border: 1.5px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(6px);
   outline: none;
   font-weight: 600;
-  transition: border-color 0.2s;
-    width: 100%;
-
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  transition: all 0.25s ease;
+  width: 100%;
 }
 
-.form-group input:focus {
+.form-group textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+  border-color: rgba(179, 140, 27, 0.4);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   border-color: var(--neon-gold);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(179, 140, 27, 0.15), 0 4px 12px rgba(179, 140, 27, 0.1);
+  transform: translateY(-1px);
 }
 
 .modal-footer {
@@ -851,6 +753,7 @@
   font-weight: 800;
   cursor: pointer;
 }
+
 /* ==========================================================================
    COSMIC TOAST NOTIFICATION
    ========================================================================== */
@@ -898,6 +801,7 @@
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(60px); }
 }
+
 .profile-detail-card {
   display: flex;
   flex-direction: column;
@@ -919,6 +823,66 @@
   margin: 0;
   color: var(--text-muted);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.giant-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #b38c1b, #d97706);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 28px;
+  box-shadow: 0 10px 25px rgba(179, 140, 27, 0.3);
+}
+
+.complaint-avatar {
+  font-size: 32px;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+.complaint-description-box {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black-title);
+  line-height: 1.6;
+  border: 1.5px solid rgba(226, 232, 240, 0.8);
+}
+
+.resolution-note-box {
+  width: 100%;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.25);
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black-title);
+}
+
+.resolution-note-box strong {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #047857;
+  margin-bottom: 6px;
+}
+
+.resolution-note-box p {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .modal-details-grid {
@@ -965,184 +929,11 @@
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 768px) {
-  .an-user-container { padding: 20px; }
+  .an-complaint-container { padding: 20px; }
   .wrapped-header-title { font-size: 30px; }
   .giant-stat-number { font-size: 38px; }
   .db-header { flex-direction: column; align-items: flex-start; gap: 20px; }
   .pt-controls-bar { flex-direction: column; align-items: stretch; }
   .filter-tabs { overflow-x: auto; }
   .modal-details-grid { grid-template-columns: 1fr; }
-}
-/* ==========================================================================
-   COSMIC LAYOUT & SIDEBAR STYLES
-   ========================================================================== */
-
-.cosmic-dashboard-layout {
-  display: flex;
-  min-height: 100vh;
-  width: 100vw;
-  background-color: var(--bg-dark-mesh);
-  overflow: hidden;
-}
-
-/* Sidebar styling matching the enterprise gradient */
-.cosmic-sidebar {
-  width: 280px;
-  background: linear-gradient(180deg, #0b0f19 0%, #0f172a 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  padding: 30px 20px;
-  z-index: 10;
-  flex-shrink: 0; /* रोकता है कि साइडबार सिकुड़े नहीं */
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 45px;
-  padding-left: 10px;
-}
-
-.brand-logo {
-  font-size: 24px;
-  color: var(--neon-gold);
-  filter: drop-shadow(0 0 8px var(--neon-gold-glow));
-}
-
-.brand-text {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  color: #ffffff;
-}
-
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.menu-section-label {
-  font-size: 11px;
-  font-weight: 800;
-  color: #475569;
-  letter-spacing: 1.5px;
-  margin: 20px 0 10px 10px;
-  text-transform: uppercase;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
-  border-radius: 16px;
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-  font-size: 14px;
-  font-weight: 700;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.menu-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
-}
-
-.menu-item.active {
-  background: linear-gradient(135deg, rgba(179, 140, 27, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
-  color: var(--neon-gold);
-  border: 1px solid rgba(179, 140, 27, 0.25);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.menu-icon {
-  font-size: 18px;
-}
-
-.sidebar-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 20px;
-}
-
-.logout-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
-  border-radius: 16px;
-  border: none;
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.logout-btn:hover {
-  background: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
-}
-
-/* Right content box styling */
-.cosmic-main-content {
-  flex: 1;
-  height: 100vh;
-  overflow-y: auto; /* सिर्फ इस एरिया में स्क्रॉल बार लाने के लिए */
-  position: relative;
-}
-
-/* Updated root container inside main content area */
-.an-user-container {
-  min-height: 100%;
-  padding: 40px 50px;
-  /* background-color यहाँ हटाने की आवश्यकता नहीं है */
-}
-
-/* Response for small screens */
-@media (max-width: 1024px) {
-  .cosmic-sidebar {
-    width: 80px;
-    padding: 30px 10px;
-    align-items: center;
-  }
-  .brand-text, .menu-section-label, .menu-item span, .logout-btn span {
-    display: none;
-  }
-  .menu-item, .logout-btn {
-    justify-content: center;
-    padding: 14px;
-  }
-}
-
-@media (max-width: 768px) {
-  .cosmic-dashboard-layout {
-    flex-direction: column;
-  }
-  .cosmic-sidebar {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-  }
-  .sidebar-brand {
-    margin-bottom: 0;
-  }
-  .sidebar-menu, .sidebar-footer, .menu-section-label {
-    display: none; 
-  }
-  .cosmic-main-content {
-    height: calc(100vh - 70px);
-  }
 }

@@ -25,7 +25,8 @@ import {
 } from "react-icons/fa";
 
 // ⚠️ API path ko apne project structure ke hisab se change karein
-import { getAllUsers, deleteUser  } from "../../api/Controller/authController"; 
+import { getAllUsers, deleteUser,   updateUser,
+  } from "../../api/Controller/authController"; 
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -42,7 +43,12 @@ export default function Users() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+ const [toast, setToast] = useState(null); 
 
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
   // Form states for edit modal mapped with backend attributes
   const [editForm, setEditForm] = useState({
     fullName: "",
@@ -52,10 +58,11 @@ export default function Users() {
     gender: "",
     zodiac: "",
     placeOfBirth: "",
-    walletBalance: 0,
+    dateOfBirth: "",     
+  timeOfBirth: "",     
+  profilePic: "", 
   });
 
-  // ================= 1. FETCH USERS FROM API =================
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -119,22 +126,50 @@ export default function Users() {
       gender: user.gender || "",
       zodiac: user.zodiac || "",
       placeOfBirth: user.placeOfBirth || "",
-      walletBalance: user.walletBalance || 0,
+      dateOfBirth: user.dateOfBirth || "",
+timeOfBirth: user.timeOfBirth || "",
+profilePic: user.profilePic || "",
     });
     setEditOpen(true);
   };
 
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
+const handleSaveEdit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const formData = new FormData();
+
+    formData.append("fullName", editForm.fullName);
+    formData.append("name", editForm.name);
+    formData.append("email", editForm.email);
+    formData.append("mobile", editForm.mobile);
+    formData.append("gender", editForm.gender);
+    formData.append("zodiac", editForm.zodiac);
+    formData.append("dateOfBirth", editForm.dateOfBirth);
+    formData.append("timeOfBirth", editForm.timeOfBirth);
+    formData.append("placeOfBirth", editForm.placeOfBirth);
+
+    // Profile Picture
+    if (editForm.profilePic instanceof File) {
+      formData.append("profilePic", editForm.profilePic);
+    }
+
+    const response = await updateUser(selectedUser._id, formData);
+
     setUsers((prev) =>
-      prev.map((u) =>
-        u._id === selectedUser._id ? { ...u, ...editForm } : u
+      prev.map((user) =>
+        user._id === selectedUser._id ? response.data : user
       )
     );
-    setEditOpen(false);
-    setSelectedUser(null);
-  };
 
+  setEditOpen(false);
+    setSelectedUser(null);
+    showToast("success", "Profile updated successfully!");
+  } catch (err) {
+    console.error(err);
+    showToast("error", err?.message || "Failed to update user");
+  }
+};
   const handleDeleteInit = (user) => {
     setSelectedUser(user);
     setDeleteOpen(true);
@@ -146,11 +181,12 @@ export default function Users() {
 
     setUsers((prev) => prev.filter((u) => u._id !== selectedUser._id));
 
-    setDeleteOpen(false);
+ setDeleteOpen(false);
     setSelectedUser(null);
+    showToast("success", "User deleted successfully!");
   } catch (err) {
     console.error("Delete failed:", err);
-    alert(err?.message || "Failed to delete user");
+    showToast("error", err?.message || "Failed to delete user");
   }
 };
 
@@ -213,7 +249,12 @@ export default function Users() {
 
   return (
     <div className="an-user-container">
-      {/* Background Orbs */}
+{toast && (
+        <div className={`cosmic-toast ${toast.type === "success" ? "toast-success" : "toast-error"}`}>
+          {toast.type === "success" ? <FaCheckCircle /> : <FaTimes />}
+          <span>{toast.message}</span>
+        </div>
+      )}      {/* Background Orbs */}
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
@@ -564,8 +605,14 @@ export default function Users() {
               </button>
             </div>
             <form onSubmit={handleSaveEdit}>
-              <div className="modal-body" style={{ display: "grid", gap: "12px" }}>
-                <div className="form-group">
+<div
+  className="modal-body"
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "16px",
+  }}
+>                <div className="form-group">
                   <label>Full Name</label>
                   <input
                     type="text"
@@ -574,13 +621,44 @@ export default function Users() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Display Name (Name)</label>
+                  <label>Name</label>
                   <input
                     type="text"
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   />
                 </div>
+                <div className="form-group">
+  <label>Profile Picture</label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) =>
+      setEditForm({
+        ...editForm,
+        profilePic: e.target.files[0],
+      })
+    }
+  />
+  {editForm.profilePic && (
+    <img
+      src={
+        editForm.profilePic instanceof File
+          ? URL.createObjectURL(editForm.profilePic)
+          : editForm.profilePic
+      }
+      alt="Profile"
+      style={{
+        width: "70px",
+        height: "70px",
+        borderRadius: "50%",
+        objectFit: "cover",
+        marginTop: "10px",
+      }}
+    />
+  )}
+</div>
                 <div className="form-group">
                   <label>Email</label>
                   <input
@@ -597,6 +675,7 @@ export default function Users() {
                     onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
                   />
                 </div>
+                
                 <div className="form-group">
                   <label>Gender</label>
                   <input
@@ -614,6 +693,26 @@ export default function Users() {
                   />
                 </div>
                 <div className="form-group">
+  <label>Date of Birth</label>
+  <input
+    type="date"
+    value={editForm.dateOfBirth}
+    onChange={(e) =>
+      setEditForm({ ...editForm, dateOfBirth: e.target.value })
+    }
+  />
+</div>
+<div className="form-group">
+  <label>Time of Birth</label>
+  <input
+    type="time"
+    value={editForm.timeOfBirth}
+    onChange={(e) =>
+      setEditForm({ ...editForm, timeOfBirth: e.target.value })
+    }
+  />
+</div>
+                <div className="form-group">
                   <label>Place of Birth</label>
                   <input
                     type="text"
@@ -621,14 +720,7 @@ export default function Users() {
                     onChange={(e) => setEditForm({ ...editForm, placeOfBirth: e.target.value })}
                   />
                 </div>
-                <div className="form-group">
-                  <label>Wallet Balance (₹)</label>
-                  <input
-                    type="number"
-                    value={editForm.walletBalance}
-                    onChange={(e) => setEditForm({ ...editForm, walletBalance: Number(e.target.value) })}
-                  />
-                </div>
+              
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setEditOpen(false)}>
