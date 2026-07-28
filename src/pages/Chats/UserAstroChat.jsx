@@ -1,172 +1,448 @@
 import React, { useState } from "react";
 import "./UserAstroChat.css";
+import {
+  FaCrown,
+  FaBolt,
+  FaSearch,
+  FaComments,
+  FaPaperPlane,
+  FaUser,
+  FaUserAstronaut,
+  FaExclamationTriangle,
+  FaStopCircle,
+  FaShieldAlt,
+  FaMoon,
+  FaHistory,
+  FaClock,
+  FaStar,
+  FaCheckDouble,
+  FaFileAlt
+} from "react-icons/fa";
 
-// Mock Data for Chats
-const initialChats = [
-  {
-    id: 1,
-    name: "Rahul Sharma",
-    zodiac: "Aries (मेष)",
-    lastMessage: "Sir, my career graph is not stable...",
-    time: "10:30 AM",
-    unread: 2,
-    online: true,
-    avatar: "♈",
-  },
-  {
-    id: 2,
-    name: "Priyanka Patel",
-    zodiac: "Virgo (कन्या)",
-    lastMessage: "Thank you for the gemstone suggestion.",
-    time: "Yesterday",
-    unread: 0,
-    online: false,
-    avatar: "♍",
-  },
-  {
-    id: 3,
-    name: "Amit Verma",
-    zodiac: "Leo (सिंह)",
-    lastMessage: "When will my Sade Sati end?",
-    time: "2 days ago",
-    unread: 0,
-    online: true,
-    avatar: "♌",
-  },
-];
+export default function AstrologyChatAdmin() {
+  // Sample Live Chat Sessions Data
+  const initialSessions = [
+    {
+      id: "CHAT-801",
+      user: "Aman Sharma",
+      userZodiac: "Scorpio ♏",
+      dob: "14 Nov 1995 (10:15 AM, Delhi)",
+      pandit: "Acharya Rahul",
+      topic: "Career & Business",
+      status: "Live", // Live, Queued, Flagged, Ended
+      duration: "14:20",
+      unread: 2,
+      lastMessage: "Looking at your 10th House, Saturn transit...",
+      flagged: false,
+      messages: [
+        { sender: "system", text: "Session started. Birth details shared with Panditji.", time: "10:00 AM" },
+        { sender: "user", text: "Namaste Panditji, when will I get my job promotion?", time: "10:01 AM" },
+        { sender: "pandit", text: "Namaste Aman. Let me generate your Lagna chart.", time: "10:02 AM" },
+        { sender: "pandit", text: "Looking at your 10th House, Saturn transit is currently causing a minor delay.", time: "10:03 AM" }
+      ]
+    },
+    {
+      id: "CHAT-802",
+      user: "Priya Patel",
+      userZodiac: "Leo ♌",
+      dob: "22 Aug 1998 (04:30 PM, Mumbai)",
+      pandit: "Acharya Sharma",
+      topic: "Love & Marriage",
+      status: "Flagged",
+      duration: "22:45",
+      unread: 0,
+      lastMessage: "System Alert: Admin flagged high response delay.",
+      flagged: true,
+      messages: [
+        { sender: "system", text: "Session started. Kundli Matchmaking mode active.", time: "10:15 AM" },
+        { sender: "user", text: "Are we compatible according to Gun Milan?", time: "10:16 AM" },
+        { sender: "system", text: "⚠️ System Warning: Astrologer inactive for 5+ minutes.", time: "10:25 AM" }
+      ]
+    },
+    {
+      id: "CHAT-803",
+      user: "Rohan Mehta",
+      userZodiac: "Taurus ♉",
+      dob: "05 May 1992 (08:00 AM, Ahmedabad)",
+      pandit: "Dr. Ananya",
+      topic: "Health & Rahu Dasha",
+      status: "Queued",
+      duration: "00:00",
+      unread: 0,
+      lastMessage: "Waiting for Astrologer to accept...",
+      flagged: false,
+      messages: [
+        { sender: "system", text: "User paid ₹350. Session in queue.", time: "10:30 AM" }
+      ]
+    },
+    {
+      id: "CHAT-804",
+      user: "Sneha Kapoor",
+      userZodiac: "Pisces ♓",
+      dob: "12 Mar 1999 (11:20 PM, Pune)",
+      pandit: "Kamlesh Dev",
+      topic: "Gemstone Suggestion",
+      status: "Ended",
+      duration: "15:00",
+      unread: 0,
+      lastMessage: "Yellow Sapphire (Pukhraj) is recommended.",
+      flagged: false,
+      messages: [
+        { sender: "system", text: "Session completed successfully.", time: "09:45 AM" },
+        { sender: "pandit", text: "Yellow Sapphire (Pukhraj) is recommended.", time: "09:44 AM" }
+      ]
+    }
+  ];
 
-const mockConversations = {
-  1: [
-    { id: 1, sender: "user", text: "Pranam Pandit ji, please review my birth chart.", time: "10:15 AM" },
-    { id: 2, sender: "astro", text: "Aadesh! Share your exact birth details (Time, Date, and Place).", time: "10:18 AM" },
-    { id: 3, sender: "user", text: "Sir, my career graph is not stable. 12th April 1995, 08:45 AM, Delhi.", time: "10:30 AM" },
-  ],
-  2: [
-    { id: 1, sender: "astro", text: "Wear Panna (Emerald) on Wednesday morning.", time: "Yesterday" },
-    { id: 2, sender: "user", text: "Thank you for the gemstone suggestion.", time: "Yesterday" },
-  ],
-  3: [
-    { id: 1, sender: "user", text: "When will my Sade Sati end?", time: "2 days ago" },
-  ]
-};
+  const [sessions, setSessions] = useState(initialSessions);
+  const [selectedChatId, setSelectedChatId] = useState("CHAT-801");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
+  const [adminNote, setAdminNote] = useState("");
 
-export default function UserAstroChat() {
-  const [activeChatId, setActiveChatId] = useState(1);
-  const [conversations, setConversations] = useState(mockConversations);
-  const [newMessage, setNewMessage] = useState("");
+  const activeChat = sessions.find((s) => s.id === selectedChatId) || sessions[0];
 
-  const activeChat = initialChats.find((chat) => chat.id === activeChatId);
-  const currentMessages = conversations[activeChatId] || [];
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    const updatedMessage = {
-      id: Date.now(),
-      sender: "astro", // Assuming logged-in entity is the Astrologer/Admin replying
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setConversations({
-      ...conversations,
-      [activeChatId]: [...currentMessages, updatedMessage],
-    });
-    setNewMessage("");
+  // Action Handlers
+  const handleSendMessage = () => {
+    if (!adminNote.trim()) return;
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id === selectedChatId) {
+          return {
+            ...s,
+            messages: [
+              ...s.messages,
+              { sender: "admin", text: `[ADMIN NOTE]: ${adminNote}`, time: "Just now" }
+            ]
+          };
+        }
+        return s;
+      })
+    );
+    setAdminNote("");
   };
 
+  const handleForceEnd = (id) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, status: "Ended" } : s
+      )
+    );
+  };
+
+  const handleToggleFlag = (id) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, flagged: !s.flagged, status: !s.flagged ? "Flagged" : "Live" } : s
+      )
+    );
+  };
+
+  // Filtered Sessions
+  const filteredSessions = sessions.filter(
+    (s) =>
+      (filter === "All" ||
+        (filter === "Live" && s.status === "Live") ||
+        (filter === "Flagged" && (s.flagged || s.status === "Flagged")) ||
+        (filter === "Queued" && s.status === "Queued") ||
+        (filter === "Ended" && s.status === "Ended")) &&
+      `${s.user} ${s.pandit} ${s.id} ${s.topic}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+
+  // Top Metrics
+  const cards = [
+    {
+      title: "Live Chats",
+      value: sessions.filter((s) => s.status === "Live").length.toString(),
+      icon: <FaComments />,
+      cls: "cyan",
+      pill: "ACTIVE",
+    },
+    {
+      title: "In Queue",
+      value: sessions.filter((s) => s.status === "Queued").length.toString(),
+      icon: <FaClock />,
+      cls: "gold",
+      pill: "WAITING",
+    },
+    {
+      title: "Flagged / Risk",
+      value: sessions.filter((s) => s.flagged || s.status === "Flagged").length.toString(),
+      icon: <FaExclamationTriangle />,
+      cls: "red",
+      pill: "ATTENTION",
+    },
+    {
+      title: "Completed Today",
+      value: "142",
+      icon: <FaHistory />,
+      cls: "emerald",
+      pill: "SUCCESSFUL",
+    },
+  ];
+
   return (
-    <div className="astro-chat-container">
-      {/* Sidebar: Chat List */}
-      <div className="chat-sidebar">
-        <div className="sidebar-header">
-          <h3>User Consultations</h3>
-          <span className="live-badge">Live</span>
+    <div className="an-dashboard-container chat-page">
+      {/* Ambient background glowing orbs */}
+      <div className="ambient-orb orb-1"></div>
+      <div className="ambient-orb orb-2"></div>
+      <div className="ambient-orb orb-3"></div>
+
+      {/* Page Header */}
+      <header className="db-header animate-fade-in">
+        <div className="db-header-left">
+          <div className="header-title-container">
+            <span className="enterprise-badge">
+              <FaCrown className="crown-icon" /> COSMIC CHAT SURVEILLANCE
+            </span>
+            <h1 className="wrapped-header-title">Live Chat Control Center</h1>
+          </div>
+          <p className="header-subtitle">
+            Monitor real-time astrologer-client conversations, enforce guidelines & broadcast admin notes.
+          </p>
         </div>
-        
-        <div className="chat-list">
-          {initialChats.map((chat) => (
-            <div
-              key={chat.id}
-              className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
-              onClick={() => setActiveChatId(chat.id)}
-            >
-              <div className="chat-avatar-wrapper">
-                <div className="chat-avatar">{chat.avatar}</div>
-                {chat.online && <span className="online-indicator"></span>}
-              </div>
-              <div className="chat-info">
-                <div className="chat-meta">
-                  <span className="user-name">{chat.name}</span>
-                  <span className="chat-time">{chat.time}</span>
-                </div>
-                <span className="user-zodiac">{chat.zodiac}</span>
-                <p className="last-message">{chat.lastMessage}</p>
-              </div>
-              {chat.unread > 0 && <span className="unread-badge">{chat.unread}</span>}
+
+        <div className="db-header-right">
+          <div className="system-status-card">
+            <div className="pulse-ring"></div>
+            <span className="status-text"><FaBolt /> SURVEILLANCE LIVE</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Top Metrics Row */}
+      <div className="db-metrics-grid">
+        {cards.map((c, i) => (
+          <div
+            className={`khatarnak-card ${c.cls}-theme animate-slide-up`}
+            style={{ animationDelay: `${0.1 * (i + 1)}s` }}
+            key={c.title}
+          >
+            <div className="card-glass-shine"></div>
+            <div className="card-top-bar">
+              <div className={`big-icon-box ${c.cls}-glow`}>{c.icon}</div>
+              <span className={`trend-badge ${c.cls}-pill`}>{c.pill}</span>
             </div>
-          ))}
+
+            <div className="card-middle-data">
+              <h2 className="giant-stat-number">{c.value}</h2>
+              <p className="giant-stat-label">{c.title}</p>
+            </div>
+
+            <div className="card-bottom-accent">
+              <div className={`glow-bar ${c.cls}-bar`}></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Toolbar / Search & Filters */}
+      <div className="super-card toolbar-super-card animate-fade-in-delayed">
+        <div className="toolbar-content">
+          <div className="search-box-cosmic">
+            <FaSearch className="search-icon" />
+            <input
+              placeholder="Search chat by User, Astrologer, Chat ID or Topic..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="filter-tabs-cosmic">
+            {["All", "Live", "Queued", "Flagged", "Ended"].map((x) => (
+              <button
+                key={x}
+                onClick={() => setFilter(x)}
+                className={`tab-btn ${filter === x ? "active" : ""}`}
+              >
+                {x}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="chat-main-window">
-        {activeChat ? (
-          <>
-            {/* Chat Window Header */}
-            <div className="chat-window-header">
-              <div className="header-user-details">
-                <div className="chat-avatar">{activeChat.avatar}</div>
-                <div>
-                  <h4>{activeChat.name}</h4>
-                  <p className="status-subtext">
-                    {activeChat.online ? (
-                      <span className="online-text">● Online | {activeChat.zodiac}</span>
-                    ) : (
-                      <span className="offline-text">Offline | {activeChat.zodiac}</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+      {/* Main Dual Pane Chat Layout */}
+      <div className="chat-surveillance-wrapper animate-fade-in-delayed">
+        {/* LEFT COLUMN: Active Sessions Sidebar */}
+        <div className="chat-sessions-sidebar">
+          <div className="sidebar-header">
+            <h3>Active Conversations ({filteredSessions.length})</h3>
+          </div>
 
-            {/* Chat Message History */}
-            <div className="chat-messages-body">
-              {currentMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`message-wrapper ${msg.sender === "astro" ? "sent" : "received"}`}
-                >
-                  <div className="message-bubble">
-                    <p className="message-text">{msg.text}</p>
-                    <span className="message-time">{msg.time}</span>
+          <div className="chat-list-scroll">
+            {filteredSessions.map((s) => (
+              <div
+                key={s.id}
+                onClick={() => setSelectedChatId(s.id)}
+                className={`chat-item-card ${selectedChatId === s.id ? "active-item" : ""} ${
+                  s.flagged ? "flagged-border" : ""
+                }`}
+              >
+                <div className="chat-item-top">
+                  <span className="session-id-tag">{s.id}</span>
+                  <span className={`status-pill status-${s.status.toLowerCase()}`}>
+                    <span className="status-dot"></span> {s.status}
+                  </span>
+                </div>
+
+                <div className="chat-item-participants">
+                  <div className="user-info">
+                    <span className="avatar-mini user"><FaUser /></span>
+                    <div>
+                      <strong>{s.user}</strong>
+                      <small>{s.userZodiac}</small>
+                    </div>
+                  </div>
+
+                  <span className="vs-divider">↔</span>
+
+                  <div className="user-info text-right">
+                    <div>
+                      <strong>{s.pandit}</strong>
+                      <small>Astrologer</small>
+                    </div>
+                    <span className="avatar-mini pandit"><FaUserAstronaut /></span>
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Chat Input Bar */}
-            <form className="chat-input-area" onSubmit={handleSendMessage}>
-              <input
-                type="text"
-                placeholder="Type your astrological advice here..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
-              <button type="submit" className="send-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="empty-chat-state">
-            <p>Select a user to start the Astro consultation</p>
+                <div className="chat-item-topic">
+                  <span className="topic-pill"><FaMoon /> {s.topic}</span>
+                  {s.duration !== "00:00" && <span className="duration-pill"><FaClock /> {s.duration}</span>}
+                </div>
+
+                <div className="chat-item-preview">
+                  <p>{s.lastMessage}</p>
+                </div>
+              </div>
+            ))}
+
+            {filteredSessions.length === 0 && (
+              <div className="empty-chat-list">
+                <p>No chat sessions matching filter.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* RIGHT COLUMN: Live Monitor & Inspector */}
+        <div className="chat-inspector-pane">
+          {activeChat ? (
+            <>
+              {/* Active Chat Header Controls */}
+              <div className="inspector-header">
+                <div className="inspector-title-area">
+                  <div className="chat-main-badges">
+                    <span className="session-id-tag lg">{activeChat.id}</span>
+                    <span className={`status-pill status-${activeChat.status.toLowerCase()}`}>
+                      <span className="status-dot"></span> {activeChat.status}
+                    </span>
+                    {activeChat.flagged && (
+                      <span className="flag-badge"><FaExclamationTriangle /> FLAGGED BY SYSTEM</span>
+                    )}
+                  </div>
+                  <h2>{activeChat.user} & {activeChat.pandit}</h2>
+                </div>
+
+                <div className="inspector-actions">
+                  <button
+                    className={`btn-action-flag ${activeChat.flagged ? "flagged-active" : ""}`}
+                    onClick={() => handleToggleFlag(activeChat.id)}
+                    title="Flag or Report Chat"
+                  >
+                    <FaShieldAlt /> {activeChat.flagged ? "Unflag Chat" : "Flag Session"}
+                  </button>
+
+                  {activeChat.status === "Live" && (
+                    <button
+                      className="btn-action-end"
+                      onClick={() => handleForceEnd(activeChat.id)}
+                    >
+                      <FaStopCircle /> Force End
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* User Kundli / Astrology Meta Summary Bar */}
+              <div className="kundli-meta-bar">
+                <div className="k-meta-item">
+                  <small><FaUser /> CLIENT DETAILS</small>
+                  <p>{activeChat.user} ({activeChat.userZodiac})</p>
+                </div>
+                <div className="k-meta-item">
+                  <small><FaStar /> BIRTH DETAILS</small>
+                  <p>{activeChat.dob}</p>
+                </div>
+                <div className="k-meta-item">
+                  <small><FaFileAlt /> CONSULTATION TOPIC</small>
+                  <p className="topic-highlight">{activeChat.topic}</p>
+                </div>
+              </div>
+
+              {/* Live Chat Message Feed */}
+              <div className="chat-messages-container">
+                <div className="surveillance-disclaimer">
+                  <FaShieldAlt /> Live Administrative Surveillance Mode Active. Messages are logged and end-to-end encrypted.
+                </div>
+
+                {activeChat.messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`chat-bubble-wrapper bubble-${msg.sender}`}
+                  >
+                    {msg.sender === "system" ? (
+                      <div className="system-event-message">
+                        <span>{msg.text}</span>
+                        <small>{msg.time}</small>
+                      </div>
+                    ) : (
+                      <div className="chat-bubble">
+                        <div className="bubble-header">
+                          <span className="sender-name">
+                            {msg.sender === "user" && <><FaUser /> {activeChat.user}</>}
+                            {msg.sender === "pandit" && <><FaUserAstronaut /> {activeChat.pandit}</>}
+                            {msg.sender === "admin" && <><FaCrown /> ADMIN OVERRIDE</>}
+                          </span>
+                          <span className="bubble-time">{msg.time}</span>
+                        </div>
+                        <p className="bubble-text">{msg.text}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Admin Broadcast / Warning Note Input Box */}
+              <div className="chat-admin-input-box">
+                <div className="input-prefix">
+                  <FaCrown className="gold-icon" />
+                  <span>Admin Broadcast Note:</span>
+                </div>
+                <div className="input-field-wrapper">
+                  <input
+                    type="text"
+                    placeholder="Type official alert or warning note into conversation..."
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  />
+                  <button className="btn-send-admin" onClick={handleSendMessage}>
+                    <FaPaperPlane /> Inject Note
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="empty-inspector-state">
+              <FaComments className="huge-icon" />
+              <h3>No Chat Selected</h3>
+              <p>Select a live session from the left pane to begin monitoring.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

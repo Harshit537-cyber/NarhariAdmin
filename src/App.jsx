@@ -35,8 +35,10 @@ const AppRoutes = () => {
             <Route path="/banners" element={<BannerManagement />} /> 
 
             
-            <Route path="/chats/user-astro" element={<UserAstroChat />} />
-
+<Route
+  path="/chats/user-astro-chats"
+  element={<UserAstroChat />}
+/>
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/shop" element={<Shop />} />
