@@ -3,25 +3,41 @@ import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { FaShieldAlt, FaMobileAlt, FaKey, FaArrowRight, FaLock, FaCheckCircle } from "react-icons/fa";
+import { 
+  FaShieldAlt, 
+  FaMobileAlt, 
+  FaKey, 
+  FaArrowRight, 
+  FaLock, 
+  FaCheckCircle, 
+  FaUser, 
+  FaEnvelope, 
+  FaMapMarkerAlt 
+} from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 
-// Firebase Authentication Imports
-import { auth } from "../../firebase/firebase"; // Path check kar lein
+import { auth } from "../../firebase/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 export default function Login() {
+  const [isRegister, setIsRegister] = useState(false);
+  const [step, setStep] = useState(1);
+
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+
   const [errors, setErrors] = useState({});
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
+  const [firebaseToken, setFirebaseToken] = useState("");
 
   const navigate = useNavigate();
 
-  // 1. ReCAPTCHA ko SIRF EK BAAR Initialize karein (React StrictMode SAFE)
   useEffect(() => {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(
@@ -29,9 +45,7 @@ export default function Login() {
         "recaptcha-container",
         {
           size: "invisible",
-          callback: (response) => {
-            // reCAPTCHA solved automatically
-          },
+          callback: () => {},
           "expired-callback": () => {
             toast.error("reCAPTCHA expired. Please try again.");
           },
@@ -40,7 +54,22 @@ export default function Login() {
     }
   }, []);
 
-  // 2. Send OTP Handler
+  const resetForm = () => {
+    setMobile("");
+    setOtp("");
+    setName("");
+    setEmail("");
+    setAddress("");
+    setErrors({});
+    setStep(1);
+    setShowOtpModal(false);
+  };
+
+  const toggleMode = (mode) => {
+    setIsRegister(mode);
+    resetForm();
+  };
+
   async function handleSendOtp(e) {
     if (e) e.preventDefault();
 
@@ -53,9 +82,8 @@ export default function Login() {
     setSendingOtp(true);
 
     try {
-      // Pehle se bane huye recaptchaVerifier ko reuse kar rahe hain (NO new RecaptchaVerifier call)
       const appVerifier = window.recaptchaVerifier;
-      const formattedPhoneNumber = `+91${mobile}`; // Country Code (India)
+      const formattedPhoneNumber = `+91${mobile}`;
 
       const confirmation = await signInWithPhoneNumber(
         auth,
@@ -69,7 +97,6 @@ export default function Login() {
     } catch (error) {
       console.error("Firebase OTP Error:", error);
 
-      // Agar error aaye toh reCAPTCHA reset karein (Delete na karein)
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.render().then((widgetId) => {
           if (window.grecaptcha) {
@@ -94,15 +121,8 @@ export default function Login() {
     }
   }
 
-  // Input Validation
-  function validate() {
+  function validateOtp() {
     const next = {};
-    if (!mobile.trim()) {
-      next.mobile = "Mobile number required";
-    } else if (!/^\d{10}$/.test(mobile)) {
-      next.mobile = "Enter a valid 10-digit mobile number";
-    }
-
     if (!otp.trim()) {
       next.otp = "OTP is required";
     } else if (!/^\d{6}$/.test(otp)) {
@@ -111,10 +131,9 @@ export default function Login() {
     return next;
   }
 
-  // 3. Verify OTP Handler
-  async function handleSubmit(e) {
+  async function handleVerifyOtp(e) {
     if (e) e.preventDefault();
-    const next = validate();
+    const next = validateOtp();
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
@@ -127,13 +146,19 @@ export default function Login() {
 
       const userCredential = await confirmationResult.confirm(otp);
       const user = userCredential.user;
-
       const token = await user.getIdToken();
-      localStorage.setItem("authToken", token);
+      setFirebaseToken(token);
 
-      toast.success("Login Successful! Welcome Back.");
       setShowOtpModal(false);
-      navigate("/dashboard");
+
+      if (isRegister) {
+        toast.success("Mobile Verified! Complete your profile.");
+        setStep(2);
+      } else {
+        localStorage.setItem("authToken", token);
+        toast.success("Login Successful! Welcome Back.");
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Verification Error:", error);
       toast.error("Invalid or Expired OTP");
@@ -142,11 +167,60 @@ export default function Login() {
     }
   }
 
+  function validateRegisterFields() {
+    const next = {};
+    if (!name.trim()) next.name = "Full Name is required";
+    if (!email.trim()) {
+      next.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      next.email = "Enter a valid email address";
+    }
+    if (!address.trim()) next.address = "Address is required";
+    return next;
+  }
+
+  async function handleRegisterSubmit(e) {
+    if (e) e.preventDefault();
+    const next = validateRegisterFields();
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("https://your-api-domain.com/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${firebaseToken}`,
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          address,
+          mobile,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("authToken", data.token || firebaseToken);
+        toast.success("Registration Successful! Welcome.");
+        navigate("/dashboard");
+      } else {
+        toast.error(data.message || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Register Error:", error);
+      toast.error("Network error. Could not complete registration.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="an-wp-page">
-      {/* Invisible Recaptcha Container (Ye page load par hamesha hona chahiye) */}
       <div id="recaptcha-container"></div>
-
       <div className="an-wp-bg-overlay" />
 
       <div className="an-wp-card">
@@ -181,47 +255,126 @@ export default function Login() {
         </div>
 
         <div className="an-wp-form-side">
+          <div className="an-wp-tabs">
+            <button
+              type="button"
+              className={!isRegister ? "active" : ""}
+              onClick={() => toggleMode(false)}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              className={isRegister ? "active" : ""}
+              onClick={() => toggleMode(true)}
+            >
+              Register
+            </button>
+          </div>
+
           <div className="an-wp-form-header">
             <div className="an-wp-lock-icon">
               <FaLock />
             </div>
-            <h2>Welcome Back</h2>
-            <p className="an-wp-sub">Sign in to Astronarhari Admin System</p>
+            <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
+            <p className="an-wp-sub">
+              {isRegister
+                ? "Register to access Astronarhari Portal"
+                : "Sign in to Astronarhari Admin System"}
+            </p>
           </div>
 
-          <form onSubmit={handleSendOtp} noValidate className="an-wp-form">
-            <div className="an-wp-field">
-              <label>Mobile Number</label>
-              <div className="an-wp-input-box">
-                <span className="an-wp-prefix">+91</span>
-                <FaMobileAlt className="an-wp-input-icon" />
-                <input
-                  type="tel"
-                  value={mobile}
-                  maxLength={10}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                  className={errors.mobile ? "error" : ""}
-                  placeholder="Enter 10-digit number"
-                />
+          {(!isRegister || (isRegister && step === 1)) && (
+            <form onSubmit={handleSendOtp} noValidate className="an-wp-form">
+              <div className="an-wp-field">
+                <label>Mobile Number</label>
+                <div className="an-wp-input-box">
+                  <span className="an-wp-prefix">+91</span>
+                  <FaMobileAlt className="an-wp-input-icon" />
+                  <input
+                    type="tel"
+                    value={mobile}
+                    maxLength={10}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                    className={errors.mobile ? "error" : ""}
+                    placeholder="Enter 10-digit number"
+                  />
+                </div>
+                {errors.mobile && <span className="an-wp-error">{errors.mobile}</span>}
               </div>
-              {errors.mobile && <span className="an-wp-error">{errors.mobile}</span>}
-            </div>
 
-            <button
-              type="submit"
-              className="an-wp-btn"
-              disabled={sendingOtp}
-            >
-              {sendingOtp ? (
-                <span className="an-wp-spinner" />
-              ) : (
-                <>
-                  <span>Send Verification OTP</span>
-                  <FaArrowRight className="an-wp-arrow" />
-                </>
-              )}
-            </button>
-          </form>
+              <button type="submit" className="an-wp-btn" disabled={sendingOtp}>
+                {sendingOtp ? (
+                  <span className="an-wp-spinner" />
+                ) : (
+                  <>
+                    <span>Send Verification OTP</span>
+                    <FaArrowRight className="an-wp-arrow" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {isRegister && step === 2 && (
+            <form onSubmit={handleRegisterSubmit} noValidate className="an-wp-form">
+              <div className="an-wp-field">
+                <label>Full Name</label>
+                <div className="an-wp-input-box">
+                  <FaUser className="an-wp-input-icon" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={errors.name ? "error" : ""}
+                    placeholder="Enter full name"
+                  />
+                </div>
+                {errors.name && <span className="an-wp-error">{errors.name}</span>}
+              </div>
+
+              <div className="an-wp-field">
+                <label>Email Address</label>
+                <div className="an-wp-input-box">
+                  <FaEnvelope className="an-wp-input-icon" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={errors.email ? "error" : ""}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                {errors.email && <span className="an-wp-error">{errors.email}</span>}
+              </div>
+
+              <div className="an-wp-field">
+                <label>Address</label>
+                <div className="an-wp-input-box">
+                  <FaMapMarkerAlt className="an-wp-input-icon" />
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className={errors.address ? "error" : ""}
+                    placeholder="Enter address"
+                  />
+                </div>
+                {errors.address && <span className="an-wp-error">{errors.address}</span>}
+              </div>
+
+              <button type="submit" className="an-wp-btn" disabled={submitting}>
+                {submitting ? (
+                  <span className="an-wp-spinner" />
+                ) : (
+                  <>
+                    <span>Complete Registration</span>
+                    <FaArrowRight className="an-wp-arrow" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           <div className="an-wp-footer">
             <p>Secured with OTP Authentication Protocol</p>
@@ -229,7 +382,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* OTP Verification Modal */}
       {showOtpModal && (
         <div className="an-wp-modal-overlay">
           <div className="an-wp-modal">
@@ -254,11 +406,11 @@ export default function Login() {
             <div className="an-wp-modal-btns">
               <button
                 type="button"
-                onClick={handleSubmit}
+                onClick={handleVerifyOtp}
                 className="an-wp-btn"
                 disabled={submitting}
               >
-                {submitting ? <span className="an-wp-spinner" /> : "Verify & Sign In"}
+                {submitting ? <span className="an-wp-spinner" /> : "Verify OTP"}
               </button>
 
               <button

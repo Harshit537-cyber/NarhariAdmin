@@ -14,7 +14,7 @@
   justify-content: center;
   font-family: 'Plus Jakarta Sans', sans-serif;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   padding: 24px;
   background-color: #f8f5ff;
   background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop');
@@ -38,7 +38,7 @@
   display: flex;
   width: 100%;
   max-width: 960px;
-  min-height: 560px;
+  min-height: 580px;
   border-radius: 28px;
   overflow: hidden;
   background: #ffffff;
@@ -167,11 +167,41 @@
 
 .an-wp-form-side {
   flex: 1;
-  padding: 48px;
+  padding: 40px 48px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background: #ffffff;
+  overflow-y: auto;
+}
+
+.an-wp-tabs {
+  display: flex;
+  background: #f3e8ff;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e9d5ff;
+}
+
+.an-wp-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #64748b;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.an-wp-tabs button.active {
+  background: #ffffff;
+  color: #2e1065;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.12);
 }
 
 .an-wp-form-header {
@@ -179,42 +209,46 @@
 }
 
 .an-wp-lock-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   background: #f3e8ff;
   border: 1px solid #e9d5ff;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #7c3aed;
-  font-size: 18px;
-  margin-bottom: 20px;
+  font-size: 16px;
+  margin-bottom: 14px;
 }
 
 .an-wp-form-header h2 {
   font-family: 'Outfit', sans-serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   color: #2e1065;
   margin-bottom: 4px;
 }
 
 .an-wp-sub {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #64748b;
 }
 
 .an-wp-form {
-  margin: 32px 0;
+  margin: 20px 0;
+}
+
+.an-wp-field {
+  margin-bottom: 14px;
 }
 
 .an-wp-field label {
   display: block;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .an-wp-input-box {
@@ -229,26 +263,36 @@
   font-size: 14px;
   font-weight: 800;
   color: #7c3aed;
+  z-index: 2;
 }
 
 .an-wp-input-icon {
   position: absolute;
-  left: 54px;
+  left: 16px;
   font-size: 15px;
   color: #94a3b8;
   pointer-events: none;
+  z-index: 2;
+}
+
+.an-wp-prefix + .an-wp-input-icon {
+  left: 54px;
 }
 
 .an-wp-input-box input {
   width: 100%;
-  padding: 14px 16px 14px 80px;
+  padding: 12px 16px 12px 44px;
   background: #fcfaff;
   border: 1.5px solid #e9d5ff;
-  border-radius: 14px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 14.5px;
   font-weight: 600;
   color: #0f172a;
   transition: all 0.25s ease;
+}
+
+.an-wp-prefix ~ input {
+  padding-left: 80px;
 }
 
 .an-wp-input-box input::placeholder {
@@ -272,7 +316,7 @@
   color: #f43f5e;
   font-size: 12px;
   font-weight: 600;
-  margin-top: 6px;
+  margin-top: 4px;
   display: block;
 }
 
@@ -282,13 +326,13 @@
 
 .an-wp-btn {
   width: 100%;
-  padding: 16px;
-  margin-top: 20px;
-  border-radius: 14px;
+  padding: 14px;
+  margin-top: 14px;
+  border-radius: 12px;
   border: none;
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -323,7 +367,7 @@
 .an-wp-spinner {
   width: 20px;
   height: 20px;
-  border: 2px.5px solid rgba(255, 255, 255, 0.35);
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -335,10 +379,11 @@
 
 .an-wp-footer {
   text-align: center;
+  margin-top: 10px;
 }
 
 .an-wp-footer p {
-  font-size: 12.5px;
+  font-size: 12px;
   color: #94a3b8;
 }
 
@@ -460,7 +505,7 @@
 @media (max-width: 860px) {
   .an-wp-card {
     flex-direction: column;
-    max-width: 440px;
+    max-width: 460px;
   }
   
   .an-wp-hero {
