@@ -1,6 +1,6 @@
 import React from "react";
 import { FiLogOut, FiX } from "react-icons/fi";
-import "./LogoutModal.css";
+import "./logoutModal.css";
 
 export default function LogoutModal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
