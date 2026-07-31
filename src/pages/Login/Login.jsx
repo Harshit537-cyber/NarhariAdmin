@@ -18,7 +18,7 @@ import { HiSparkles } from "react-icons/hi";
 
 import { auth } from "../../firebase/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { verifyOtp , registerAdmin } from "../../api/Controller/verifyOtpApi";
+import { verifyOtp, registerAdmin } from "../../api/Controller/verifyOtpApi";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -38,21 +38,44 @@ export default function Login() {
 
   const navigate = useNavigate();
 
+  // Component unmount hone par reCAPTCHA cleanup karne ke liye
   useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: () => {},
-          "expired-callback": () => {
-            toast.error("reCAPTCHA expired. Please try again.");
-          },
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.error(e);
         }
-      );
-    }
+        window.recaptchaVerifier = null;
+      }
+    };
   }, []);
+
+  // Fresh reCAPTCHA Instance banane ka helper function
+  const setupRecaptcha = () => {
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {
+        console.error("Clearing previous recaptcha error:", e);
+      }
+      window.recaptchaVerifier = null;
+    }
+
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: () => {},
+        "expired-callback": () => {
+          toast.error("reCAPTCHA expired. Please try again.");
+        },
+      }
+    );
+    return window.recaptchaVerifier;
+  };
 
   const resetForm = () => {
     setMobile("");
@@ -82,7 +105,8 @@ export default function Login() {
     setSendingOtp(true);
 
     try {
-      const appVerifier = window.recaptchaVerifier;
+      // Direct Fresh reCAPTCHA generate karo
+      const appVerifier = setupRecaptcha();
       const formattedPhoneNumber = `+91${mobile}`;
 
       const confirmation = await signInWithPhoneNumber(
@@ -95,12 +119,14 @@ export default function Login() {
       toast.success("OTP sent successfully to your mobile.");
       setShowOtpModal(true);
     } catch (error) {
+      console.error("OTP Error:", error);
+
+      // Error aane par reCAPTCHA reset karein
       if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.render().then((widgetId) => {
-          if (window.grecaptcha) {
-            window.grecaptcha.reset(widgetId);
-          }
-        });
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {}
+        window.recaptchaVerifier = null;
       }
 
       Swal.fire({
@@ -205,6 +231,7 @@ export default function Login() {
 
   return (
     <div className="an-wp-page">
+      {/* Container hamesha Top level par rahega */}
       <div id="recaptcha-container"></div>
       <div className="an-wp-bg-overlay" />
 
