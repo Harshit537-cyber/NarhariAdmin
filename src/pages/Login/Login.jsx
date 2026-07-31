@@ -39,20 +39,30 @@ export default function Login() {
   const navigate = useNavigate();
 
   // Component unmount hone par reCAPTCHA cleanup karne ke liye
-  // useEffect(() => {
-  //   return () => {
-  //     if (window.recaptchaVerifier) {
-  //       try {
-  //         window.recaptchaVerifier.clear();
-  //       } catch (e) {
-  //         console.error(e);
-  //       }
-  //       window.recaptchaVerifier = null;
-  //     }
-  //   };
-  // }, []);
   useEffect(() => {
-  if (!window.recaptchaVerifier) {
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.error(e);
+        }
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  // Fresh reCAPTCHA Instance banane ka helper function
+  const setupRecaptcha = () => {
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {
+        console.error("Clearing previous recaptcha error:", e);
+      }
+      window.recaptchaVerifier = null;
+    }
+
     window.recaptchaVerifier = new RecaptchaVerifier(
       auth,
       "recaptcha-container",
@@ -64,43 +74,8 @@ export default function Login() {
         },
       }
     );
-  }
-
-  return () => {
-    if (window.recaptchaVerifier) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (e) {}
-
-      window.recaptchaVerifier = null;
-    }
+    return window.recaptchaVerifier;
   };
-}, []);
-
-  // Fresh reCAPTCHA Instance banane ka helper function
-  // const setupRecaptcha = () => {
-  //   if (window.recaptchaVerifier) {
-  //     try {
-  //       window.recaptchaVerifier.clear();
-  //     } catch (e) {
-  //       console.error("Clearing previous recaptcha error:", e);
-  //     }
-  //     window.recaptchaVerifier = null;
-  //   }
-
-  //   window.recaptchaVerifier = new RecaptchaVerifier(
-  //     auth,
-  //     "recaptcha-container",
-  //     {
-  //       size: "invisible",
-  //       callback: () => {},
-  //       "expired-callback": () => {
-  //         toast.error("reCAPTCHA expired. Please try again.");
-  //       },
-  //     }
-  //   );
-  //   return window.recaptchaVerifier;
-  // };
 
   const resetForm = () => {
     setMobile("");
@@ -131,7 +106,7 @@ export default function Login() {
 
     try {
       // Direct Fresh reCAPTCHA generate karo
-     const appVerifier = window.recaptchaVerifier;
+      const appVerifier = setupRecaptcha();
       const formattedPhoneNumber = `+91${mobile}`;
 
       const confirmation = await signInWithPhoneNumber(
@@ -269,7 +244,7 @@ export default function Login() {
               <div className="an-wp-logo-icon">
                 <HiSparkles />
               </div>
-              <span>ASTRONARHARI 1</span>
+              <span>ASTRONARHARI</span>
             </div>
 
             <div className="an-wp-hero-body">
