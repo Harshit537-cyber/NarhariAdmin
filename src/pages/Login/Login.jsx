@@ -269,7 +269,7 @@ export default function Login() {
               <div className="an-wp-logo-icon">
                 <HiSparkles />
               </div>
-              <span>ASTRONARHARI</span>
+              <span>ASTRONARHARI 1</span>
             </div>
 
             <div className="an-wp-hero-body">
