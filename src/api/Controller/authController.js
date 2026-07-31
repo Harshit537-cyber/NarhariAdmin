@@ -1,6 +1,6 @@
 import apiClient from "../Interceptor/apiClient";
 
- export const loginAdmin = async (data) => {
+export const loginAdmin = async (data) => {
   try {
     const response = await apiClient.post("/admin/login", data);
 
@@ -12,13 +12,13 @@ import apiClient from "../Interceptor/apiClient";
 
     return response.data;
 
-  } 
+  }
   catch (error) {
 
     throw (
 
       error.response?.data || {
-        
+
         message: "Something went wrong",
       }
     );
@@ -27,12 +27,11 @@ import apiClient from "../Interceptor/apiClient";
 
 
 export const getAllUsers = async () => {
-  try 
-  {
+  try {
     const response = await apiClient.get("/admin/dashboard/all-users");
 
     return response.data;
-  } 
+  }
   catch (error) {
 
     throw (
@@ -53,7 +52,7 @@ export const getDashboardStats = async () => {
     const response = await apiClient.get("/admin/dashboard/stats");
 
     return response.data;
-  } 
+  }
   catch (error) {
 
     throw (
@@ -73,7 +72,7 @@ export const getRecentUsers = async () => {
   try {
     const response = await apiClient.get("/admin/dashboard/recent-users");
     return response.data;
-  } 
+  }
   catch (error) {
     throw (
       error.response?.data || {
@@ -94,9 +93,8 @@ export const deleteUser = async (userId) => {
     );
 
     return response.data;
-  } 
-  catch (error) 
-  {
+  }
+  catch (error) {
     throw (
 
       error.response?.data || {
@@ -107,26 +105,22 @@ export const deleteUser = async (userId) => {
   }
 };
 
-export const sendOtp = async (data) => 
-  {
-  try  {
-    const response = await apiClient.post("/admin/send-otp", data);
+// export const sendOtp = async (data) => {
+//   try {
+//     const response = await apiClient.post("/admin/send-otp", data);
 
-    return response.data;
+//     return response.data;
 
-  } 
-  catch (error)
-   {
-    throw (
+//   }
+//   catch (error) {
+//     throw (
+//       error.response?.data || {
 
-
-     error.response?.data || {
-
-        message: "Something went wrong",
-      }
-    );
-  }
-};
+//         message: "Something went wrong",
+//       }
+//     );
+//   }
+// };
 
 // Update User
 export const updateUser = async (userId, formData) => {

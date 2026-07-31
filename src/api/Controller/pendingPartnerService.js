@@ -11,6 +11,7 @@ export const getPendingPartners = async () => {
   }
 };
 
+
 export const getPendingKycPartners = async () => {
   try {
     const { data } = await apiClient.get(
@@ -21,6 +22,7 @@ export const getPendingKycPartners = async () => {
     throw error.response?.data || { message: "Something went wrong" };
   }
 };
+
 
 export const updatePartnerStatus = async (partnerId, payload) => {
   try {
