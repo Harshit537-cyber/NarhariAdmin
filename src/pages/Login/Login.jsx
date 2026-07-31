@@ -18,6 +18,7 @@ import { HiSparkles } from "react-icons/hi";
 
 import { auth } from "../../firebase/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { verifyOtp , registerAdmin } from "../../api/Controller/verifyOtpApi";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -34,7 +35,6 @@ export default function Login() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
-  const [firebaseToken, setFirebaseToken] = useState("");
 
   const navigate = useNavigate();
 
@@ -95,8 +95,6 @@ export default function Login() {
       toast.success("OTP sent successfully to your mobile.");
       setShowOtpModal(true);
     } catch (error) {
-      console.error("Firebase OTP Error:", error);
-
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.render().then((widgetId) => {
           if (window.grecaptcha) {
@@ -146,8 +144,12 @@ export default function Login() {
 
       const userCredential = await confirmationResult.confirm(otp);
       const user = userCredential.user;
-      const token = await user.getIdToken();
-      setFirebaseToken(token);
+      const idToken = await user.getIdToken();
+
+      const verifyResponse = await verifyOtp({
+        mobile: `+91${mobile}`,
+        idToken: idToken,
+      });
 
       setShowOtpModal(false);
 
@@ -155,13 +157,11 @@ export default function Login() {
         toast.success("Mobile Verified! Complete your profile.");
         setStep(2);
       } else {
-        localStorage.setItem("authToken", token);
-        toast.success("Login Successful! Welcome Back.");
+        toast.success(verifyResponse?.message || "Login Successful! Welcome Back.");
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error("Verification Error:", error);
-      toast.error("Invalid or Expired OTP");
+      toast.error(error.message || "Invalid or Expired OTP");
     } finally {
       setSubmitting(false);
     }
@@ -187,32 +187,17 @@ export default function Login() {
 
     setSubmitting(true);
     try {
-      const response = await fetch("https://your-api-domain.com/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${firebaseToken}`,
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          address,
-          mobile,
-        }),
+      const response = await registerAdmin({
+        name,
+        email,
+        address,
+        mobile: `+91${mobile}`,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("authToken", data.token || firebaseToken);
-        toast.success("Registration Successful! Welcome.");
-        navigate("/dashboard");
-      } else {
-        toast.error(data.message || "Registration failed. Please try again.");
-      }
+      toast.success(response?.message || "Registration Successful! Welcome.");
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Register Error:", error);
-      toast.error("Network error. Could not complete registration.");
+      toast.error(error.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
