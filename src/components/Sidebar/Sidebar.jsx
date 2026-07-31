@@ -3,11 +3,12 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
 import { AlertCircle, Ticket } from "lucide-react";
+
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
-  
+
   // States to keep groups open if the current path matches
   const [partnerOpen, setPartnerOpen] = useState(
     location.pathname.startsWith("/partner")
@@ -18,6 +19,18 @@ export default function Sidebar() {
   const [chatsOpen, setChatsOpen] = useState(
     location.pathname.startsWith("/chats")
   );
+
+  
+  const handleLogoutConfirm = () => {
+  
+    localStorage.clear();
+
+  
+    setShowModal(false);
+
+  
+    navigate("/login", { replace: true });
+  };
 
   return (
     <aside className="an-sidebar">
@@ -142,7 +155,7 @@ export default function Sidebar() {
           <span className="an-nav-text">Banner Management</span>
         </NavLink>
 
-        {/* Collapsible Chats Menu (Banner ke niche) */}
+        {/* Collapsible Chats Menu */}
         <div className="an-nav-group">
           <button
             className={`an-nav-item an-nav-parent ${
@@ -234,26 +247,30 @@ export default function Sidebar() {
           <IconList />
           <span className="an-nav-text">Orders</span>
         </NavLink>
-      </nav>
-<NavLink
-  to="/complaints"
-  className={({ isActive }) =>
-    `an-nav-item ${isActive ? "is-active" : ""}`
-  }
->
-  <AlertCircle />
-  <span className="an-nav-text">Complaints</span>
-</NavLink>
 
-<NavLink
-  to="/tickets"
-  className={({ isActive }) =>
-    `an-nav-item ${isActive ? "is-active" : ""}`
-  }
->
-  <Ticket />
-  <span className="an-nav-text">Tickets</span>
-</NavLink>
+        {/* Complaints */}
+        <NavLink
+          to="/complaints"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <AlertCircle />
+          <span className="an-nav-text">Complaints</span>
+        </NavLink>
+
+        {/* Tickets */}
+        <NavLink
+          to="/tickets"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <Ticket />
+          <span className="an-nav-text">Tickets</span>
+        </NavLink>
+      </nav>
+
       {/* Logout Button */}
       <button
         className="an-nav-item logout-btn"
@@ -267,10 +284,7 @@ export default function Sidebar() {
       <LogoutModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onConfirm={() => {
-          setShowModal(false);
-          navigate("/login");
-        }}
+        onConfirm={handleLogoutConfirm}
       />
     </aside>
   );
