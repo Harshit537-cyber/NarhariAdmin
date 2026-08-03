@@ -7,4 +7,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+   server: {
+    allowedHosts: [
+      'https://visionary-biscotti-cc607a.netlify.app/login',
+    ],
+  },
 });

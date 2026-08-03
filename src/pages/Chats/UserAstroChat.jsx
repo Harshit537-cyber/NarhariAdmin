@@ -1,5 +1,7 @@
-import React, { useState } from "react";
 import "./UserAstroChat.css";
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebase/firebase"
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import {
   FaCrown,
   FaBolt,
@@ -19,86 +21,79 @@ import {
   FaFileAlt
 } from "react-icons/fa";
 
-export default function AstrologyChatAdmin() {
-  // Sample Live Chat Sessions Data
-  const initialSessions = [
-    {
-      id: "CHAT-801",
-      user: "Aman Sharma",
-      userZodiac: "Scorpio ♏",
-      dob: "14 Nov 1995 (10:15 AM, Delhi)",
-      pandit: "Acharya Rahul",
-      topic: "Career & Business",
-      status: "Live", // Live, Queued, Flagged, Ended
-      duration: "14:20",
-      unread: 2,
-      lastMessage: "Looking at your 10th House, Saturn transit...",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "Session started. Birth details shared with Panditji.", time: "10:00 AM" },
-        { sender: "user", text: "Namaste Panditji, when will I get my job promotion?", time: "10:01 AM" },
-        { sender: "pandit", text: "Namaste Aman. Let me generate your Lagna chart.", time: "10:02 AM" },
-        { sender: "pandit", text: "Looking at your 10th House, Saturn transit is currently causing a minor delay.", time: "10:03 AM" }
-      ]
-    },
-    {
-      id: "CHAT-802",
-      user: "Priya Patel",
-      userZodiac: "Leo ♌",
-      dob: "22 Aug 1998 (04:30 PM, Mumbai)",
-      pandit: "Acharya Sharma",
-      topic: "Love & Marriage",
-      status: "Flagged",
-      duration: "22:45",
-      unread: 0,
-      lastMessage: "System Alert: Admin flagged high response delay.",
-      flagged: true,
-      messages: [
-        { sender: "system", text: "Session started. Kundli Matchmaking mode active.", time: "10:15 AM" },
-        { sender: "user", text: "Are we compatible according to Gun Milan?", time: "10:16 AM" },
-        { sender: "system", text: "⚠️ System Warning: Astrologer inactive for 5+ minutes.", time: "10:25 AM" }
-      ]
-    },
-    {
-      id: "CHAT-803",
-      user: "Rohan Mehta",
-      userZodiac: "Taurus ♉",
-      dob: "05 May 1992 (08:00 AM, Ahmedabad)",
-      pandit: "Dr. Ananya",
-      topic: "Health & Rahu Dasha",
-      status: "Queued",
-      duration: "00:00",
-      unread: 0,
-      lastMessage: "Waiting for Astrologer to accept...",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "User paid ₹350. Session in queue.", time: "10:30 AM" }
-      ]
-    },
-    {
-      id: "CHAT-804",
-      user: "Sneha Kapoor",
-      userZodiac: "Pisces ♓",
-      dob: "12 Mar 1999 (11:20 PM, Pune)",
-      pandit: "Kamlesh Dev",
-      topic: "Gemstone Suggestion",
-      status: "Ended",
-      duration: "15:00",
-      unread: 0,
-      lastMessage: "Yellow Sapphire (Pukhraj) is recommended.",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "Session completed successfully.", time: "09:45 AM" },
-        { sender: "pandit", text: "Yellow Sapphire (Pukhraj) is recommended.", time: "09:44 AM" }
-      ]
-    }
-  ];
 
-  const [sessions, setSessions] = useState(initialSessions);
-  const [selectedChatId, setSelectedChatId] = useState("CHAT-801");
+ export default function AstrologyChatAdmin() {
+  const [selectedChatId, setSelectedChatId] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [adminNote, setAdminNote] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const convSnap = await getDocs(collection(db, "conversations"));
+        const sessionsData = [];
+
+        for (const convDoc of convSnap.docs) {
+          const data = convDoc.data();
+          const docId = convDoc.id;
+
+          // conversation doc ke andar do keys hain jo {name, imageUrl} rakhti hain
+          const participantKeys = Object.keys(data).filter(
+            (key) => data[key] && typeof data[key] === "object" && data[key].name
+          );
+          if (participantKeys.length < 2) continue;
+
+          const [partnerKey, userKey] = participantKeys;
+          const partner = data[partnerKey];
+          const user = data[userKey];
+
+          const msgsSnap = await getDocs(
+            query(collection(db, "conversations", docId, "messages"), orderBy("createdAt", "asc"))
+          );
+
+          const messages = msgsSnap.docs.map((m) => {
+            const md = m.data();
+            const isPartner = md.senderId === partnerKey;
+            return {
+              sender: isPartner ? "pandit" : "user",
+              text: md.text || "",
+              time: md.createdAt?.toDate
+                ? md.createdAt.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : ""
+            };
+          });
+
+          sessionsData.push({
+            id: docId,
+            user: user?.name || "Unknown User",
+            userZodiac: "",
+            dob: "",
+            pandit: partner?.name || "Unknown Astrologer",
+            topic: "General Consultation",
+            status: "Ended",
+            duration: "--",
+            unread: 0,
+            lastMessage: messages.length ? messages[messages.length - 1].text : "No messages yet",
+            flagged: false,
+            messages
+          });
+        }
+
+        setSessions(sessionsData);
+        if (sessionsData.length > 0) setSelectedChatId(sessionsData[0].id);
+      } catch (err) {
+        console.error("Error fetching conversations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  const [sessions, setSessions] = useState(initialSessions);
 
   const activeChat = sessions.find((s) => s.id === selectedChatId) || sessions[0];
 
