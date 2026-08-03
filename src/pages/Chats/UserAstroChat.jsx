@@ -1,5 +1,14 @@
-import React, { useState } from "react";
 import "./UserAstroChat.css";
+import React, { useState, useEffect, useRef } from "react";
+import { db } from "../../firebase/firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc
+} from "firebase/firestore";
 import {
   FaCrown,
   FaBolt,
@@ -15,127 +24,209 @@ import {
   FaHistory,
   FaClock,
   FaStar,
-  FaCheckDouble,
-  FaFileAlt
+  FaFileAlt,
+  FaSpinner
 } from "react-icons/fa";
 
-export default function AstrologyChatAdmin() {
-  // Sample Live Chat Sessions Data
-  const initialSessions = [
-    {
-      id: "CHAT-801",
-      user: "Aman Sharma",
-      userZodiac: "Scorpio ♏",
-      dob: "14 Nov 1995 (10:15 AM, Delhi)",
-      pandit: "Acharya Rahul",
-      topic: "Career & Business",
-      status: "Live", // Live, Queued, Flagged, Ended
-      duration: "14:20",
-      unread: 2,
-      lastMessage: "Looking at your 10th House, Saturn transit...",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "Session started. Birth details shared with Panditji.", time: "10:00 AM" },
-        { sender: "user", text: "Namaste Panditji, when will I get my job promotion?", time: "10:01 AM" },
-        { sender: "pandit", text: "Namaste Aman. Let me generate your Lagna chart.", time: "10:02 AM" },
-        { sender: "pandit", text: "Looking at your 10th House, Saturn transit is currently causing a minor delay.", time: "10:03 AM" }
-      ]
-    },
-    {
-      id: "CHAT-802",
-      user: "Priya Patel",
-      userZodiac: "Leo ♌",
-      dob: "22 Aug 1998 (04:30 PM, Mumbai)",
-      pandit: "Acharya Sharma",
-      topic: "Love & Marriage",
-      status: "Flagged",
-      duration: "22:45",
-      unread: 0,
-      lastMessage: "System Alert: Admin flagged high response delay.",
-      flagged: true,
-      messages: [
-        { sender: "system", text: "Session started. Kundli Matchmaking mode active.", time: "10:15 AM" },
-        { sender: "user", text: "Are we compatible according to Gun Milan?", time: "10:16 AM" },
-        { sender: "system", text: "⚠️ System Warning: Astrologer inactive for 5+ minutes.", time: "10:25 AM" }
-      ]
-    },
-    {
-      id: "CHAT-803",
-      user: "Rohan Mehta",
-      userZodiac: "Taurus ♉",
-      dob: "05 May 1992 (08:00 AM, Ahmedabad)",
-      pandit: "Dr. Ananya",
-      topic: "Health & Rahu Dasha",
-      status: "Queued",
-      duration: "00:00",
-      unread: 0,
-      lastMessage: "Waiting for Astrologer to accept...",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "User paid ₹350. Session in queue.", time: "10:30 AM" }
-      ]
-    },
-    {
-      id: "CHAT-804",
-      user: "Sneha Kapoor",
-      userZodiac: "Pisces ♓",
-      dob: "12 Mar 1999 (11:20 PM, Pune)",
-      pandit: "Kamlesh Dev",
-      topic: "Gemstone Suggestion",
-      status: "Ended",
-      duration: "15:00",
-      unread: 0,
-      lastMessage: "Yellow Sapphire (Pukhraj) is recommended.",
-      flagged: false,
-      messages: [
-        { sender: "system", text: "Session completed successfully.", time: "09:45 AM" },
-        { sender: "pandit", text: "Yellow Sapphire (Pukhraj) is recommended.", time: "09:44 AM" }
-      ]
-    }
-  ];
+// A partner/astrologer id in this project looks like a 24-char hex (Mongo-style) id,
+// e.g. "6a51fb5bcc00266ce80b743d". A real user id is a 28-char Firebase Auth uid,
+// e.g. "7ZNBYc91cDfmMavuM0INVnZW35v2". We back this up by checking the imageUrl path,
+// since partner photos are uploaded under /partners/ and user photos under /user_profiles/.
+function isPartnerId(id, info) {
+  const looksLikeMongoId = /^[0-9a-f]{24}$/i.test(id);
+  const imageUrl = info?.imageUrl || "";
+  return looksLikeMongoId || imageUrl.includes("/partners/");
+}
 
-  const [sessions, setSessions] = useState(initialSessions);
-  const [selectedChatId, setSelectedChatId] = useState("CHAT-801");
+function toDate(ts) {
+  return ts?.toDate ? ts.toDate() : null;
+}
+
+function formatTime(ts) {
+  const d = toDate(ts);
+  return d ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+}
+
+// Heuristic only: your schema has no explicit status field, so "Live" here just means
+// "someone sent a message in the last N minutes". Swap this out once you have a real
+// signal (e.g. a partner "online" flag, or a session-closed field written elsewhere).
+function deriveStatus(lastMessageAt, adminOverride) {
+  if (adminOverride) return adminOverride; // "Flagged" or "Ended" set explicitly by admin
+  const d = toDate(lastMessageAt);
+  if (!d) return "Ended";
+  const minutesAgo = (Date.now() - d.getTime()) / 60000;
+  return minutesAgo <= 5 ? "Live" : "Ended";
+}
+
+export default function AstrologyChatAdmin() {
+  const [selectedChatId, setSelectedChatId] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [adminNote, setAdminNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sessions, setSessions] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
 
-  const activeChat = sessions.find((s) => s.id === selectedChatId) || sessions[0];
+  const hasAutoSelected = useRef(false);
 
-  // Action Handlers
-  const handleSendMessage = () => {
-    if (!adminNote.trim()) return;
-    setSessions((prev) =>
-      prev.map((s) => {
-        if (s.id === selectedChatId) {
-          return {
-            ...s,
-            messages: [
-              ...s.messages,
-              { sender: "admin", text: `[ADMIN NOTE]: ${adminNote}`, time: "Just now" }
-            ]
-          };
+  // Live-listen to the conversations collection so new/updated chats show up
+  // without a manual refresh.
+  useEffect(() => {
+    const q = query(collection(db, "conversations"), orderBy("lastMessageAt", "desc"));
+
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const sessionsData = snap.docs
+          .map((convDoc) => {
+            const data = convDoc.data();
+            const docId = convDoc.id;
+            const info = data.participantsInfo || {};
+            const infoKeys = Object.keys(info);
+
+            if (infoKeys.length < 2) return null; // malformed/incomplete doc, skip it
+
+            let partnerKey = infoKeys.find((k) => isPartnerId(k, info[k]));
+            let userKey = infoKeys.find((k) => k !== partnerKey);
+            if (!partnerKey) {
+              // fallback: couldn't confidently tell them apart, just pick an order
+              [partnerKey, userKey] = infoKeys;
+            }
+
+            const partner = info[partnerKey] || {};
+            const user = info[userKey] || {};
+            const lastMessage = data.lastMessage || {};
+            const lastMessageAt = data.lastMessageAt || lastMessage.lastMessageAt || null;
+
+            return {
+              id: docId,
+              userId: userKey,
+              partnerId: partnerKey,
+              user: user.name || "Unknown User",
+              userImage: user.imageUrl || "",
+              userZodiac: "", // not present in this schema
+              dob: "", // not present in this schema
+              pandit: partner.name || "Unknown Astrologer",
+              panditImage: partner.imageUrl || "",
+              topic: "General Consultation", // not present in this schema
+              adminOverrideStatus: data.adminOverrideStatus || null,
+              status: deriveStatus(lastMessageAt, data.adminOverrideStatus),
+              lastMessageAt,
+              unreadCount: data.unreadCount || {},
+              flagged: data.adminOverrideStatus === "Flagged",
+              lastMessage: lastMessage.text || "No messages yet",
+              lastMessageSenderId: lastMessage.senderId || null
+            };
+          })
+          .filter(Boolean);
+
+        setSessions(sessionsData);
+        setLoading(false);
+
+        if (!hasAutoSelected.current && sessionsData.length > 0) {
+          hasAutoSelected.current = true;
+          setSelectedChatId(sessionsData[0].id);
         }
-        return s;
-      })
+      },
+      (err) => {
+        console.error("Error listening to conversations:", err);
+        setLoading(false);
+      }
     );
-    setAdminNote("");
+
+    return () => unsub();
+  }, []);
+
+  // Live-listen to messages for whichever chat is selected.
+  useEffect(() => {
+    if (!selectedChatId) {
+      setMessages([]);
+      return;
+    }
+
+    setMessagesLoading(true);
+    const msgsQuery = query(
+      collection(db, "conversations", selectedChatId, "messages"),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsub = onSnapshot(
+      msgsQuery,
+      (snap) => {
+        const active = sessions.find((s) => s.id === selectedChatId);
+        const msgs = snap.docs.map((m) => {
+          const md = m.data();
+          let sender = "user";
+          if (active) {
+            if (md.senderId === active.partnerId) sender = "pandit";
+            else if (md.senderId === active.userId) sender = "user";
+            else sender = "admin"; // e.g. injected admin notes written to this same subcollection
+          }
+          return {
+            id: m.id,
+            sender,
+            text: md.text || "",
+            time: formatTime(md.createdAt)
+          };
+        });
+        setMessages(msgs);
+        setMessagesLoading(false);
+      },
+      (err) => {
+        console.error("Error listening to messages:", err);
+        setMessagesLoading(false);
+      }
+    );
+
+    return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChatId]);
+
+  const activeChat = sessions.find((s) => s.id === selectedChatId) || null;
+
+  // Action Handlers — these now persist to Firestore instead of only touching
+  // local state, so they survive refresh and sync across admin sessions.
+
+  const handleSendMessage = async () => {
+    if (!adminNote.trim() || !selectedChatId) return;
+    try {
+      // NOTE: adjust this to however your app actually models an injected admin
+      // message. If admin notes shouldn't appear in the user/astrologer's chat
+      // thread, write them to a separate "adminNotes" subcollection instead of
+      // the shared "messages" subcollection.
+      const { addDoc, serverTimestamp } = await import("firebase/firestore");
+      await addDoc(collection(db, "conversations", selectedChatId, "messages"), {
+        senderId: "admin",
+        text: `[ADMIN NOTE]: ${adminNote}`,
+        createdAt: serverTimestamp()
+      });
+      setAdminNote("");
+    } catch (err) {
+      console.error("Error sending admin note:", err);
+    }
   };
 
-  const handleForceEnd = (id) => {
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, status: "Ended" } : s
-      )
-    );
+  const handleForceEnd = async (id) => {
+    try {
+      await updateDoc(doc(db, "conversations", id), {
+        adminOverrideStatus: "Ended"
+      });
+    } catch (err) {
+      console.error("Error force-ending chat:", err);
+    }
   };
 
-  const handleToggleFlag = (id) => {
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, flagged: !s.flagged, status: !s.flagged ? "Flagged" : "Live" } : s
-      )
-    );
+  const handleToggleFlag = async (id) => {
+    const chat = sessions.find((s) => s.id === id);
+    if (!chat) return;
+    try {
+      await updateDoc(doc(db, "conversations", id), {
+        adminOverrideStatus: chat.flagged ? null : "Flagged"
+      });
+    } catch (err) {
+      console.error("Error toggling flag:", err);
+    }
   };
 
   // Filtered Sessions
@@ -143,12 +234,9 @@ export default function AstrologyChatAdmin() {
     (s) =>
       (filter === "All" ||
         (filter === "Live" && s.status === "Live") ||
-        (filter === "Flagged" && (s.flagged || s.status === "Flagged")) ||
-        (filter === "Queued" && s.status === "Queued") ||
+        (filter === "Flagged" && s.flagged) ||
         (filter === "Ended" && s.status === "Ended")) &&
-      `${s.user} ${s.pandit} ${s.id} ${s.topic}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      `${s.user} ${s.pandit} ${s.id} ${s.topic}`.toLowerCase().includes(search.toLowerCase())
   );
 
   // Top Metrics
@@ -158,39 +246,30 @@ export default function AstrologyChatAdmin() {
       value: sessions.filter((s) => s.status === "Live").length.toString(),
       icon: <FaComments />,
       cls: "cyan",
-      pill: "ACTIVE",
-    },
-    {
-      title: "In Queue",
-      value: sessions.filter((s) => s.status === "Queued").length.toString(),
-      icon: <FaClock />,
-      cls: "gold",
-      pill: "WAITING",
+      pill: "ACTIVE"
     },
     {
       title: "Flagged / Risk",
-      value: sessions.filter((s) => s.flagged || s.status === "Flagged").length.toString(),
+      value: sessions.filter((s) => s.flagged).length.toString(),
       icon: <FaExclamationTriangle />,
       cls: "red",
-      pill: "ATTENTION",
+      pill: "ATTENTION"
     },
     {
-      title: "Completed Today",
-      value: "142",
+      title: "Ended",
+      value: sessions.filter((s) => s.status === "Ended").length.toString(),
       icon: <FaHistory />,
       cls: "emerald",
-      pill: "SUCCESSFUL",
-    },
+      pill: "CLOSED"
+    }
   ];
 
   return (
     <div className="an-dashboard-container chat-page">
-      {/* Ambient background glowing orbs */}
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
 
-      {/* Page Header */}
       <header className="db-header animate-fade-in">
         <div className="db-header-left">
           <div className="header-title-container">
@@ -207,12 +286,13 @@ export default function AstrologyChatAdmin() {
         <div className="db-header-right">
           <div className="system-status-card">
             <div className="pulse-ring"></div>
-            <span className="status-text"><FaBolt /> SURVEILLANCE LIVE</span>
+            <span className="status-text">
+              <FaBolt /> SURVEILLANCE LIVE
+            </span>
           </div>
         </div>
       </header>
 
-      {/* Top Metrics Row */}
       <div className="db-metrics-grid">
         {cards.map((c, i) => (
           <div
@@ -225,12 +305,10 @@ export default function AstrologyChatAdmin() {
               <div className={`big-icon-box ${c.cls}-glow`}>{c.icon}</div>
               <span className={`trend-badge ${c.cls}-pill`}>{c.pill}</span>
             </div>
-
             <div className="card-middle-data">
               <h2 className="giant-stat-number">{c.value}</h2>
               <p className="giant-stat-label">{c.title}</p>
             </div>
-
             <div className="card-bottom-accent">
               <div className={`glow-bar ${c.cls}-bar`}></div>
             </div>
@@ -238,20 +316,19 @@ export default function AstrologyChatAdmin() {
         ))}
       </div>
 
-      {/* Toolbar / Search & Filters */}
       <div className="super-card toolbar-super-card animate-fade-in-delayed">
         <div className="toolbar-content">
           <div className="search-box-cosmic">
             <FaSearch className="search-icon" />
             <input
-              placeholder="Search chat by User, Astrologer, Chat ID or Topic..."
+              placeholder="Search chat by User, Astrologer, or Chat ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <div className="filter-tabs-cosmic">
-            {["All", "Live", "Queued", "Flagged", "Ended"].map((x) => (
+            {["All", "Live", "Flagged", "Ended"].map((x) => (
               <button
                 key={x}
                 onClick={() => setFilter(x)}
@@ -264,74 +341,87 @@ export default function AstrologyChatAdmin() {
         </div>
       </div>
 
-      {/* Main Dual Pane Chat Layout */}
       <div className="chat-surveillance-wrapper animate-fade-in-delayed">
-        {/* LEFT COLUMN: Active Sessions Sidebar */}
         <div className="chat-sessions-sidebar">
           <div className="sidebar-header">
             <h3>Active Conversations ({filteredSessions.length})</h3>
           </div>
 
-          <div className="chat-list-scroll">
-            {filteredSessions.map((s) => (
-              <div
-                key={s.id}
-                onClick={() => setSelectedChatId(s.id)}
-                className={`chat-item-card ${selectedChatId === s.id ? "active-item" : ""} ${
-                  s.flagged ? "flagged-border" : ""
-                }`}
-              >
-                <div className="chat-item-top">
-                  <span className="session-id-tag">{s.id}</span>
-                  <span className={`status-pill status-${s.status.toLowerCase()}`}>
-                    <span className="status-dot"></span> {s.status}
-                  </span>
-                </div>
+          {loading ? (
+            <div className="empty-chat-list">
+              <FaSpinner className="spin-icon" style={{ animation: "spin 1s linear infinite" }} />
+              <p>Loading conversations...</p>
+            </div>
+          ) : (
+            <div className="chat-list-scroll">
+              {filteredSessions.map((s) => (
+                <div
+                  key={s.id}
+                  onClick={() => setSelectedChatId(s.id)}
+                  className={`chat-item-card ${selectedChatId === s.id ? "active-item" : ""} ${
+                    s.flagged ? "flagged-border" : ""
+                  }`}
+                >
+                  <div className="chat-item-top">
+                    <span className="session-id-tag">{s.id}</span>
+                    <span className={`status-pill status-${s.status.toLowerCase()}`}>
+                      <span className="status-dot"></span> {s.status}
+                    </span>
+                  </div>
 
-                <div className="chat-item-participants">
-                  <div className="user-info">
-                    <span className="avatar-mini user"><FaUser /></span>
-                    <div>
-                      <strong>{s.user}</strong>
-                      <small>{s.userZodiac}</small>
+                  <div className="chat-item-participants">
+                    <div className="user-info">
+                      <span className="avatar-mini user">
+                        <FaUser />
+                      </span>
+                      <div>
+                        <strong>{s.user}</strong>
+                      </div>
+                    </div>
+
+                    <span className="vs-divider">↔</span>
+
+                    <div className="user-info text-right">
+                      <div>
+                        <strong>{s.pandit}</strong>
+                        <small>Astrologer</small>
+                      </div>
+                      <span className="avatar-mini pandit">
+                        <FaUserAstronaut />
+                      </span>
                     </div>
                   </div>
 
-                  <span className="vs-divider">↔</span>
+                  <div className="chat-item-topic">
+                    <span className="topic-pill">
+                      <FaMoon /> {s.topic}
+                    </span>
+                  </div>
 
-                  <div className="user-info text-right">
-                    <div>
-                      <strong>{s.pandit}</strong>
-                      <small>Astrologer</small>
-                    </div>
-                    <span className="avatar-mini pandit"><FaUserAstronaut /></span>
+                  <div className="chat-item-preview">
+                    <p>{s.lastMessage}</p>
                   </div>
                 </div>
+              ))}
 
-                <div className="chat-item-topic">
-                  <span className="topic-pill"><FaMoon /> {s.topic}</span>
-                  {s.duration !== "00:00" && <span className="duration-pill"><FaClock /> {s.duration}</span>}
+              {filteredSessions.length === 0 && (
+                <div className="empty-chat-list">
+                  <p>No chat sessions matching filter.</p>
                 </div>
-
-                <div className="chat-item-preview">
-                  <p>{s.lastMessage}</p>
-                </div>
-              </div>
-            ))}
-
-            {filteredSessions.length === 0 && (
-              <div className="empty-chat-list">
-                <p>No chat sessions matching filter.</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* RIGHT COLUMN: Live Monitor & Inspector */}
         <div className="chat-inspector-pane">
-          {activeChat ? (
+          {loading ? (
+            <div className="empty-inspector-state">
+              <FaSpinner className="huge-icon" style={{ animation: "spin 1s linear infinite" }} />
+              <h3>Loading Sessions</h3>
+              <p>Fetching live conversations from the database...</p>
+            </div>
+          ) : activeChat ? (
             <>
-              {/* Active Chat Header Controls */}
               <div className="inspector-header">
                 <div className="inspector-title-area">
                   <div className="chat-main-badges">
@@ -340,10 +430,14 @@ export default function AstrologyChatAdmin() {
                       <span className="status-dot"></span> {activeChat.status}
                     </span>
                     {activeChat.flagged && (
-                      <span className="flag-badge"><FaExclamationTriangle /> FLAGGED BY SYSTEM</span>
+                      <span className="flag-badge">
+                        <FaExclamationTriangle /> FLAGGED BY ADMIN
+                      </span>
                     )}
                   </div>
-                  <h2>{activeChat.user} & {activeChat.pandit}</h2>
+                  <h2>
+                    {activeChat.user} & {activeChat.pandit}
+                  </h2>
                 </div>
 
                 <div className="inspector-actions">
@@ -356,66 +450,75 @@ export default function AstrologyChatAdmin() {
                   </button>
 
                   {activeChat.status === "Live" && (
-                    <button
-                      className="btn-action-end"
-                      onClick={() => handleForceEnd(activeChat.id)}
-                    >
+                    <button className="btn-action-end" onClick={() => handleForceEnd(activeChat.id)}>
                       <FaStopCircle /> Force End
                     </button>
                   )}
                 </div>
               </div>
 
-              {/* User Kundli / Astrology Meta Summary Bar */}
               <div className="kundli-meta-bar">
                 <div className="k-meta-item">
-                  <small><FaUser /> CLIENT DETAILS</small>
-                  <p>{activeChat.user} ({activeChat.userZodiac})</p>
+                  <small>
+                    <FaUser /> CLIENT
+                  </small>
+                  <p>{activeChat.user}</p>
                 </div>
                 <div className="k-meta-item">
-                  <small><FaStar /> BIRTH DETAILS</small>
-                  <p>{activeChat.dob}</p>
+                  <small>
+                    <FaStar /> ASTROLOGER
+                  </small>
+                  <p>{activeChat.pandit}</p>
                 </div>
                 <div className="k-meta-item">
-                  <small><FaFileAlt /> CONSULTATION TOPIC</small>
+                  <small>
+                    <FaFileAlt /> CONSULTATION TOPIC
+                  </small>
                   <p className="topic-highlight">{activeChat.topic}</p>
                 </div>
               </div>
 
-              {/* Live Chat Message Feed */}
               <div className="chat-messages-container">
                 <div className="surveillance-disclaimer">
-                  <FaShieldAlt /> Live Administrative Surveillance Mode Active. Messages are logged and end-to-end encrypted.
+                  <FaShieldAlt /> Live Administrative Surveillance Mode Active. Messages are logged.
                 </div>
 
-                {activeChat.messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`chat-bubble-wrapper bubble-${msg.sender}`}
-                  >
-                    {msg.sender === "system" ? (
-                      <div className="system-event-message">
-                        <span>{msg.text}</span>
-                        <small>{msg.time}</small>
-                      </div>
-                    ) : (
+                {messagesLoading ? (
+                  <div className="empty-chat-list">
+                    <FaSpinner className="spin-icon" style={{ animation: "spin 1s linear infinite" }} />
+                    <p>Loading messages...</p>
+                  </div>
+                ) : (
+                  messages.map((msg) => (
+                    <div key={msg.id} className={`chat-bubble-wrapper bubble-${msg.sender}`}>
                       <div className="chat-bubble">
                         <div className="bubble-header">
                           <span className="sender-name">
-                            {msg.sender === "user" && <><FaUser /> {activeChat.user}</>}
-                            {msg.sender === "pandit" && <><FaUserAstronaut /> {activeChat.pandit}</>}
-                            {msg.sender === "admin" && <><FaCrown /> ADMIN OVERRIDE</>}
+                            {msg.sender === "user" && (
+                              <>
+                                <FaUser /> {activeChat.user}
+                              </>
+                            )}
+                            {msg.sender === "pandit" && (
+                              <>
+                                <FaUserAstronaut /> {activeChat.pandit}
+                              </>
+                            )}
+                            {msg.sender === "admin" && (
+                              <>
+                                <FaCrown /> ADMIN OVERRIDE
+                              </>
+                            )}
                           </span>
                           <span className="bubble-time">{msg.time}</span>
                         </div>
                         <p className="bubble-text">{msg.text}</p>
                       </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ))
+                )}
               </div>
 
-              {/* Admin Broadcast / Warning Note Input Box */}
               <div className="chat-admin-input-box">
                 <div className="input-prefix">
                   <FaCrown className="gold-icon" />
@@ -439,7 +542,7 @@ export default function AstrologyChatAdmin() {
             <div className="empty-inspector-state">
               <FaComments className="huge-icon" />
               <h3>No Chat Selected</h3>
-              <p>Select a live session from the left pane to begin monitoring.</p>
+              <p>Select a session from the left pane to begin monitoring.</p>
             </div>
           )}
         </div>
