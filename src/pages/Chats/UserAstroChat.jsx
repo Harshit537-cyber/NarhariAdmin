@@ -1,14 +1,7 @@
 import "./UserAstroChat.css";
-import React, { useState, useEffect, useRef } from "react";
-import { db } from "../../firebase/firebase";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc
-} from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebase/firebase"
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import {
   FaCrown,
   FaBolt,
@@ -28,45 +21,79 @@ import {
   FaSpinner
 } from "react-icons/fa";
 
-// A partner/astrologer id in this project looks like a 24-char hex (Mongo-style) id,
-// e.g. "6a51fb5bcc00266ce80b743d". A real user id is a 28-char Firebase Auth uid,
-// e.g. "7ZNBYc91cDfmMavuM0INVnZW35v2". We back this up by checking the imageUrl path,
-// since partner photos are uploaded under /partners/ and user photos under /user_profiles/.
-function isPartnerId(id, info) {
-  const looksLikeMongoId = /^[0-9a-f]{24}$/i.test(id);
-  const imageUrl = info?.imageUrl || "";
-  return looksLikeMongoId || imageUrl.includes("/partners/");
-}
 
-function toDate(ts) {
-  return ts?.toDate ? ts.toDate() : null;
-}
-
-function formatTime(ts) {
-  const d = toDate(ts);
-  return d ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
-}
-
-// Heuristic only: your schema has no explicit status field, so "Live" here just means
-// "someone sent a message in the last N minutes". Swap this out once you have a real
-// signal (e.g. a partner "online" flag, or a session-closed field written elsewhere).
-function deriveStatus(lastMessageAt, adminOverride) {
-  if (adminOverride) return adminOverride; // "Flagged" or "Ended" set explicitly by admin
-  const d = toDate(lastMessageAt);
-  if (!d) return "Ended";
-  const minutesAgo = (Date.now() - d.getTime()) / 60000;
-  return minutesAgo <= 5 ? "Live" : "Ended";
-}
-
-export default function AstrologyChatAdmin() {
+ export default function AstrologyChatAdmin() {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [adminNote, setAdminNote] = useState("");
   const [loading, setLoading] = useState(true);
-  const [sessions, setSessions] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [messagesLoading, setMessagesLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const convSnap = await getDocs(collection(db, "conversations"));
+        const sessionsData = [];
+
+        for (const convDoc of convSnap.docs) {
+          const data = convDoc.data();
+          const docId = convDoc.id;
+
+          // conversation doc ke andar do keys hain jo {name, imageUrl} rakhti hain
+          const participantKeys = Object.keys(data).filter(
+            (key) => data[key] && typeof data[key] === "object" && data[key].name
+          );
+          if (participantKeys.length < 2) continue;
+
+          const [partnerKey, userKey] = participantKeys;
+          const partner = data[partnerKey];
+          const user = data[userKey];
+
+          const msgsSnap = await getDocs(
+            query(collection(db, "conversations", docId, "messages"), orderBy("createdAt", "asc"))
+          );
+
+          const messages = msgsSnap.docs.map((m) => {
+            const md = m.data();
+            const isPartner = md.senderId === partnerKey;
+            return {
+              sender: isPartner ? "pandit" : "user",
+              text: md.text || "",
+              time: md.createdAt?.toDate
+                ? md.createdAt.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : ""
+            };
+          });
+
+          sessionsData.push({
+            id: docId,
+            user: user?.name || "Unknown User",
+            userZodiac: "",
+            dob: "",
+            pandit: partner?.name || "Unknown Astrologer",
+            topic: "General Consultation",
+            status: "Ended",
+            duration: "--",
+            unread: 0,
+            lastMessage: messages.length ? messages[messages.length - 1].text : "No messages yet",
+            flagged: false,
+            messages
+          });
+        }
+
+        setSessions(sessionsData);
+        if (sessionsData.length > 0) setSelectedChatId(sessionsData[0].id);
+      } catch (err) {
+        console.error("Error fetching conversations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  const [sessions, setSessions] = useState(initialSessions);
 
   const hasAutoSelected = useRef(false);
 

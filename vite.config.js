@@ -9,7 +9,7 @@ export default defineConfig({
   ],
    server: {
     allowedHosts: [
-      'much-empirical-smooth-exemption.trycloudflare.com',
+      'https://visionary-biscotti-cc607a.netlify.app/login',
     ],
   },
 });
