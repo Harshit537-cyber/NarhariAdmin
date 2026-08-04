@@ -9,7 +9,6 @@ export default function Sidebar() {
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
 
-  // States to keep groups open if the current path matches
   const [partnerOpen, setPartnerOpen] = useState(
     location.pathname.startsWith("/partner")
   );
@@ -203,7 +202,16 @@ export default function Sidebar() {
           <IconBox />
           <span className="an-nav-text">Product</span>
         </NavLink>
-
+{/* Category */}
+<NavLink
+  to="/category"
+  className={({ isActive }) =>
+    `an-nav-item ${isActive ? "is-active" : ""}`
+  }
+>
+  <IconCategory />
+  <span className="an-nav-text">Category</span>
+</NavLink>
         {/* Wallet */}
         <NavLink
           to="/wallet"
@@ -227,7 +235,7 @@ export default function Sidebar() {
         </NavLink>
 
         {/* Shopping */}
-        <NavLink
+        {/* <NavLink
           to="/shopping"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -235,7 +243,7 @@ export default function Sidebar() {
         >
           <IconBag />
           <span className="an-nav-text">Shopping</span>
-        </NavLink>
+        </NavLink> */}
 
         {/* Orders */}
         <NavLink
@@ -493,6 +501,21 @@ function IconLogout() {
       strokeLinejoin="round"
     >
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+    </svg>
+  );
+}
+
+function IconCategory() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 7h18M3 12h18M3 17h18" />
     </svg>
   );
 }

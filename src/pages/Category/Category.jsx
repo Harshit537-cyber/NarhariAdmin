@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { getProductCategories, createProductCategory } from "../../api/Controller/product";
-import "./Shop.css";
-import AddProductModal from "../Product/AddProductModal";
+import {
+  updateProductCategory,
+  deleteProductCategory,
+} from "../../api/Controller/category";
+import "./Category.css";
+import AddCategoryModal from "../Category/AddCategoryModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -13,21 +17,22 @@ import {
   FaTimes,
   FaCheckCircle,
   FaTimesCircle,
+  FaTrash,
 } from "react-icons/fa";
 
-export default function Shop() {
-  // Admin Shop Live Stats & Form State
-  const [stockCount, setStockCount] = useState("");
-  const [shopPrice, setShopPrice] = useState("");
-  const [originalPrice, setOriginalPrice] = useState("");
+export default function Category() {
+  const [stockCount, setStockCount] = useState(45);
+  const [categoryPrice, setCategoryPrice] = useState("799");
+  const [originalPrice, setOriginalPrice] = useState("999");
   const [showEditModal, setShowEditModal] = useState(false);
-  const [shopName, setShopName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState("Healing Crystal");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState(null);
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -38,7 +43,6 @@ export default function Shop() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-
       const response = await getProductCategories();
       setCategories(response.data || []);
     } catch (error) {
@@ -48,7 +52,7 @@ export default function Shop() {
     }
   };
 
-  const handleAddShop = async (formData) => {
+  const handleAddCategory = async (formData) => {
     try {
       const data = new FormData();
       data.append("name", formData.name);
@@ -60,24 +64,60 @@ export default function Shop() {
 
       setCategories((prev) => [...prev, response.data]);
       setShowAddModal(false);
-      toast.success("Shop added successfully!");
+      toast.success("Category added successfully!");
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Failed to add shop");
+      toast.error(error.message || "Failed to add category");
     }
   };
+const handleSaveSpecs = async () => {
+  if (!formData) return;
 
-  const handleSaveSpecs = () => {
-    if (!formData) return;
-    setShopName(formData.shopName);
-    setShopPrice(formData.shopPrice);
-    setOriginalPrice(formData.originalPrice);
-    setStockCount(Number(formData.stockCount));
+  try {
+    const data = new FormData();
+
+    data.append("name", formData.name);
+    data.append("description", formData.description);
+    data.append("isActive", formData.isActive);
+
+    if (formData.image instanceof File) {
+      data.append("image", formData.image);
+    }
+
+    const response = await updateProductCategory(formData._id, data);
+
+    setCategories((prev) =>
+      prev.map((item) =>
+        item._id === formData._id ? response.data : item
+      )
+    );
+
     setShowEditModal(false);
-    toast.success("Shop updated successfully!");
-  };
+    toast.success("Category updated successfully!");
+  } catch (error) {
+    console.log(error);
+    toast.error(error.message || "Failed to update category");
+  }
+};
+const handleDeleteCategory = async () => {
+  if (!selectedCategory) return;
 
-  // Pagination Logic
+  try {
+    await deleteProductCategory(selectedCategory._id);
+
+    setCategories((prev) =>
+      prev.filter((item) => item._id !== selectedCategory._id)
+    );
+
+    setShowDeleteModal(false);
+    setSelectedCategory(null);
+
+    toast.success("Category deleted successfully!");
+  } catch (error) {
+    console.log(error);
+    toast.error(error.message || "Failed to delete category");
+  }
+};
   const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -90,23 +130,21 @@ export default function Shop() {
   };
 
   return (
-    <div className="an-dashboard-container shop-page">
-      {/* Background Ambient Orbs */}
+    <div className="an-dashboard-container category-page">
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
 
-      {/* Header Section */}
       <header className="db-header animate-fade-in">
         <div className="db-header-left">
           <div className="header-title-container">
             <span className="enterprise-badge">
               <FaCrown className="crown-icon" /> COSMIC INVENTORY HUB
             </span>
-            <h1 className="wrapped-header-title">Shop & Inventory Hub</h1>
+            <h1 className="wrapped-header-title">Category Management</h1>
           </div>
           <p className="header-subtitle">
-            Monitor sales velocity, manage specs, and review shop categories.
+            Monitor sales velocity, manage specs, and review product categories.
           </p>
         </div>
 
@@ -115,17 +153,16 @@ export default function Shop() {
             className="btn-add-cosmic"
             onClick={() => setShowAddModal(true)}
           >
-            <FaPlus /> Add Shop
+            <FaPlus /> Add Category
           </button>
         </div>
       </header>
 
-      {/* Main Content: Shop Category Management Card */}
       <div className="super-card main-table-card animate-fade-in-delayed">
         <div className="super-card-header">
           <div className="header-accent-title">
             <div className="title-vertical-bar gold"></div>
-            <h2>Shop Management</h2>
+            <h2>Category Management</h2>
           </div>
           <span className="giant-badge gold">{categories.length} Categories</span>
         </div>
@@ -135,7 +172,7 @@ export default function Shop() {
             <thead>
               <tr>
                 <th>IMAGE</th>
-                <th>SHOP NAME</th>
+                <th>CATEGORY NAME</th>
                 <th>DESCRIPTION</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
@@ -151,7 +188,7 @@ export default function Shop() {
               ) : categories.length === 0 ? (
                 <tr>
                   <td colSpan="5" style={{ textAlign: "center", padding: "40px" }}>
-                    No shops found.
+                    No categories found.
                   </td>
                 </tr>
               ) : (
@@ -197,18 +234,27 @@ export default function Shop() {
                       <button
                         className="btn-pro btn-pro-edit"
                         onClick={() => {
-                          setFormData({
-                            shopName: item.name,
-                            category: item.name,
-                            shopPrice: shopPrice,
-                            originalPrice: originalPrice,
-                            stockCount: stockCount,
-                          });
+                        setFormData({
+  _id: item._id,
+  name: item.name,
+  description: item.description,
+  isActive: item.isActive,
+  image: item.image,
+});
                           setShowEditModal(true);
                         }}
                       >
                         <FaEdit /> Edit
                       </button>
+                      <button
+  className="btn-pro btn-pro-delete"
+  onClick={() => {
+    setSelectedCategory(item);
+    setShowDeleteModal(true);
+  }}
+>
+  <FaTrash /> 
+</button>
                     </td>
                   </tr>
                 ))
@@ -217,7 +263,6 @@ export default function Shop() {
           </table>
         </div>
 
-        {/* Bottom Right Pagination Bar */}
         <div className="table-pagination-footer">
           <div className="pagination-container">
             <button
@@ -253,7 +298,6 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* Edit Specifications Ultra Modal */}
       {showEditModal && formData && (
         <div
           className="ultra-modal-backdrop"
@@ -264,7 +308,7 @@ export default function Shop() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="ultra-modal-header">
-              <h3>Edit Shop Specifications</h3>
+              <h3>Edit Category Specifications</h3>
               <button
                 className="modal-close-btn"
                 onClick={() => setShowEditModal(false)}
@@ -273,63 +317,59 @@ export default function Shop() {
               </button>
             </div>
 
-            <div className="edit-form-body">
-              <div className="form-group">
-                <label>Shop Name</label>
-                <input
-                  type="text"
-                  value={formData.shopName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, shopName: e.target.value })
-                  }
-                />
-              </div>
+       <div className="edit-form-body">
 
-              <div className="form-group">
-                <label>Category</label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                />
-              </div>
+  <div className="form-group">
+    <label>Name</label>
+    <input
+      type="text"
+      value={formData.name}
+      onChange={(e) =>
+        setFormData({ ...formData, name: e.target.value })
+      }
+    />
+  </div>
 
-              <div className="form-group">
-                <label>Selling Price (₹)</label>
-                <input
-                  type="text"
-                  value={formData.shopPrice}
-                  onChange={(e) =>
-                    setFormData({ ...formData, shopPrice: e.target.value })
-                  }
-                />
-              </div>
+  <div className="form-group">
+    <label>Description</label>
+    <textarea
+      value={formData.description}
+      onChange={(e) =>
+        setFormData({ ...formData, description: e.target.value })
+      }
+    />
+  </div>
 
-              <div className="form-group">
-                <label>Original Price (₹)</label>
-                <input
-                  type="text"
-                  value={formData.originalPrice}
-                  onChange={(e) =>
-                    setFormData({ ...formData, originalPrice: e.target.value })
-                  }
-                />
-              </div>
+  <div className="form-group">
+    <label>Status</label>
+    <select
+      value={formData.isActive}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          isActive: e.target.value === "true",
+        })
+      }
+    >
+      <option value={true}>Active</option>
+      <option value={false}>Inactive</option>
+    </select>
+  </div>
 
-              <div className="form-group">
-                <label>Stock Count</label>
-                <input
-                  type="number"
-                  value={formData.stockCount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, stockCount: e.target.value })
-                  }
-                />
-              </div>
-            </div>
+  <div className="form-group">
+    <label>Image</label>
+    <input
+      type="file"
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          image: e.target.files[0],
+        })
+      }
+    />
+  </div>
 
+</div>
             <div className="modal-actions-row">
               <button
                 className="btn-modal-pro cancel"
@@ -347,12 +387,52 @@ export default function Shop() {
           </div>
         </div>
       )}
+{showDeleteModal && (
+  <div
+    className="ultra-modal-backdrop"
+    onClick={() => setShowDeleteModal(false)}
+  >
+    <div
+      className="ultra-modal-box"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="ultra-modal-header">
+        <h3>Delete Category</h3>
+        <button
+          className="modal-close-btn"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <FaTimes />
+        </button>
+      </div>
 
-      {/* Add Shop Modal Component */}
-      <AddProductModal
+      <p style={{ margin: "20px 0" }}>
+        Are you sure you want to delete
+        <strong> {selectedCategory?.name}</strong>?
+      </p>
+
+      <div className="modal-actions-row">
+        <button
+          className="btn-modal-pro cancel"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          Cancel
+        </button>
+
+      <button
+  className="btn-modal-pro delete"
+  onClick={handleDeleteCategory}
+>
+  Delete
+</button>
+      </div>
+    </div>
+  </div>
+)}
+      <AddCategoryModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddShop}
+        onSubmit={handleAddCategory}
       />
     </div>
   );

@@ -1,5 +1,54 @@
 import apiClient from "../Interceptor/apiClient";
 
+
+// Get Product List
+export const getProductList = async () => {
+  try {
+
+    const response = await apiClient.get("/admin/product/list");
+
+    return response.data;
+
+  } catch (error) {
+
+    throw (
+
+      error.response?.data || {
+
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+// Add Product
+export const addProduct = async (formData) => {
+  try {
+
+    const response = await apiClient.post(
+
+      "/api/admin/product/add",
+      formData,
+      {
+        headers: {
+
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw (
+
+      error.response?.data || {
+        
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
 // Get Product Categories
 export const getProductCategories = async () => {
 

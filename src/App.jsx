@@ -20,7 +20,7 @@ import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 import Complaints from "./pages/Complaints/Complaints";
 import Tickets from "./pages/Tickets/Tickets";
-
+import Category from "./pages/Category/Category.jsx"
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -53,6 +53,7 @@ const AppRoutes = () => {
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/partner" element={<Partner />} />
+              <Route path="/category" element={<Category/>}/>
               <Route
                 path="/partner/kyc-verification"
                 element={<KycVerification />}

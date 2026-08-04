@@ -5,7 +5,6 @@
   --black-title: #0b0f19;
   --text-muted: #526075;
 
-  /* Theme Accents */
   --neon-cyan: #06b6d4;
   --neon-purple: #8b5cf6;
   --neon-emerald: #10b981;
@@ -13,8 +12,7 @@
   --danger-red: #ef4444;
 }
 
-/* Page Layout Container */
-.an-dashboard-container.product-page {
+.an-dashboard-container.category-page {
   position: relative;
   padding: 40px 50px;
   background-color: var(--bg-dark-mesh);
@@ -24,7 +22,6 @@
   overflow-x: hidden;
 }
 
-/* Ambient Glow Orbs */
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
@@ -36,7 +33,6 @@
 .orb-2 { top: 300px; right: -80px; width: 500px; height: 500px; background: rgba(6, 182, 212, 0.1); }
 .orb-3 { bottom: 0; left: 30%; width: 400px; height: 400px; background: rgba(139, 92, 246, 0.08); }
 
-/* Header Section */
 .db-header {
   position: relative;
   z-index: 2;
@@ -108,7 +104,6 @@
   box-shadow: 0 15px 30px rgba(179, 140, 27, 0.45);
 }
 
-/* Super Card & Table */
 .super-card {
   position: relative;
   z-index: 2;
@@ -156,7 +151,6 @@
   border-radius: 50px;
 }
 
-/* Khatarnak Floating Table Styling */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -176,6 +170,7 @@
   color: var(--text-muted);
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-align: left;
 }
 
 .khatarnak-table td {
@@ -225,7 +220,6 @@
   display: inline-block;
 }
 
-/* Status Pills */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -268,9 +262,6 @@
   box-shadow: 0 6px 18px rgba(179, 140, 27, 0.35);
 }
 
-/* ==========================================
-   PAGINATION FOOTER (MATCHING IMAGE DESIGN)
-   ========================================== */
 .table-pagination-footer {
   display: flex;
   justify-content: flex-end;
@@ -308,7 +299,6 @@
   transform: translateY(-2px);
 }
 
-/* Active Page Button (Gold/Yellow theme matching image) */
 .pagination-btn.active {
   background: var(--neon-gold);
   color: #ffffff;
@@ -320,9 +310,6 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   ULTRA EDIT MODAL STYLING
-   ========================================== */
 .ultra-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -340,19 +327,20 @@
   border-radius: 28px;
   padding: 32px;
   width: 90%;
-    max-height: 95vh;
+  max-height: 95vh;
   overflow: hidden;
   max-width: 500px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease;
-  padding-bottom: 40px; 
+  padding-bottom: 40px;
 }
 
 .ultra-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 20px;
+
   padding-bottom: 12px;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -360,7 +348,6 @@
   font-size: 20px;
   font-weight: 800;
   margin: 0;
-
   background: linear-gradient(90deg, #493f05 0%, #000000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -391,17 +378,14 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
-
-  max-height: 420px;      /* adjust if needed */
+  max-height: 420px;
   overflow-y: auto;
-
-  /* Hide scrollbar */
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .edit-form-body::-webkit-scrollbar {
-  display: none;              /* Chrome/Safari */
+  display: none;
 }
 
 .form-group {
@@ -435,7 +419,7 @@
 .modal-actions-row {
   display: flex;
   gap: 14px;
- 
+  margin:20px;
 }
 
 .btn-modal-pro {
@@ -469,7 +453,6 @@
   box-shadow: 0 12px 25px rgba(179, 140, 27, 0.45);
 }
 
-/* Keyframes */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -480,9 +463,8 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Styles */
 @media (max-width: 768px) {
-  .an-dashboard-container.product-page {
+  .an-dashboard-container.category-page {
     padding: 20px;
   }
   .db-header {

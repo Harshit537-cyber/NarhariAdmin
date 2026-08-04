@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProductCategories, createProductCategory } from "../../api/Controller/product";
+import { getProductList, addProduct } from "../../api/Controller/product";
 import "./Product.css";
 import AddProductModal from "./AddProductModal";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,6 +23,7 @@ export default function Product() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [productName, setProductName] = useState("Healing Crystal");
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState(null);
 
@@ -34,33 +35,56 @@ export default function Product() {
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await getProductCategories();
-      setCategories(response.data || []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+const fetchCategories = async () => {
+  try {
+    setLoading(true);
 
-  const handleAddProduct = async (formData) => {
-    try {
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("description", formData.description);
-      data.append("image", formData.image);
+    const response = await getProductList();
+    setCategories(response.data || []);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const response = await createProductCategory(data);
-      console.log(response);
+const handleAddProduct = async (formData) => {
+  try {
+    const data = new FormData();
 
-      setCategories((prev) => [...prev, response.data]);
-      setShowAddModal(false);
-      toast.success("Category added successfully!");
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Failed to add category");
-    }
-  };
+    data.append("name", formData.name);
+    data.append("shortDescription", formData.shortDescription);
+    data.append("description", formData.description);
+    data.append("category", formData.category);
+    data.append("price", formData.price);
+    data.append("salePrice", formData.salePrice);
+    data.append("stock", formData.stock);
+
+    data.append(
+      "benefits",
+      JSON.stringify(
+        formData.benefits.split(",").map(item => item.trim())
+      )
+    );
+
+    data.append("howToUse", formData.howToUse);
+    data.append("careInstructions", formData.careInstructions);
+    data.append("isFeatured", formData.isFeatured);
+    data.append("isActive", formData.isActive);
+
+    formData.images.forEach((img) => {
+      data.append("images", img);
+    });
+
+    const response = await createProduct(data);
+
+    toast.success(response.message);
+    setShowAddModal(false);
+    fetchCategories();
+  } catch (err) {
+    toast.error(err.message);
+  }
+};
 
   const handleSaveSpecs = () => {
     if (!formData) return;
@@ -120,7 +144,7 @@ export default function Product() {
         <div className="super-card-header">
           <div className="header-accent-title">
             <div className="title-vertical-bar gold"></div>
-            <h2>Category Management</h2>
+            <h2>Product Management</h2>
           </div>
           <span className="giant-badge gold">{categories.length} Categories</span>
         </div>
@@ -136,68 +160,79 @@ export default function Product() {
                 <th style={{ textAlign: "right" }}>ACTION</th>
               </tr>
             </thead>
-            <tbody>
-              {currentCategories.map((item) => (
-                <tr key={item._id}>
-                  <td>
-                    <div className="category-img-container">
-                      <img
-                        className="category-img"
-                        src={item.image}
-                        alt={item.name}
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <span className="main-name">{item.name}</span>
-                  </td>
-                  <td>
-                    <span className="desc-cell">{item.description || "—"}</span>
-                  </td>
-                  <td>
-                    <span
-                      className={`status-pill ${
-                        item.isActive ? "active" : "inactive"
-                      }`}
-                    >
-                      {item.isActive ? (
-                        <>
-                          <FaCheckCircle /> Active
-                        </>
-                      ) : (
-                        <>
-                          <FaTimesCircle /> Inactive
-                        </>
-                      )}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "right" }}>
-                    <button
-                      className="btn-pro btn-pro-edit"
-                      onClick={() => {
-                        setFormData({
-                          productName: item.name,
-                          category: item.name,
-                          productPrice: productPrice,
-                          originalPrice: originalPrice,
-                          stockCount: stockCount,
-                        });
-                        setShowEditModal(true);
-                      }}
-                    >
-                      <FaEdit /> Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {categories.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "40px" }}>
-                    No categories found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+        <tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="5" style={{ textAlign: "center", padding: "60px" }}>
+        <div className="gold-loader"></div>
+      </td>
+    </tr>
+  ) : categories.length === 0 ? (
+    <tr>
+      <td colSpan="5" style={{ textAlign: "center", padding: "40px" }}>
+        No categories found.
+      </td>
+    </tr>
+  ) : (
+    currentCategories.map((item) => (
+      <tr key={item._id}>
+        <td>
+          <div className="category-img-container">
+            <img
+  className="category-img"
+  src={item.images?.[0]}   
+  alt={item.name}
+/>
+          </div>
+        </td>
+
+        <td>
+          <span className="main-name">{item.name}</span>
+        </td>
+
+        <td>
+          <span className="desc-cell">{item.description || "—"}</span>
+        </td>
+
+        <td>
+          <span
+            className={`status-pill ${
+              item.isActive ? "active" : "inactive"
+            }`}
+          >
+            {item.isActive ? (
+              <>
+                <FaCheckCircle /> Active
+              </>
+            ) : (
+              <>
+                <FaTimesCircle /> Inactive
+              </>
+            )}
+          </span>
+        </td>
+
+        <td style={{ textAlign: "right" }}>
+          <button
+            className="btn-pro btn-pro-edit"
+            onClick={() => {
+              setFormData({
+                productName: item.name,
+                category: item.name,
+                productPrice: productPrice,
+                originalPrice: originalPrice,
+                stockCount: stockCount,
+              });
+              setShowEditModal(true);
+            }}
+          >
+            <FaEdit /> Edit
+          </button>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
           </table>
         </div>
 
@@ -332,12 +367,12 @@ export default function Product() {
         </div>
       )}
 
-      {/* Add Product / Category Modal Component */}
-      <AddProductModal
-        open={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddProduct}
-      />
+     <AddProductModal
+  open={showAddModal}
+  onClose={() => setShowAddModal(false)}
+  onSubmit={handleAddProduct}
+  categories={categories}
+/>
     </div>
   );
 }

@@ -12,11 +12,9 @@ export default defineConfig({
 
     tailwindcss(),
   ],
-   server:
-    {
-    allowedHosts: [
-      
-      'https://visionary-biscotti-cc607a.netlify.app/login',
-    ],
-  },
+ server: {
+  allowedHosts: [
+    "observation-instruments-affiliates-actress.trycloudflare.com",
+  ],
+}
 });
