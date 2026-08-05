@@ -94,6 +94,73 @@ import {
   }, []);
 
   const [sessions, setSessions] = useState(initialSessions);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const convSnap = await getDocs(collection(db, "conversations"));
+        const sessionsData = [];
+
+        for (const convDoc of convSnap.docs) {
+          const data = convDoc.data();
+          const docId = convDoc.id;
+
+          // conversation doc ke andar do keys hain jo {name, imageUrl} rakhti hain
+          const participantKeys = Object.keys(data).filter(
+            (key) => data[key] && typeof data[key] === "object" && data[key].name
+          );
+          if (participantKeys.length < 2) continue;
+
+          const [partnerKey, userKey] = participantKeys;
+          const partner = data[partnerKey];
+          const user = data[userKey];
+
+          const msgsSnap = await getDocs(
+            query(collection(db, "conversations", docId, "messages"), orderBy("createdAt", "asc"))
+          );
+
+          const messages = msgsSnap.docs.map((m) => {
+            const md = m.data();
+            const isPartner = md.senderId === partnerKey;
+            return {
+              sender: isPartner ? "pandit" : "user",
+              text: md.text || "",
+              time: md.createdAt?.toDate
+                ? md.createdAt.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : ""
+            };
+          });
+
+          sessionsData.push({
+            id: docId,
+            user: user?.name || "Unknown User",
+            userZodiac: "",
+            dob: "",
+            pandit: partner?.name || "Unknown Astrologer",
+            topic: "General Consultation",
+            status: "Ended",
+            duration: "--",
+            unread: 0,
+            lastMessage: messages.length ? messages[messages.length - 1].text : "No messages yet",
+            flagged: false,
+            messages
+          });
+        }
+
+        setSessions(sessionsData);
+        if (sessionsData.length > 0) setSelectedChatId(sessionsData[0].id);
+      } catch (err) {
+        console.error("Error fetching conversations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  const [sessions, setSessions] = useState(initialSessions);
 
   const hasAutoSelected = useRef(false);
 
