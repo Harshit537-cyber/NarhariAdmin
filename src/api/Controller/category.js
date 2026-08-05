@@ -27,15 +27,22 @@ export const updateProductCategory = async (categoryId, formData) => {
 };
 
 export const deleteProductCategory = async (categoryId) => {
+
   try {
+
     const response = await apiClient.delete(
+
       `/admin/product-category/${categoryId}`
     );
 
     return response.data;
+
   } catch (error) {
+
     throw (
+
       error.response?.data || {
+        
         message: "Something went wrong",
       }
     );

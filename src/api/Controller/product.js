@@ -99,3 +99,15 @@ export const createProductCategory = async (formData) => {
     );
   }
 };
+
+
+export const updateProduct=(id,data)=>{
+  return apiClient.put(`/admin/product/update/${id}`,data,
+  {
+        headers: {
+
+          "Content-Type": "multipart/form-data",
+        },
+      }
+  )
+}
