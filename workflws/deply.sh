@@ -4,7 +4,7 @@ name: admin
 on:
   push:
     branches:
-      - main
+      - master
 
 
 jobs:
