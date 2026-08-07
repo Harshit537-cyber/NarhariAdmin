@@ -7,9 +7,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-   server: {
+
+  server: {
     allowedHosts: [
-      'much-empirical-smooth-exemption.trycloudflare.com',
+      "much-empirical-smooth-exemption.trycloudflare.com",
     ],
+  },
+
+  build: {
+    chunkSizeWarningLimit: 10000, // 10 MB
   },
 });
