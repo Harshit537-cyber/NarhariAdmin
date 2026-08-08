@@ -1,10 +1,11 @@
-import React, { useState } from "react";
 
+import React, { useState, useEffect } from "react";
+import { getProductCategories } from "../../api/Controller/product";
 export default function AddProductModal({
   open,
   onClose,
   onSubmit,
-  categories,
+  
 }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +22,26 @@ export default function AddProductModal({
     isActive: true,
     images: [],
   });
+ const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  useEffect(() => {
+    if (open) {
+      fetchCategories();
+    }
+  }, [open]);
 
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const data = await getProductCategories();
+      setCategories(data?.data || data || []); // response structure check kar lena
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
   if (!open) return null;
 
   const handleChange = (e) => {

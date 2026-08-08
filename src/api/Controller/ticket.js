@@ -20,3 +20,27 @@ export const getAllTickets = async () => {
     );
   }
 };
+
+
+// Update Ticket
+export const updateTicket = async (ticketId, data) => {
+  try {
+
+    const response = await apiClient.put(
+
+      `/tickets/admin/update/${ticketId}`,
+
+      data
+    );
+
+    return response.data;
+  } catch (error) {
+
+    throw (
+      error.response?.data || {
+
+        message: "Something went wrong",
+      }
+    );
+  }
+};

@@ -14,7 +14,7 @@
 }
 
 /* Page Layout Container */
-.an-dashboard-container.product-page {
+.an-dashboard-container.ritual-page {
   position: relative;
   padding: 40px 50px;
   background-color: var(--bg-dark-mesh);
@@ -357,8 +357,6 @@
   border-bottom: 1px solid #f1f5f9;
 }
 .ultra-modal-header h3 {
-  position: relative;           /* ADD THIS LINE */
-  display: inline-block;        /* ADD THIS LINE */
   font-size: 20px;
   font-weight: 800;
   margin: 0;
@@ -367,17 +365,6 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-.ultra-modal-header h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 100%;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #b38c1b, #d97706);  /* yellow-brown gradient */
 }
 
 .modal-close-btn {
@@ -495,7 +482,7 @@
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  .an-dashboard-container.product-page {
+  .an-dashboard-container.ritual-page {
     padding: 20px;
   }
   .db-header {

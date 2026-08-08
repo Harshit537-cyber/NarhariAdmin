@@ -24,7 +24,7 @@ import {
   FaPaperclip,
   FaPhoneAlt,
 } from "react-icons/fa";
-import { getAllTickets } from "../../api/Controller/ticket";
+import { getAllTickets , updateTicket } from "../../api/Controller/ticket";
 
 let DUMMY_TICKETS = [
   {
@@ -107,14 +107,7 @@ const deleteTicket = async (id) => {
   return { success: true };
 };
 
-const updateTicket = async (id, payload) => {
-  await delay(300);
-  DUMMY_TICKETS = DUMMY_TICKETS.map((t) =>
-    t._id === id ? { ...t, ...payload, updatedAt: new Date().toISOString() } : t
-  );
-  const updated = DUMMY_TICKETS.find((t) => t._id === id);
-  return { success: true, ticket: updated };
-};
+
 
 export default function Tickets() {
   const [tickets, setTickets] = useState([]);
@@ -138,9 +131,6 @@ export default function Tickets() {
   };
 
   const [editForm, setEditForm] = useState({
-    subject: "",
-    category: "",
-    priority: "",
     status: "",
     adminResponse: "",
   });
@@ -195,9 +185,7 @@ export default function Tickets() {
   const handleEditInit = (ticket) => {
     setSelectedTicket(ticket);
     setEditForm({
-      subject: ticket.subject || "",
-      category: ticket.category || "",
-      priority: ticket.priority || "Medium",
+      
       status: ticket.status || "Pending",
       adminResponse: ticket.adminResponse || ticket.adminReply || "",
     });
@@ -208,20 +196,24 @@ export default function Tickets() {
     e.preventDefault();
     try {
       const payload = {
-        subject: editForm.subject,
-        category: editForm.category,
-        priority: editForm.priority,
+       
         status: editForm.status,
         adminResponse: editForm.adminResponse,
       };
 
-      const response = await updateTicket(selectedTicket._id, payload);
-      const updatedItem = response.ticket || response.data || payload;
+    const response = await updateTicket(selectedTicket._id, payload);
 
-      setTickets((prev) =>
-        prev.map((t) => (t._id === selectedTicket._id ? { ...t, ...updatedItem } : t))
-      );
+if (response.success) {
+  setTickets((prev) =>
+    prev.map((t) =>
+      t._id === selectedTicket._id ? response.ticket : t
+    )
+  );
 
+  setEditOpen(false);
+  setSelectedTicket(null);
+  showToast("success", response.message);
+}
       setEditOpen(false);
       setSelectedTicket(null);
       showToast("success", "Ticket updated successfully!");
@@ -758,36 +750,11 @@ const profilePic = ticket.raisedBy?.profilePic || null;
                   gap: "16px",
                 }}
               >
-                <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label>Subject</label>
-                  <input
-                    type="text"
-                    value={editForm.subject}
-                    onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                  />
-                </div>
+               
 
-                <div className="form-group">
-                  <label>Category</label>
-                  <input
-                    type="text"
-                    value={editForm.category}
-                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  />
-                </div>
+             
 
-                <div className="form-group">
-                  <label>Priority</label>
-                  <select
-                    value={editForm.priority}
-                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent</option>
-                  </select>
-                </div>
+               
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
                   <label>Status</label>

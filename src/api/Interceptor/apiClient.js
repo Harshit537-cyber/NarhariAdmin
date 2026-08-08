@@ -23,11 +23,11 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
+      // localStorage.removeItem("token");
       localStorage.removeItem("role");
 
       // Redirect Login Page
-      window.location.href = "/";
+      // window.location.href = "/";
     }
 
     return Promise.reject(error);

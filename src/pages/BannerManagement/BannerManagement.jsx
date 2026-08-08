@@ -17,7 +17,7 @@ import {
   FaTimesCircle,
   FaEdit,
   FaChevronLeft,
-  FaChevronRight,
+  FaChevronRight, FaCrown, 
 } from "react-icons/fa";
 
 export default function BannerManagement() {
@@ -27,22 +27,30 @@ export default function BannerManagement() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
 
-  const [isEditing, setIsEditing] = useState(false);
   const [bannerId, setBannerId] = useState("");
   const [bannerTitle, setBannerTitle] = useState("");
 
   // Image Upload States
-  const [bannerImageFile, setBannerImageFile] = useState(null);       // For upload (File object)
-  const [bannerImagePreview, setBannerImagePreview] = useState("");   // UI Preview URL
-  const [existingImageUrl, setExistingImageUrl] = useState("");       // Backend Image URL
-
-  const [bannerLink, setBannerLink] = useState("");
+  const [bannerImageFile, setBannerImageFile] = useState(null);       
+  const [bannerImagePreview, setBannerImagePreview] = useState("");   
+  const [existingImageUrl, setExistingImageUrl] = useState("");      
+ 
   const [bannerCategory, setBannerCategory] = useState("home");
   const [bannerStatus, setBannerStatus] = useState("active");
-
+const [showEditModal, setShowEditModal] = useState(false);
   // --- PAGINATION STATES ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+const [bannerType, setBannerType] = useState("");
+const [bannerFor, setBannerFor] = useState("");
+const [redirectType, setRedirectType] = useState("");
+const [redirectId, setRedirectId] = useState("");
+const [redirectUrl, setRedirectUrl] = useState("");
+
+const [priority, setPriority] = useState(1);
+
+
 
   // Load Banners from API
   const loadBanners = async () => {
@@ -51,15 +59,18 @@ export default function BannerManagement() {
       const res = await getAllBanners();
 
       const rawData = res.banners || res.data || res || [];
-      const data = rawData.map((item) => ({
-        _id: item._id,
-        title: item.title,
-        imageUrl: item.image,
-        redirectUrl: item.redirectUrl || "-",
-        category: item.type || "home",
-        status: item.isActive ? "active" : "inactive",
-        impressions: item.impressions || 0,
-      }));
+    const data = rawData.map((item) => ({
+  _id: item._id,
+  title: item.title,
+  imageUrl: item.image,
+  type: item.type,
+  bannerFor: item.bannerFor,
+  redirectType: item.redirectType,
+  redirectId: item.redirectId,
+  redirectUrl: item.redirectUrl,
+  priority: item.priority,
+  status: item.isActive ? "active" : "inactive",
+}));
 
       setBanners(data);
     } catch (err) {
@@ -75,31 +86,41 @@ export default function BannerManagement() {
   }, []);
 
   const handleOpenAddModal = () => {
-    setIsEditing(false);
+    
     setBannerId("");
     setBannerTitle("");
     setBannerImageFile(null);
     setBannerImagePreview("");
     setExistingImageUrl("");
-    setBannerLink("");
+    setBannerFor("");
     setBannerCategory("home");
     setBannerStatus("active");
     setShowFormModal(true);
   };
 
   const handleOpenEditModal = (banner) => {
-    setIsEditing(true);
-    setBannerId(banner._id);
-    setBannerTitle(banner.title);
-    setBannerImageFile(null);
-    setBannerImagePreview(banner.imageUrl);
-    setExistingImageUrl(banner.imageUrl);
-    setBannerLink(banner.redirectUrl === "-" ? "" : banner.redirectUrl);
-    setBannerCategory(banner.category);
-    setBannerStatus(banner.status);
-    setShowFormModal(true);
-  };
+  
 
+  setBannerId(banner._id);
+  setBannerTitle(banner.title);
+
+  setBannerType(banner.type);
+  setBannerFor(banner.bannerFor);
+
+  setRedirectType(banner.redirectType);
+  setRedirectId(banner.redirectId);
+  setRedirectUrl(banner.redirectUrl);
+
+  setPriority(banner.priority);
+
+  setBannerStatus(banner.status);
+
+  setBannerImageFile(null);
+  setBannerImagePreview(banner.imageUrl);
+  setExistingImageUrl(banner.imageUrl);
+
+  setShowEditModal(true);
+};
   const confirmDelete = (banner) => {
     setSelectedBanner(banner);
     setShowDeleteModal(true);
@@ -149,8 +170,7 @@ export default function BannerManagement() {
   // Create or Update Banner Details (Multipart Form-Data)
   const handleSaveBanner = async (e) => {
     e.preventDefault();
-    if (!bannerTitle || (!bannerImageFile && !isEditing) || !bannerLink) {
-      toast.warn("Please fill all required fields!");
+if (!bannerTitle || !bannerImageFile || !bannerFor){      toast.warn("Please fill all required fields!");
       return;
     }
 
@@ -158,59 +178,53 @@ export default function BannerManagement() {
     formData.append("title", bannerTitle);
     formData.append("type", bannerCategory);
     formData.append("isActive", bannerStatus === "active" ? "true" : "false");
-    formData.append("redirectUrl", bannerLink);
+    formData.append("bannerFor", bannerFor);
 
     if (bannerImageFile) {
       formData.append("image", bannerImageFile);
     }
 
-    try {
-      if (isEditing) {
-        const res = await updateBanner(bannerId, formData);
-        const apiBanner = res?.banner || res?.data || res;
+   try {
+  await addBanner(formData);
 
-        const updatedData = {
-          _id: bannerId,
-          title: apiBanner.title || bannerTitle,
-          imageUrl: apiBanner.image || existingImageUrl,
-          redirectUrl: apiBanner.redirectUrl || bannerLink,
-          category: apiBanner.type || bannerCategory,
-          status: apiBanner.isActive !== undefined
-            ? (apiBanner.isActive ? "active" : "inactive")
-            : bannerStatus,
-          impressions: apiBanner.impressions || 0,
-        };
-
-        setBanners((prev) =>
-          prev.map((b) => (b._id === bannerId ? { ...b, ...updatedData } : b))
-        );
-
-        toast.success("Banner updated successfully!");
-      } else {
-        const res = await addBanner(formData);
-        const apiBanner = res?.banner || res?.data || res;
-
-        const newData = {
-          _id: apiBanner._id,
-          title: apiBanner.title,
-          imageUrl: apiBanner.image,
-          redirectUrl: apiBanner.redirectUrl || "-",
-          category: apiBanner.type || "home",
-          status: apiBanner.isActive ? "active" : "inactive",
-          impressions: apiBanner.impressions || 0,
-        };
-
-        setBanners((prev) => [...prev, newData]);
-
-        toast.success("New banner added successfully!");
-      }
-      setShowFormModal(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save banner details");
-    }
+  toast.success("Banner added successfully!");
+  setShowFormModal(false);
+  loadBanners();
+} catch (err) {
+  console.error(err);
+  toast.error("Failed to save banner");
+}
   };
+const handleUpdateBanner = async (e) => {
+  e.preventDefault();
 
+  try {
+    const formData = new FormData();
+
+    formData.append("title", bannerTitle);
+    formData.append("type", bannerType);
+    formData.append("bannerFor", bannerFor);
+    formData.append("redirectType", redirectType);
+    // formData.append("redirectId", redirectId);
+    // formData.append("redirectUrl", redirectUrl);
+    formData.append("isActive", bannerStatus === "active");
+    formData.append("priority", priority);
+
+    if (bannerImageFile) {
+      formData.append("image", bannerImageFile);
+    }
+
+    await updateBanner(bannerId, formData);
+
+    loadBanners();
+    toast.success("Banner updated successfully!");
+    setShowEditModal(false);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update banner");
+  }
+};
   // --- PAGINATION MATHEMATICS ---
   const indexOfLastBanner = currentPage * itemsPerPage;
   const indexOfFirstBanner = indexOfLastBanner - itemsPerPage;
@@ -223,21 +237,28 @@ export default function BannerManagement() {
 
   return (
     <div className="banner-page">
-      <div className="banner-card">
-        {/* Header Section */}
-        <div className="banner-card-header">
-          <h2 className="banner-card-title">
-            <span className="title-bar" />
-            Banner Management
-          </h2>
-          <div className="banner-header-actions">
-            <span className="banner-count-badge">{banners.length} Banners</span>
-            <button className="btn-add-banner" onClick={handleOpenAddModal}>
-              <FaPlus /> Add Banner
-            </button>
-          </div>
-        </div>
+      {/* <div className="banner-card"> */}
+   <div className="product-header">
+  <div className="product-header-left">
+    <span className="header-tag">
+      <FaCrown /> COSMIC INVENTORY HUB
+    </span>
 
+    <h1>Banner Management</h1>
+
+    <p>
+      Manage banner images, redirects and promotional campaigns.
+    </p>
+  </div>
+
+  <button
+    className="add-product-btn"
+    onClick={handleOpenAddModal}
+  >
+    <FaPlus /> Add Banner
+  </button>
+</div>
+ <div className="banner-card">
         {/* Table Container */}
         <div className="table-responsive">
           {loading ? (
@@ -254,6 +275,7 @@ export default function BannerManagement() {
                   <th>IMAGE</th>
                   <th>TITLE</th>
                   <th>REDIRECT LINK</th>
+                  <th>Banner For</th>
                   <th>CATEGORY</th>
                   <th>STATUS</th>
                   <th>IMPRESSIONS</th>
@@ -282,8 +304,10 @@ export default function BannerManagement() {
                         {banner.redirectUrl}
                       </span>
                     </td>
+
+                    <td>{banner.bannerFor}</td>
                     <td>
-                      <span className="cell-category">{banner.category}</span>
+                      <span className="cell-category">{banner.type}</span>
                     </td>
                     <td>
                       <button
@@ -359,13 +383,13 @@ export default function BannerManagement() {
         )}
       </div>
 
-      {/* Add & Edit Banner Modal */}
+     
       {showFormModal && (
         <div className="modal-overlay" onClick={() => setShowFormModal(false)}>
           <div className="modal-box form-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="form-modal-header">
-  <span className="form-modal-icon">{isEditing ? <FaEdit /> : <FaPlus />}</span>
-  <h3 className="form-modal-title">{isEditing ? "Edit Banner" : "Add New Banner"}</h3>
+  <span className="form-modal-icon"> <FaPlus /></span>
+  <h3 className="form-modal-title">Add New Banner</h3>
 </div>
 
             <form onSubmit={handleSaveBanner} className="banner-form">
@@ -394,7 +418,7 @@ export default function BannerManagement() {
                         setBannerImagePreview(URL.createObjectURL(file));
                       }
                     }}
-                    required={!isEditing}
+                    required
                     style={{ display: "none" }}
                   />
                   <label htmlFor="banner-file-input" className="file-upload-label">
@@ -417,19 +441,21 @@ export default function BannerManagement() {
               </div>
 
               <div className="grid-2-col">
-                <div className="input-group">
-                  <label>Redirect URL</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. /shop or /consultation"
-                    value={bannerLink}
-                    onChange={(e) => setBannerLink(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="input-group">
+  <label>Banner For</label>
+ <select
+  value={bannerFor}
+  onChange={(e) => setBannerFor(e.target.value)}
+  required
+>
+  <option value="">Select...</option>
+  <option value="user">User</option>
+  <option value="partner">Partner</option>
+</select>
+</div>
 
                 <div className="input-group">
-                  <label>Category</label>
+                  <label>TYPE</label>
                   <select
                     value={bannerCategory}
                     onChange={(e) => setBannerCategory(e.target.value)}
@@ -471,14 +497,212 @@ export default function BannerManagement() {
                   Cancel
                 </button>
                 <button type="submit" className="btn-modal-pro save">
-                  {isEditing ? "Update Banner" : "Add Banner"}
+                  Add Banner
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+{showEditModal && (
+  <div
+    className="modal-overlay"
+    onClick={() => setShowEditModal(false)}
+  >
+    <div
+      className="modal-box form-modal-box"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="form-modal-header">
+        <span className="form-modal-icon">
+          <FaEdit />
+        </span>
+        <h3 className="form-modal-title">Edit Banner</h3>
+      </div>
 
+      <form onSubmit={handleUpdateBanner} className="banner-form">
+
+        {/* Title */}
+        <div className="input-group">
+          <label>Banner Title</label>
+          <input
+            type="text"
+            placeholder="Enter banner title"
+            value={bannerTitle}
+            onChange={(e) => setBannerTitle(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Banner Type */}
+        <div className="input-group">
+          <label>Banner Type</label>
+          <select
+            value={bannerType}
+            onChange={(e) => setBannerType(e.target.value)}
+            required
+          >
+            <option value="">Select Type</option>
+            <option value="home">Home</option>
+            <option value="offer">Offer</option>
+            <option value="category">Category</option>
+            <option value="popup">Popup</option>
+          </select>
+        </div>
+
+        {/* Banner For */}
+        <div className="input-group">
+          <label>Banner For</label>
+          <select
+            value={bannerFor}
+            onChange={(e) => setBannerFor(e.target.value)}
+            required
+          >
+            <option value="">Select Banner For</option>
+            <option value="user">User</option>
+            <option value="partner">Partner</option>
+          </select>
+        </div>
+
+        {/* Redirect Type */}
+        <div className="input-group">
+          <label>Redirect Type</label>
+          <select
+            value={redirectType}
+            onChange={(e) => setRedirectType(e.target.value)}
+            required
+          >
+            <option value="">Select Redirect Type</option>
+            <option value="product">Product</option>
+            <option value="category">Category</option>
+            <option value="url">URL</option>
+          </select>
+        </div>
+
+        {/* <div className="input-group">
+          <label>Redirect ID</label>
+          <input
+            type="text"
+            placeholder="Enter Redirect ID"
+            value={redirectId}
+            onChange={(e) => setRedirectId(e.target.value)}
+          />
+        </div> */}
+
+        {/* <div className="input-group">
+          <label>Redirect URL</label>
+          <input
+            type="text"
+            placeholder="Enter Redirect URL"
+            value={redirectUrl}
+            onChange={(e) => setRedirectUrl(e.target.value)}
+          />
+        </div> */}
+
+        {/* Priority */}
+        <div className="input-group">
+          <label>Priority</label>
+          <input
+            type="number"
+            min="1"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div className="input-group">
+          <label>Banner Image</label>
+
+          <div className="file-upload-wrapper">
+            <input
+              type="file"
+              accept="image/*"
+              id="edit-banner-image"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setBannerImageFile(file);
+                  setBannerImagePreview(URL.createObjectURL(file));
+                }
+              }}
+            />
+
+            <label
+              htmlFor="edit-banner-image"
+              className="file-upload-label"
+            >
+              <FaImage />
+              <span>
+                {bannerImageFile
+                  ? bannerImageFile.name
+                  : "Choose Banner Image"}
+              </span>
+            </label>
+          </div>
+
+          {(bannerImagePreview || existingImageUrl) && (
+            <div className="image-preview-box">
+              <img
+                src={bannerImagePreview || existingImageUrl}
+                alt="Banner Preview"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Status */}
+        <div className="input-group">
+          <label>Status</label>
+
+          <div className="status-radio-group">
+            <button
+              type="button"
+              className={`radio-btn ${
+                bannerStatus === "active" ? "active" : ""
+              }`}
+              onClick={() => setBannerStatus("active")}
+            >
+              <FaCheckCircle />
+              Active
+            </button>
+
+            <button
+              type="button"
+              className={`radio-btn ${
+                bannerStatus === "inactive" ? "inactive" : ""
+              }`}
+              onClick={() => setBannerStatus("inactive")}
+            >
+              <FaTimesCircle />
+              Inactive
+            </button>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="modal-actions-row">
+          <button
+            type="button"
+            className="btn-modal-pro cancel"
+            onClick={() => setShowEditModal(false)}
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            className="btn-modal-pro save"
+          >
+            Update Banner
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+)}
       {/* Delete Banner Modal */}
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>

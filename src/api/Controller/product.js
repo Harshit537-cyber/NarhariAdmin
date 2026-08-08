@@ -27,7 +27,7 @@ export const addProduct = async (formData) => {
 
     const response = await apiClient.post(
 
-      "/api/admin/product/add",
+      "/admin/product/add",
       formData,
       {
         headers: {
@@ -111,3 +111,27 @@ export const updateProduct=(id,data)=>{
       }
   )
 }
+
+
+// Delete Product
+export const deleteProduct = async (productId) => {
+  try 
+  {
+    const response = await apiClient.delete(
+
+      `/admin/product/delete/${productId}`
+
+    );
+
+    return response.data;
+
+  } 
+  catch (error) {
+    throw (
+      error.response?.data || {
+
+        message: "Something went wrong",
+      }
+    );
+  }
+};
