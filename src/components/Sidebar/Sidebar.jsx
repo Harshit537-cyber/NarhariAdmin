@@ -55,7 +55,7 @@ export default function Sidebar() {
             </defs>
           </svg>
         </div>
-        <span className="an-sidebar-brand-text">ASTRONARHARI</span>
+        <span className="an-sidebar-brand-text">NAMAH ASTRO</span>
       </div>
 
       {/* Navigation List */}
@@ -111,6 +111,15 @@ export default function Sidebar() {
               >
                 <span>KYC Document Verify</span>
               </NavLink>
+
+              <NavLink
+  to="/partner/min-rate-astrologer"
+  className={({ isActive }) =>
+    `an-nav-subitem ${isActive ? "is-active" : ""}`
+  }
+>
+  <span>Min Rate Astrologer</span>
+</NavLink>
             </div>
           )}
         </div>
@@ -141,7 +150,19 @@ export default function Sidebar() {
               </NavLink>
             </div>
           )}
+
         </div>
+
+        {/* Pandit Ji */}
+<NavLink
+  to="/pandit"
+  className={({ isActive }) =>
+    `an-nav-item ${isActive ? "is-active" : ""}`
+  }
+>
+  <IconPartner />
+  <span className="an-nav-text">Pandit Ji</span>
+</NavLink>
 {/* Rituals */}
 <NavLink
   to="/rituals"

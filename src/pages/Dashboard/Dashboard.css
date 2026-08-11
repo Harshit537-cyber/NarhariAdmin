@@ -355,7 +355,8 @@
   backdrop-filter: blur(20px);
   border-radius: 28px;
   border: 1.5px solid rgba(255, 255, 255, 1);
-  padding: 32px;
+    padding: 15px;
+  overflow-x: auto;
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.04);
 }
 
@@ -633,6 +634,7 @@
 .khatarnak-table {
   display: table !important;
   table-layout: auto;
+  min-width: 700px;
 }
 
 .khatarnak-table thead {
@@ -714,4 +716,25 @@
   .wrapped-header-title { font-size: 30px; }
   .giant-stat-number { font-size: 38px; }
   .db-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
+
+
+@media (max-width: 768px) {
+  .an-dashboard-container {
+    padding: 20px;
+  }
+
+  .super-card {
+    padding: 15px;
+    overflow-x: auto;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .khatarnak-table {
+    min-width: 700px;
+  }
 }

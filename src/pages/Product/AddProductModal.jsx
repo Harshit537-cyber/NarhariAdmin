@@ -9,6 +9,7 @@ export default function AddProductModal({
 }) {
   const [formData, setFormData] = useState({
     name: "",
+     slug: "",
     shortDescription: "",
     description: "",
     category: "",
@@ -145,21 +146,21 @@ export default function AddProductModal({
           flex-shrink:0;
           border:none;
           border-radius:50%;
-          background:#f2f4f8;
+          background:gray;
           color:#555;
           font-size:22px;
-          line-height:1;
-          cursor:pointer;
-          transition:.25s;
+       margin-bottom:20px;
+
+       
           display:flex;
           align-items:center;
           justify-content:center;
         }
 
         .close-btn:hover{
-          background:#e8ebef;
+          background:red;
           color:#111;
-          transform:rotate(90deg);
+          
         }
 
         /* BODY */
@@ -419,7 +420,16 @@ export default function AddProductModal({
                 placeholder="e.g. Rose Gold Facial Serum"
               />
             </div>
-
+<div className="form-group">
+  <label>Slug</label>
+  <input
+    type="text"
+    name="slug"
+    value={formData.slug}
+    onChange={handleChange}
+    placeholder="e.g. rose-gold-facial-serum"
+  />
+</div>
             {/* Short Description */}
             <div className="form-group">
               <label>Short Description</label>

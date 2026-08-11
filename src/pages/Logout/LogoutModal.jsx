@@ -20,7 +20,7 @@ export default function LogoutModal({ isOpen, onClose, onConfirm }) {
 
         <p>
           Are you sure you want to logout from
-          <strong> AstroNarhari Admin Panel</strong>?
+          <strong> NAMAH ASTRO Admin Panel</strong>?
         </p>
 
         <div className="logout-actions">

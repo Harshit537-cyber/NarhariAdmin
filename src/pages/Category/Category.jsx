@@ -56,6 +56,7 @@ const [selectedCategory, setSelectedCategory] = useState(null);
     try {
       const data = new FormData();
       data.append("name", formData.name);
+      
       data.append("description", formData.description);
       data.append("image", formData.image);
 

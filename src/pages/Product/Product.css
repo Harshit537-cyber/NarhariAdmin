@@ -91,7 +91,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #b38c1b, #d97706);
+  background: linear-gradient(135deg, #6b540f, #d97706);
   color: #ffffff;
   border: none;
   padding: 14px 28px;
@@ -349,26 +349,30 @@
 }
 
 .ultra-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 20px;
+padding-bottom: 12px;
+border-bottom: 1px solid #f1f5f9;
 }
+
 .ultra-modal-header h3 {
-  position: relative;           /* ADD THIS LINE */
-  display: inline-block;        /* ADD THIS LINE */
+  position: relative;
+  display: inline-block;
   font-size: 20px;
   font-weight: 800;
   margin: 0;
-
   background: linear-gradient(90deg, #493f05 0%, #000000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+.modal-title{
+  display:flex;
+  align-items:center;
+}
 .ultra-modal-header h3::after {
   content: "";
   position: absolute;
@@ -389,9 +393,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: auto;
   cursor: pointer;
   color: var(--text-muted);
   transition: 0.2s;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .modal-close-btn:hover {
@@ -550,6 +557,7 @@
 .ultra-modal-box.delete-modal-box {
   max-width: 400px;
   text-align: center;
+    overflow-x: hidden;
 }
 
 .delete-confirm-text {

@@ -279,7 +279,6 @@ const handlePageChange = (pageNumber) => {
 
       {/* Main Content Area */}
       <div className="db-content-grid">
-        {/* All Users Management */}
         <div className="super-card main-table-card animate-fade-in-delayed">
           <div className="super-card-header">
             <div className="header-accent-title">

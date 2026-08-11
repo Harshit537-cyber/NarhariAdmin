@@ -244,7 +244,7 @@ export default function Login() {
               <div className="an-wp-logo-icon">
                 <HiSparkles />
               </div>
-              <span>ASTRONARHARI</span>
+              <span>NAMAH ASTRO</span>
             </div>
 
             <div className="an-wp-hero-body">
@@ -291,8 +291,8 @@ export default function Login() {
             <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
             <p className="an-wp-sub">
               {isRegister
-                ? "Register to access Astronarhari Portal"
-                : "Sign in to Astronarhari Admin System"}
+                ? "Register to access Namah Astro Portal"
+                : "Sign in to Namah Astro Admin System"}
             </p>
           </div>
 

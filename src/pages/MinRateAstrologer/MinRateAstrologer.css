@@ -1,0 +1,78 @@
+/* Note: Most variables and layouts are inherited from the main theme */
+
+.rate-comparison-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(15, 23, 42, 0.04);
+  padding: 15px;
+  border-radius: 20px;
+  margin-top: 15px;
+  border: 1px dashed rgba(179, 140, 27, 0.3);
+}
+
+.rate-box-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rate-box-side small {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.old-rate {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--danger-red);
+}
+
+.new-rate {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--neon-emerald);
+}
+
+.rate-arrow-middle {
+  color: var(--text-muted);
+  font-size: 14px;
+  background: white;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.emerald-glow-btn:hover {
+  background: var(--neon-emerald) !important;
+  color: white !important;
+  box-shadow: 0 0 15px var(--neon-emerald-glow) !important;
+}
+
+.modal-actions-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Animations and Base Orbs are already in your Users.css, 
+   but added here in case of standalone usage */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out; }
+.animate-fade-in-delayed { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+.animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
+
+.gold-glow-btn:hover {
+    background: var(--neon-gold) !important;
+    color: white !important;
+}
