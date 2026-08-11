@@ -260,9 +260,7 @@
   color: #ffffff;
 }
 
-/* ==========================================
-   RESPONSIVE DESIGN (MOBILE/COLLAPSED)
-   ========================================== */
+
 @media (max-width: 860px) {
   .an-sidebar {
     width: 76px;

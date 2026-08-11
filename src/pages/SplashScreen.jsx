@@ -287,7 +287,7 @@ export default function SplashScreen() {
         </div>
 
         {/* Brand Typography */}
-        <h1 className="an-title">Astronarhari</h1>
+        <h1 className="an-title">Namah Astro</h1>
 
         {/* Tagline Divider */}
         <div className="an-tagline-box">

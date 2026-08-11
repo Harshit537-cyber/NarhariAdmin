@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Rituals.css";
+import { getAllRituals ,addRitual } from "../../api/Controller/rituals";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -9,67 +10,12 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaTimes,
-  FaTrash,
+  
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
 
-// ---- DUMMY DATA (replace with API later) ----
-const DUMMY_RITUALS = [
-  {
-    _id: "r1",
-    name: "Morning Surya Namaskar",
-    shortDescription: "Sun salutation ritual for positive energy",
-    description:
-      "A traditional ritual performed at sunrise to invoke positivity, health and prosperity.",
-    duration: "15 mins",
-    price: 499,
-    salePrice: 349,
-    isFeatured: true,
-    isActive: true,
-    images: [`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#b38c1b"/><text x="50" y="55" font-size="14" fill="white" text-anchor="middle" font-family="sans-serif">Surya</text></svg>')}`],
-  },
-  {
-    _id: "r2",
-    name: "Rudra Abhishek",
-    shortDescription: "Sacred Shiva ritual for peace and protection",
-    description:
-      "A powerful Vedic ritual dedicated to Lord Shiva, performed to remove obstacles and bring calm.",
-    duration: "45 mins",
-    price: 1499,
-    salePrice: 1199,
-    isFeatured: true,
-    isActive: true,
-   images: [`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#8b5cf6"/><text x="50" y="55" font-size="14" fill="white" text-anchor="middle" font-family="sans-serif">Rudra</text></svg>')}`],
-  },
-  {
-    _id: "r3",
-    name: "Navgrah Shanti Puja",
-    shortDescription: "Planetary peace ritual",
-    description:
-      "Performed to pacify the nine planets and reduce their malefic effects on one's life.",
-    duration: "60 mins",
-    price: 2499,
-    salePrice: 1999,
-    isFeatured: false,
-    isActive: true,
-   images: [`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#06b6d4"/><text x="50" y="55" font-size="13" fill="white" text-anchor="middle" font-family="sans-serif">Navgrah</text></svg>')}`],
-  },
-  {
-    _id: "r4",
-    name: "Lakshmi Puja",
-    shortDescription: "Wealth and prosperity ritual",
-    description:
-      "A ritual dedicated to Goddess Lakshmi to invite wealth, abundance and good fortune.",
-    duration: "30 mins",
-    price: 999,
-    salePrice: 799,
-    isFeatured: false,
-    isActive: false,
-  images: [`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#ef4444"/><text x="50" y="55" font-size="11" fill="white" text-anchor="middle" font-family="sans-serif">KaalSarp</text></svg>')}`],
-  },
- 
-];
+
 
 export default function Rituals() {
   const [rituals, setRituals] = useState([]);
@@ -77,20 +23,27 @@ export default function Rituals() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [formData, setFormData] = useState(null);
-  const [addFormData, setAddFormData] = useState({
-    name: "",
-    shortDescription: "",
-    description: "",
-    duration: "",
-    price: "",
-    salePrice: "",
-    isFeatured: false,
-    isActive: true,
-  });
-  const [deleteId, setDeleteId] = useState(null);
+const [addFormData, setAddFormData] = useState({
+  title: "",
+  tagline: "",
+  price: "",
+  originalPrice: "",
+  discount: "",
+  duration: "",
+  format: "online",
+  about: "",
+  category: "",
+  benefits: [{ title: "", description: "" }],
+  whatsincluded: [""],
+  formConfig: { askSankalp: false, askBirthDetails: false },
+  image: null,
+  isFeatured: false,
+  isActive: true,
+});
+  // const [deleteId, setDeleteId] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -99,50 +52,70 @@ export default function Rituals() {
     fetchRituals();
   }, []);
 
-  // ---- Simulated fetch (replace with real API call) ----
-  const fetchRituals = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setRituals(DUMMY_RITUALS);
-      setLoading(false);
-    }, 500);
-  };
 
-  // ---- ADD RITUAL (dummy) ----
-  const handleAddRitual = () => {
-    if (!addFormData.name) {
-      toast.error("Ritual name is required");
-      return;
+const fetchRituals = async () => {
+  setLoading(true);
+  try {
+    const res = await getAllRituals();
+    setRituals(res.data || []);
+  } catch (err) {
+    toast.error(err.message || "Failed to load rituals");
+  } finally {
+    setLoading(false);
+  }
+};
+ const handleAddRitual = async () => {
+  if (!addFormData.title) {
+    toast.error("Ritual title is required");
+    return;
+  }
+
+  try {
+    const payload = new FormData();
+    payload.append("title", addFormData.title);
+    payload.append("tagline", addFormData.tagline);
+    payload.append("price", addFormData.price);
+    payload.append("originalPrice", addFormData.originalPrice);
+    payload.append("discount", addFormData.discount);
+    payload.append("duration", addFormData.duration);
+    payload.append("format", addFormData.format);
+    payload.append("about", addFormData.about);
+    payload.append("category", addFormData.category);
+    payload.append("benefits", JSON.stringify(addFormData.benefits));
+    payload.append("whatsincluded", JSON.stringify(addFormData.whatsincluded));
+    payload.append("formConfig", JSON.stringify(addFormData.formConfig));
+    payload.append("isFeatured", addFormData.isFeatured);
+    payload.append("isActive", addFormData.isActive);
+    if (addFormData.image) {
+      payload.append("image", addFormData.image);
     }
 
-    const newRitual = {
-      _id: "r" + Date.now(),
-      name: addFormData.name,
-      shortDescription: addFormData.shortDescription,
-      description: addFormData.description,
-      duration: addFormData.duration,
-      price: addFormData.price,
-      salePrice: addFormData.salePrice,
-      isFeatured: addFormData.isFeatured,
-      isActive: addFormData.isActive,
-      images: ["https://via.placeholder.com/100x100.png?text=Ritual"],
-    };
+    const res = await addRitual(payload);
 
-    setRituals((prev) => [newRitual, ...prev]);
+    setRituals((prev) => [res.data || res.ritual, ...prev]);
     toast.success("Ritual added successfully!");
     setShowAddModal(false);
     setAddFormData({
-      name: "",
-      shortDescription: "",
-      description: "",
-      duration: "",
+      title: "",
+      tagline: "",
       price: "",
-      salePrice: "",
+      originalPrice: "",
+      discount: "",
+      duration: "",
+      format: "online",
+      about: "",
+      category: "",
+      benefits: [{ title: "", description: "" }],
+      whatsincluded: [""],
+      formConfig: { askSankalp: false, askBirthDetails: false },
+      image: null,
       isFeatured: false,
       isActive: true,
     });
-  };
-
+  } catch (err) {
+    toast.error(err.message || "Failed to add ritual");
+  }
+};
   // ---- UPDATE RITUAL (dummy) ----
   const handleSaveSpecs = () => {
     if (!formData) return;
@@ -170,18 +143,18 @@ export default function Rituals() {
   };
 
   // ---- DELETE RITUAL (dummy) ----
-  const handleDeleteClick = (id) => {
-    setDeleteId(id);
-    setShowDeleteModal(true);
-  };
+  // const handleDeleteClick = (id) => {
+  //   setDeleteId(id);
+  //   setShowDeleteModal(true);
+  // };
 
-  const confirmDeleteRitual = () => {
-    if (!deleteId) return;
-    setRituals((prev) => prev.filter((item) => item._id !== deleteId));
-    toast.success("Ritual deleted successfully!");
-    setShowDeleteModal(false);
-    setDeleteId(null);
-  };
+  // const confirmDeleteRitual = () => {
+  //   if (!deleteId) return;
+  //   setRituals((prev) => prev.filter((item) => item._id !== deleteId));
+  //   toast.success("Ritual deleted successfully!");
+  //   setShowDeleteModal(false);
+  //   setDeleteId(null);
+  // };
 
   // ---- Pagination ----
   const totalPages = Math.max(1, Math.ceil(rituals.length / itemsPerPage));
@@ -195,21 +168,33 @@ export default function Rituals() {
     }
   };
 
-  const openEditModal = (item) => {
-    setFormData({
-      _id: item._id,
-      ritualName: item.name || "",
-      shortDescription: item.shortDescription || "",
-      description: item.description || "",
-      duration: item.duration || "",
-      ritualPrice: item.price ?? "",
-      originalPrice: item.salePrice ?? "",
-      isFeatured: !!item.isFeatured,
-      isActive: item.isActive !== undefined ? item.isActive : true,
-      image: item.images?.[0] || "",
-    });
-    setShowEditModal(true);
-  };
+const openEditModal = (item) => {
+  setFormData({
+    _id: item._id,
+    title: item.title || "",
+    tagline: item.tagline || "",
+    about: item.about || "",
+    price: item.price ?? "",
+    originalPrice: item.originalPrice ?? "",
+    discount: item.discount ?? "",
+    duration: item.duration || "",
+    format: item.format || "online",
+    category: item.category || "",
+    benefits: item.benefits?.length
+      ? item.benefits
+      : [{ title: "", description: "" }],
+    whatsincluded: item.whatsIncluded?.length ? item.whatsIncluded : [""],
+    formConfig: item.formConfig || {
+      askSankalp: false,
+      askBirthDetails: false,
+      askPrasadAddress: false,
+    },
+    isActive: item.isLive !== undefined ? item.isLive : true,
+    isFeatured: !!item.isFeatured,
+    image: item.image || "",
+  });
+  setShowEditModal(true);
+};
 
   return (
     <div className="an-dashboard-container ritual-page">
@@ -254,8 +239,8 @@ export default function Rituals() {
             <thead>
               <tr>
                 <th>IMAGE</th>
-                <th>RITUAL NAME</th>
-                <th>DESCRIPTION</th>
+                <th>TITLE</th>
+                <th>CATEGORY</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
               </tr>
@@ -278,40 +263,40 @@ export default function Rituals() {
                   <tr key={item._id}>
                     <td>
                       <div className="category-img-container">
-                        <img
-                          className="category-img"
-                          src={item.images?.[0]}
-                          alt={item.name}
-                        />
+                       <img
+  className="category-img"
+  src={item.image || "https://via.placeholder.com/100x100.png?text=Ritual"}
+  alt={item.title}
+/>
                       </div>
                     </td>
 
                     <td>
-                      <span className="main-name">{item.name}</span>
+                      <span className="main-name">{item.title}</span>
                     </td>
 
                     <td>
-                      <span className="desc-cell">
-                        {item.shortDescription || "—"}
-                      </span>
-                    </td>
+  <span className="desc-cell">
+    {item.category || "—"}
+  </span>
+</td>
 
                     <td>
-                      <span
-                        className={`status-pill ${
-                          item.isActive ? "active" : "inactive"
-                        }`}
-                      >
-                        {item.isActive ? (
-                          <>
-                            <FaCheckCircle /> Active
-                          </>
-                        ) : (
-                          <>
-                            <FaTimesCircle /> Inactive
-                          </>
-                        )}
-                      </span>
+                     <span
+  className={`status-pill ${
+    item.isLive ? "active" : "inactive"
+  }`}
+>
+  {item.isLive ? (
+    <>
+      <FaCheckCircle /> Active
+    </>
+  ) : (
+    <>
+      <FaTimesCircle /> Inactive
+    </>
+  )}
+</span>
                     </td>
 
                     <td style={{ textAlign: "right" }}>
@@ -321,12 +306,12 @@ export default function Rituals() {
                       >
                         <FaEdit /> Edit
                       </button>
-                      <button
+                      {/* <button
                         className="btn-pro btn-pro-delete"
                         onClick={() => handleDeleteClick(item._id)}
                       >
                         <FaTrash /> Delete
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))
@@ -372,152 +357,341 @@ export default function Rituals() {
       </div>
 
       {/* Add Ritual Modal */}
-      {showAddModal && (
-        <div
-          className="ultra-modal-backdrop"
+    {showAddModal && (
+  <div
+    className="ultra-modal-backdrop"
+    onClick={() => setShowAddModal(false)}
+  >
+    <div
+      className="ultra-modal-box edit-modal-box"
+      onClick={(e) => e.stopPropagation()}
+    >
+     <div className="ultra-modal-header">
+  <div className="modal-header-top">
+    <h3>Add New Ritual</h3>
+    <button className="modal-close-btn" onClick={() => setShowAddModal(false)}>
+      <FaTimes />
+    </button>
+  </div>
+  <div className="modal-title-underline"></div>
+</div>
+      <div className="edit-form-body">
+        <div className="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            value={addFormData.title}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, title: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Tagline</label>
+          <input
+            type="text"
+            value={addFormData.tagline}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, tagline: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>About</label>
+          <textarea
+            value={addFormData.about}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, about: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Price (₹)</label>
+          <input
+            type="text"
+            value={addFormData.price}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, price: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Original Price (₹)</label>
+          <input
+            type="text"
+            value={addFormData.originalPrice}
+            onChange={(e) =>
+              setAddFormData({
+                ...addFormData,
+                originalPrice: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Discount (%)</label>
+          <input
+            type="text"
+            value={addFormData.discount}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, discount: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Duration</label>
+          <input
+            type="text"
+            placeholder="e.g. 30 mins"
+            value={addFormData.duration}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, duration: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Format</label>
+          <select
+            value={addFormData.format}
+            onChange={(e) =>
+              setAddFormData({ ...addFormData, format: e.target.value })
+            }
+          >
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+          </select>
+        </div>
+
+       <div className="form-group">
+  <label>Category</label>
+  <select
+    value={addFormData.category}
+    onChange={(e) =>
+      setAddFormData({ ...addFormData, category: e.target.value })
+    }
+  >
+    <option value="">Select Category</option>
+    <option value="Wealth">Wealth</option>
+    <option value="Health">Health</option>
+    <option value="Relationship">Relationship</option>
+    <option value="Career">Career</option>
+    <option value="Protection">Protection</option>
+    <option value="Others">Others</option>
+  </select>
+</div>
+
+        {/* ---- Benefits Dynamic Array ---- */}
+        <div className="form-group">
+          <label>Benefits</label>
+          {addFormData.benefits.map((b, idx) => (
+            <div
+              key={idx}
+              style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+            >
+              <input
+                type="text"
+                placeholder="Title"
+                value={b.title}
+                onChange={(e) => {
+                  const updated = [...addFormData.benefits];
+                  updated[idx].title = e.target.value;
+                  setAddFormData({ ...addFormData, benefits: updated });
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={b.description}
+                onChange={(e) => {
+                  const updated = [...addFormData.benefits];
+                  updated[idx].description = e.target.value;
+                  setAddFormData({ ...addFormData, benefits: updated });
+                }}
+              />
+              <button
+                type="button"
+                className="btn-pro btn-pro-delete"
+                onClick={() => {
+                  const updated = addFormData.benefits.filter(
+                    (_, i) => i !== idx
+                  );
+                  setAddFormData({ ...addFormData, benefits: updated });
+                }}
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="btn-pro btn-pro-edit"
+            onClick={() =>
+              setAddFormData({
+                ...addFormData,
+                benefits: [
+                  ...addFormData.benefits,
+                  { title: "", description: "" },
+                ],
+              })
+            }
+          >
+            <FaPlus /> Add Benefit
+          </button>
+        </div>
+
+        {/* ---- Whats Included Dynamic Array ---- */}
+        <div className="form-group">
+          <label>What's Included</label>
+          {addFormData.whatsincluded.map((item, idx) => (
+            <div
+              key={idx}
+              style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+            >
+              <input
+                type="text"
+                placeholder="Item"
+                value={item}
+                onChange={(e) => {
+                  const updated = [...addFormData.whatsincluded];
+                  updated[idx] = e.target.value;
+                  setAddFormData({ ...addFormData, whatsincluded: updated });
+                }}
+              />
+              <button
+                type="button"
+                className="btn-pro btn-pro-delete"
+                onClick={() => {
+                  const updated = addFormData.whatsincluded.filter(
+                    (_, i) => i !== idx
+                  );
+                  setAddFormData({ ...addFormData, whatsincluded: updated });
+                }}
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="btn-pro btn-pro-edit"
+            onClick={() =>
+              setAddFormData({
+                ...addFormData,
+                whatsincluded: [...addFormData.whatsincluded, ""],
+              })
+            }
+          >
+            <FaPlus /> Add Item
+          </button>
+        </div>
+
+        {/* ---- Form Config ---- */}
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={addFormData.formConfig.askSankalp}
+              onChange={(e) =>
+                setAddFormData({
+                  ...addFormData,
+                  formConfig: {
+                    ...addFormData.formConfig,
+                    askSankalp: e.target.checked,
+                  },
+                })
+              }
+            />{" "}
+            Ask Sankalp
+          </label>
+        </div>
+
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={addFormData.formConfig.askBirthDetails}
+              onChange={(e) =>
+                setAddFormData({
+                  ...addFormData,
+                  formConfig: {
+                    ...addFormData.formConfig,
+                    askBirthDetails: e.target.checked,
+                  },
+                })
+              }
+            />{" "}
+            Ask Birth Details
+          </label>
+        </div>
+
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={addFormData.isFeatured}
+              onChange={(e) =>
+                setAddFormData({
+                  ...addFormData,
+                  isFeatured: e.target.checked,
+                })
+              }
+            />{" "}
+            Featured
+          </label>
+        </div>
+
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={addFormData.isActive}
+              onChange={(e) =>
+                setAddFormData({
+                  ...addFormData,
+                  isActive: e.target.checked,
+                })
+              }
+            />{" "}
+            Active
+          </label>
+        </div>
+
+        <div className="form-group">
+          <label>Ritual Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setAddFormData({
+                ...addFormData,
+                image: e.target.files[0],
+              })
+            }
+          />
+        </div>
+      </div>
+
+      <div className="modal-actions-row">
+        <button
+          className="btn-modal-pro cancel"
           onClick={() => setShowAddModal(false)}
         >
-          <div
-            className="ultra-modal-box edit-modal-box"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="ultra-modal-header">
-              <h3>Add New Ritual</h3>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowAddModal(false)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-
-            <div className="edit-form-body">
-              <div className="form-group">
-                <label>Ritual Name</label>
-                <input
-                  type="text"
-                  value={addFormData.name}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, name: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Short Description</label>
-                <input
-                  type="text"
-                  value={addFormData.shortDescription}
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      shortDescription: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={addFormData.description}
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      description: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Duration</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 30 mins"
-                  value={addFormData.duration}
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      duration: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Price (₹)</label>
-                <input
-                  type="text"
-                  value={addFormData.price}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, price: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Sale Price (₹)</label>
-                <input
-                  type="text"
-                  value={addFormData.salePrice}
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      salePrice: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={addFormData.isFeatured}
-                    onChange={(e) =>
-                      setAddFormData({
-                        ...addFormData,
-                        isFeatured: e.target.checked,
-                      })
-                    }
-                  />{" "}
-                  Featured
-                </label>
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={addFormData.isActive}
-                    onChange={(e) =>
-                      setAddFormData({
-                        ...addFormData,
-                        isActive: e.target.checked,
-                      })
-                    }
-                  />{" "}
-                  Active
-                </label>
-              </div>
-            </div>
-
-            <div className="modal-actions-row">
-              <button
-                className="btn-modal-pro cancel"
-                onClick={() => setShowAddModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn-modal-pro save" onClick={handleAddRitual}>
-                Add Ritual
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+          Cancel
+        </button>
+        <button className="btn-modal-pro save" onClick={handleAddRitual}>
+          Add Ritual
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Edit Specifications Modal */}
       {showEditModal && formData && (
         <div
@@ -528,51 +702,105 @@ export default function Rituals() {
             className="ultra-modal-box edit-modal-box"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="ultra-modal-header">
-              <h3>Edit Ritual Specifications</h3>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowEditModal(false)}
-              >
-                <FaTimes />
-              </button>
-            </div>
+           <div className="ultra-modal-header">
+  <div className="modal-header-top">
+    <h3>Edit Ritual Specifications</h3>
+    <button className="modal-close-btn" onClick={() => setShowEditModal(false)}>
+      <FaTimes />
+    </button>
+  </div>
+  <div className="modal-title-underline"></div>
+</div>
 
             <div className="edit-form-body">
-              <div className="form-group">
-                <label>Ritual Name</label>
-                <input
-                  type="text"
-                  value={formData.ritualName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, ritualName: e.target.value })
-                  }
-                />
-              </div>
+              
 
               <div className="form-group">
-                <label>Short Description</label>
-                <input
-                  type="text"
-                  value={formData.shortDescription}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      shortDescription: e.target.value,
-                    })
-                  }
-                />
-              </div>
+  <label>Title</label>
+  <input
+    type="text"
+    value={formData.title}
+    onChange={(e) =>
+      setFormData({ ...formData, title: e.target.value })
+    }
+  />
+</div>
 
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
-              </div>
+<div className="form-group">
+  <label>Tagline</label>
+  <input
+    type="text"
+    value={formData.tagline}
+    onChange={(e) =>
+      setFormData({ ...formData, tagline: e.target.value })
+    }
+  />
+</div>
+
+<div className="form-group">
+  <label>About</label>
+  <textarea
+    value={formData.about}
+    onChange={(e) =>
+      setFormData({ ...formData, about: e.target.value })
+    }
+  />
+</div>
+
+<div className="form-group">
+  <label>Price (₹)</label>
+  <input
+    type="text"
+    value={formData.price}
+    onChange={(e) =>
+      setFormData({ ...formData, price: e.target.value })
+    }
+  />
+</div>
+
+<div className="form-group">
+  <label>Discount (%)</label>
+  <input
+    type="text"
+    value={formData.discount}
+    onChange={(e) =>
+      setFormData({ ...formData, discount: e.target.value })
+    }
+  />
+</div>
+
+<div className="form-group">
+  <label>Format</label>
+  <select
+    value={formData.format}
+    onChange={(e) =>
+      setFormData({ ...formData, format: e.target.value })
+    }
+  >
+    <option value="online">Online</option>
+    <option value="offline">Offline</option>
+  </select>
+</div>
+
+<div className="form-group">
+  <label>Category</label>
+  <select
+    value={formData.category}
+    onChange={(e) =>
+      setFormData({ ...formData, category: e.target.value })
+    }
+  >
+    <option value="">Select Category</option>
+    <option value="Wealth">Wealth</option>
+    <option value="Health">Health</option>
+    <option value="Relationship">Relationship</option>
+    <option value="Career">Career</option>
+    <option value="Protection">Protection</option>
+    <option value="Others">Others</option>
+  </select>
+</div>
+
+             
 
               <div className="form-group">
                 <label>Duration</label>
@@ -585,16 +813,7 @@ export default function Rituals() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>Price (₹)</label>
-                <input
-                  type="text"
-                  value={formData.ritualPrice}
-                  onChange={(e) =>
-                    setFormData({ ...formData, ritualPrice: e.target.value })
-                  }
-                />
-              </div>
+             
 
               <div className="form-group">
                 <label>Sale Price (₹)</label>
@@ -670,8 +889,7 @@ export default function Rituals() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <div
           className="ultra-modal-backdrop"
           onClick={() => setShowDeleteModal(false)}
@@ -711,7 +929,7 @@ export default function Rituals() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

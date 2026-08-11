@@ -22,6 +22,8 @@ import Complaints from "./pages/Complaints/Complaints";
 import Tickets from "./pages/Tickets/Tickets";
 import Category from "./pages/Category/Category.jsx"
 import Rituals from "./pages/Rituals/Rituals.jsx";
+import MinRateAstrologer from "./pages/MinRateAstrologer/MinRateAstrologer.jsx"
+import Pandit from "./pages/Pandit/Pandit.jsx"
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -56,6 +58,9 @@ const AppRoutes = () => {
               <Route path="/partner" element={<Partner />} />
               <Route path="/category" element={<Category/>}/>
               <Route path="/rituals" element={<Rituals />} />
+                                     <Route path="/pandit" element={<Pandit />} />
+
+
               <Route
                 path="/partner/kyc-verification"
                 element={<KycVerification />}
@@ -64,6 +69,7 @@ const AppRoutes = () => {
                 path="/partner/profile-approval"
                 element={<ProfileApproval />}
               />
+               <Route path="/partner/min-rate-astrologer" element={<MinRateAstrologer />} />
               <Route path="/user" element={<AllUsers />} />
               <Route path="/complaints" element={<Complaints />} />
               <Route path="/tickets" element={<Tickets />} />

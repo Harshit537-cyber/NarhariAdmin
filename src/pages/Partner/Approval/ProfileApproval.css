@@ -809,6 +809,25 @@
 
 @media (max-width: 768px) {
   .an-dashboard-container { padding: 20px; }
+
+  .db-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .super-card {
+    padding: 15px;
+    overflow-x: auto;
+  }
+
+  .partner-cards-grid {
+    min-width: 600px;
+  }
+
   .wrapped-header-title { font-size: 28px; }
-  .db-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+
+  .db-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
 }

@@ -115,7 +115,8 @@
   font-size:18px;
 
   transition:.3s;
-
+margin-top: 20px;
+margin-right: 20px;
 }
 
 
@@ -226,9 +227,8 @@
   display:flex;
 
   gap:15px;
-
   margin-top:32px;
-
+   
 }
 
 

@@ -49,6 +49,7 @@ const [deleteId, setDeleteId] = useState(null);
       const data = new FormData();
 
       data.append("name", formData.name);
+      data.append("slug", formData.slug);
       data.append("shortDescription", formData.shortDescription);
       data.append("description", formData.description);
       data.append("category", formData.category);
@@ -88,6 +89,7 @@ const [deleteId, setDeleteId] = useState(null);
       const data = new FormData();
 
       data.append("name", formData.productName);
+      data.append("slug", formData.slug);
       data.append("shortDescription", formData.shortDescription || "");
       data.append("description", formData.description || "");
       data.append("category", formData.category);
@@ -165,6 +167,7 @@ const confirmDeleteProduct = async () => {
     setFormData({
       _id: item._id,
       productName: item.name || "",
+      slug: item.slug || "",
       shortDescription: item.shortDescription || "",
       description: item.description || "",
       category:
@@ -231,6 +234,7 @@ const confirmDeleteProduct = async () => {
               <tr>
                 <th>IMAGE</th>
                 <th>PRODUCT NAME</th>
+                
                 <th>DESCRIPTION</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
@@ -331,12 +335,18 @@ const confirmDeleteProduct = async () => {
       {showEditModal && formData && (
         <div className="ultra-modal-backdrop" onClick={() => setShowEditModal(false)}>
           <div className="ultra-modal-box edit-modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="ultra-modal-header">
-              <h3>Edit Product Specifications</h3>
-              <button className="modal-close-btn" onClick={() => setShowEditModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
+        
+             
+              <div className="ultra-modal-header">
+  <div className="modal-title">
+    <h3>Edit Product Specifications</h3>
+  </div>
+
+  <button className="modal-close-btn">
+    ×
+  </button>
+</div>
+    
 
             <div className="edit-form-body">
               <div className="form-group">
@@ -347,7 +357,14 @@ const confirmDeleteProduct = async () => {
                   onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
                 />
               </div>
-
+<div className="form-group">
+  <label>Slug</label>
+  <input
+    type="text"
+    value={formData.slug}
+    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+  />
+</div>
               <div className="form-group">
                 <label>Short Description</label>
                 <input
