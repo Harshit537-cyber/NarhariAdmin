@@ -1,16 +1,25 @@
 import { defineConfig } from "vite";
+
 import react from "@vitejs/plugin-react";
+
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+
   plugins: [
+
     react(),
+
     tailwindcss(),
   ],
-
-  server: {
+//  server: {
+//   allowedHosts: [
+//     "observation-instruments-affiliates-actress.trycloudflare.com",
+//   ],
+// }
+   server: {
     allowedHosts: [
-      "much-empirical-smooth-exemption.trycloudflare.com",
+      'https://visionary-biscotti-cc607a.netlify.app/login',
     ],
   },
 

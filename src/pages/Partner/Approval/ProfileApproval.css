@@ -535,8 +535,15 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+    max-height: 90vh;
+    overflow-y: auto;      
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
 }
 
+.approval-modal-box::-webkit-scrollbar {
+    display: none; /* Chrome, Edge, Safari */
+}
 .modal-top-header {
   display: flex;
   justify-content: space-between;

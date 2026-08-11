@@ -1,487 +1,341 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+// 1. Updated imports to use Product APIs
+import { getProductList, addProduct, updateProduct, deleteProduct } from "../../api/Controller/product";
 import "./Shop.css";
+import AddProductModal from "../Product/AddProductModal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   FaCrown,
-  FaBolt,
-  FaRupeeSign,
-  FaBoxes,
-  FaExclamationTriangle,
-  FaClock,
+  FaPlus,
   FaEdit,
-  FaTrashAlt,
-  FaPlusCircle,
-  FaShippingFast,
+  FaChevronLeft,
+  FaChevronRight,
+  FaTimes,
+  FaTrash, // Added Trash icon
   FaCheckCircle,
-  FaStore,
+  FaTimesCircle,
 } from "react-icons/fa";
 
 export default function Shop() {
-  const [products, setProducts] = useState([
-    {
-      id: "PROD-101",
-      name: "Healing Crystal",
-      category: "Gemstone",
-      description: "Natural Energy Stone",
-      price: "799",
-      stock: 45,
-      sales: 124,
-      img: "https://images.unsplash.com/photo-1616628182509-6c0b5d0f4a55?w=500",
-    },
-    {
-      id: "PROD-102",
-      name: "Rudraksha Mala",
-      category: "Mala",
-      description: "Original 5 Mukhi",
-      price: "599",
-      stock: 4,
-      sales: 238,
-      img: "https://images.unsplash.com/photo-1605106702734-205df224ecce?w=500",
-    },
-    {
-      id: "PROD-103",
-      name: "Lucky Ring",
-      category: "Ring",
-      description: "Astrology Recommended",
-      price: "1299",
-      stock: 0,
-      sales: 89,
-      img: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=500",
-    },
-    {
-      id: "PROD-104",
-      name: "Shree Yantra",
-      category: "Yantra",
-      description: "Premium Brass Finish",
-      price: "999",
-      stock: 18,
-      sales: 64,
-      img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=500",
-    },
-  ]);
+  // Logic states from Product module
+  const [categories, setCategories] = useState([]); // This will now hold Product data
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formData, setFormData] = useState(null);
+  
+  // Delete states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD-9901",
-      user: "Aman Sharma",
-      product: "Rudraksha Mala",
-      recommendedBy: "Acharya Rahul",
-      status: "Processing",
-    },
-    {
-      id: "ORD-9902",
-      user: "Priya Patel",
-      product: "Healing Crystal",
-      recommendedBy: "Direct Purchase",
-      status: "Shipped",
-    },
-    {
-      id: "ORD-9903",
-      user: "Rajesh Kumar",
-      product: "Lucky Ring",
-      recommendedBy: "Pandit Kamlesh Dev",
-      status: "Delivered",
-    },
-  ]);
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  const [newProdName, setNewProdName] = useState("");
-  const [newProdCategory, setNewProdCategory] = useState("Gemstone");
-  const [newProdDesc, setNewProdDesc] = useState("");
-  const [newProdPrice, setNewProdPrice] = useState("");
-  const [newProdStock, setNewProdStock] = useState("");
-  const [newProdImg, setNewProdImg] = useState("");
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    if (!newProdName || !newProdPrice) return;
-
-    const newProduct = {
-      id: `PROD-${Math.floor(100 + Math.random() * 900)}`,
-      name: newProdName,
-      category: newProdCategory,
-      description: newProdDesc || "Spiritual Accessory",
-      price: newProdPrice,
-      stock: parseInt(newProdStock) || 10,
-      sales: 0,
-      img:
-        newProdImg ||
-        "https://images.unsplash.com/photo-1616628182509-6c0b5d0f4a55?w=500",
-    };
-
-    setProducts([...products, newProduct]);
-
-    setNewProdName("");
-    setNewProdDesc("");
-    setNewProdPrice("");
-    setNewProdStock("");
-    setNewProdImg("");
+  // 2. Updated to use getProductList
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await getProductList();
+      setCategories(response.data || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteProduct = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
+  // 3. Updated to use addProduct (Product Logic)
+  const handleAddShop = async (formData) => {
+    try {
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("shortDescription", formData.shortDescription);
+      data.append("description", formData.description);
+      data.append("category", formData.category);
+      data.append("price", formData.price);
+      data.append("salePrice", formData.salePrice);
+      data.append("stock", formData.stock);
+      data.append("benefits", JSON.stringify(formData.benefits.split(",").map((item) => item.trim())));
+      data.append("howToUse", formData.howToUse);
+      data.append("careInstructions", formData.careInstructions);
+      data.append("isFeatured", formData.isFeatured);
+      data.append("isActive", formData.isActive);
+
+      formData.images.forEach((img) => {
+        data.append("images", img);
+      });
+
+      const response = await addProduct(data);
+      toast.success(response.message || "Shop Product added successfully!");
+      setShowAddModal(false);
+      fetchCategories();
+    } catch (error) {
+      toast.error(error.message || "Failed to add shop product");
+    }
   };
 
-  const handleUpdateOrderStatus = (id, newStatus) => {
-    setOrders(
-      orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
-    );
+  // 4. Updated to use updateProduct (Product Logic)
+  const handleSaveSpecs = async () => {
+    if (!formData) return;
+    try {
+      const data = new FormData();
+      data.append("name", formData.productName);
+      data.append("shortDescription", formData.shortDescription || "");
+      data.append("description", formData.description || "");
+      data.append("category", formData.category);
+      data.append("price", formData.productPrice);
+      data.append("salePrice", formData.originalPrice);
+      data.append("stock", formData.stockCount);
+      data.append("howToUse", formData.howToUse || "");
+      data.append("careInstructions", formData.careInstructions || "");
+      data.append("isFeatured", formData.isFeatured);
+      data.append("isActive", formData.isActive);
+      data.append("benefits", JSON.stringify((formData.benefits || "").split(",").map((item) => item.trim()).filter(Boolean)));
+
+      if (formData.newImages && formData.newImages.length > 0) {
+        formData.newImages.forEach((file) => {
+          data.append("images", file);
+        });
+      }
+
+      const response = await updateProduct(formData._id, data);
+      setShowEditModal(false);
+      fetchCategories();
+      toast.success(response?.message || "Shop updated successfully!");
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
-  const getStockStatus = (stock) => {
-    if (stock === 0) return { text: "Out of Stock", class: "out-of-stock" };
-    if (stock <= 5) return { text: "Low Stock", class: "low-stock" };
-    return { text: "In Stock", class: "in-stock" };
+  // 5. Delete Logic Implementation
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!deleteId) return;
+    try {
+      const response = await deleteProduct(deleteId);
+      toast.success(response?.message || "Shop deleted successfully!");
+      fetchCategories();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteId(null);
+    }
+  };
+
+  // Pagination Logic
+  const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Function to pre-fill the edit modal
+  const openEditModal = (item) => {
+    setFormData({
+      _id: item._id,
+      productName: item.name || "",
+      shortDescription: item.shortDescription || "",
+      description: item.description || "",
+      category: typeof item.category === "object" ? item.category?._id : item.category || "",
+      productPrice: item.price ?? "",
+      originalPrice: item.salePrice ?? "",
+      stockCount: item.stock ?? 0,
+      howToUse: item.howToUse || "",
+      careInstructions: item.careInstructions || "",
+      isFeatured: !!item.isFeatured,
+      isActive: item.isActive !== undefined ? item.isActive : true,
+      benefits: Array.isArray(item.benefits) ? item.benefits.join(", ") : item.benefits || "",
+      image: item.images?.[0] || "",
+      newImages: [],
+    });
+    setShowEditModal(true);
   };
 
   return (
-    <div className="an-shop-container">
+    <div className="an-dashboard-container shop-page">
+      <ToastContainer />
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
 
+      {/* UI Remains Same: Shop & Inventory Hub */}
       <header className="db-header animate-fade-in">
         <div className="db-header-left">
           <div className="header-title-container">
             <span className="enterprise-badge">
-              <FaCrown className="crown-icon" /> COSMIC SHOP HUB
+              <FaCrown className="crown-icon" /> COSMIC INVENTORY HUB
             </span>
             <h1 className="wrapped-header-title">Shop & Inventory Hub</h1>
           </div>
           <p className="header-subtitle">
-            Monitor product demand, manage spiritual inventory & dispatch
-            seeker orders.
+            Monitor sales velocity, manage specs, and review shop categories.
           </p>
         </div>
 
         <div className="db-header-right">
-          <div className="system-status-card">
-            <div className="pulse-ring"></div>
-            <span className="status-text">
-              <FaBolt /> STORE LIVE
-            </span>
-          </div>
+          <button className="btn-add-cosmic" onClick={() => setShowAddModal(true)}>
+            <FaPlus /> Add Shop
+          </button>
         </div>
       </header>
 
-      <div className="db-metrics-grid">
-        <div
-          className="khatarnak-card gold-theme animate-slide-up"
-          style={{ animationDelay: "0.1s" }}
-        >
-          <div className="card-glass-shine"></div>
-          <div className="card-top-bar">
-            <div className="big-icon-box gold-glow">
-              <FaRupeeSign />
-            </div>
-            <span className="trend-badge gold-pill">REVENUE</span>
+      {/* UI Remains Same: Shop Management Card */}
+      <div className="super-card main-table-card animate-fade-in-delayed">
+        <div className="super-card-header">
+          <div className="header-accent-title">
+            <div className="title-vertical-bar gold"></div>
+            <h2>Shop Management</h2>
           </div>
-          <div className="card-middle-data">
-            <h2 className="giant-stat-number">₹3.45L</h2>
-            <p className="giant-stat-label">Total Shop Revenue</p>
-          </div>
-          <div className="card-bottom-accent">
-            <div className="glow-bar gold-bar"></div>
-          </div>
+          <span className="giant-badge gold">{categories.length} Items</span>
         </div>
 
-        <div
-          className="khatarnak-card cyan-theme animate-slide-up"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <div className="card-glass-shine"></div>
-          <div className="card-top-bar">
-            <div className="big-icon-box cyan-glow">
-              <FaBoxes />
-            </div>
-            <span className="trend-badge cyan-pill">LISTED</span>
-          </div>
-          <div className="card-middle-data">
-            <h2 className="giant-stat-number">{products.length}</h2>
-            <p className="giant-stat-label">Active Inventory Items</p>
-          </div>
-          <div className="card-bottom-accent">
-            <div className="glow-bar cyan-bar"></div>
-          </div>
-        </div>
-
-        <div
-          className="khatarnak-card danger-theme animate-slide-up"
-          style={{ animationDelay: "0.3s" }}
-        >
-          <div className="card-glass-shine"></div>
-          <div className="card-top-bar">
-            <div className="big-icon-box danger-glow">
-              <FaExclamationTriangle />
-            </div>
-            <span className="trend-badge danger-pill">ACTION NEEDED</span>
-          </div>
-          <div className="card-middle-data">
-            <h2 className="giant-stat-number">
-              {products.filter((p) => p.stock <= 5).length}
-            </h2>
-            <p className="giant-stat-label">Low / Out of Stock</p>
-          </div>
-          <div className="card-bottom-accent">
-            <div className="glow-bar danger-bar"></div>
-          </div>
-        </div>
-
-        <div
-          className="khatarnak-card purple-theme animate-slide-up"
-          style={{ animationDelay: "0.4s" }}
-        >
-          <div className="card-glass-shine"></div>
-          <div className="card-top-bar">
-            <div className="big-icon-box purple-glow">
-              <FaClock />
-            </div>
-            <span className="trend-badge purple-pill">PENDING</span>
-          </div>
-          <div className="card-middle-data">
-            <h2 className="giant-stat-number">
-              {orders.filter((o) => o.status === "Processing").length}
-            </h2>
-            <p className="giant-stat-label">Pending Dispatch</p>
-          </div>
-          <div className="card-bottom-accent">
-            <div className="glow-bar purple-bar"></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="shop-layout-grid">
-        <div className="layout-left-col">
-          <div className="super-card animate-fade-in-delayed">
-            <div className="super-card-header">
-              <div className="header-accent-title">
-                <div className="title-vertical-bar"></div>
-                <h2>
-                  <FaStore style={{ marginRight: 8 }} />
-                  Inventory Products
-                </h2>
-              </div>
-              <span className="giant-badge">Active Store</span>
-            </div>
-
-            <div className="inventory-grid">
-              {products.map((prod, idx) => {
-                const stockStatus = getStockStatus(prod.stock);
-                return (
-                  <div
-                    className="inventory-card animate-slide-up"
-                    style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
-                    key={prod.id}
-                  >
-                    <div className="card-glass-shine"></div>
-                    <div className="inventory-img-wrap">
-                      <img src={prod.img} alt={prod.name} />
-                    </div>
-
-                    <div className="inventory-body">
-                      <div className="category-and-id">
-                        <span className="category-badge">{prod.category}</span>
-                        <span className="prod-id">{prod.id}</span>
+        <div className="table-responsive">
+          <table className="khatarnak-table">
+            <thead>
+              <tr>
+                <th>IMAGE</th>
+                <th>SHOP NAME</th>
+                <th>DESCRIPTION</th>
+                <th>STATUS</th>
+                <th style={{ textAlign: "right" }}>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", padding: "60px" }}>
+                    <div className="gold-loader"></div>
+                  </td>
+                </tr>
+              ) : categories.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", padding: "40px" }}>
+                    No shops found.
+                  </td>
+                </tr>
+              ) : (
+                currentCategories.map((item) => (
+                  <tr key={item._id}>
+                    <td>
+                      <div className="category-img-container">
+                        <img
+                          className="category-img"
+                          src={item.images?.[0] || item.image}
+                          alt={item.name}
+                        />
                       </div>
-
-                      <h3>{prod.name}</h3>
-                      <p className="desc-text">{prod.description}</p>
-
-                      <div className="price-and-sales">
-                        <h4>₹ {prod.price}</h4>
-                        <span className="sales-text">{prod.sales} Sold</span>
-                      </div>
-
-                      <div className="stock-line">
-                        <span
-                          className={`stock-status-pill ${stockStatus.class}`}
-                        >
-                          {stockStatus.text} ({prod.stock} units)
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="inventory-actions">
-                      <button className="btn-edit">
+                    </td>
+                    <td><span className="main-name">{item.name}</span></td>
+                    <td><span className="desc-cell">{item.description || "—"}</span></td>
+                    <td>
+                      <span className={`status-pill ${item.isActive ? "active" : "inactive"}`}>
+                        {item.isActive ? <><FaCheckCircle /> Active</> : <><FaTimesCircle /> Inactive</>}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <button className="btn-pro btn-pro-edit" onClick={() => openEditModal(item)}>
                         <FaEdit /> Edit
                       </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDeleteProduct(prod.id)}
-                      >
-                        <FaTrashAlt /> Remove
+                      <button className="btn-pro btn-pro-delete" style={{marginLeft: '8px', color: '#ef4444'}} onClick={() => handleDeleteClick(item._id)}>
+                        <FaTrash /> Delete
                       </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
-        <div className="layout-right-col">
-          <div
-            className="super-card animate-fade-in-delayed"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <div className="super-card-header">
-              <div className="header-accent-title">
-                <div className="title-vertical-bar gold"></div>
-                <h2>
-                  <FaPlusCircle style={{ marginRight: 8 }} />
-                  Add Cosmic Product
-                </h2>
-              </div>
-            </div>
-
-            <form onSubmit={handleAddProduct} className="add-product-form">
-              <div className="form-group">
-                <label>Product Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Energized Emerald Ring"
-                  value={newProdName}
-                  onChange={(e) => setNewProdName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group flex-2">
-                  <label>Category</label>
-                  <select
-                    value={newProdCategory}
-                    onChange={(e) => setNewProdCategory(e.target.value)}
-                  >
-                    <option value="Gemstone">Gemstone</option>
-                    <option value="Mala">Mala</option>
-                    <option value="Ring">Ring</option>
-                    <option value="Yantra">Yantra</option>
-                  </select>
-                </div>
-
-                <div className="form-group flex-1">
-                  <label>Price (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="799"
-                    value={newProdPrice}
-                    onChange={(e) => setNewProdPrice(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group flex-2">
-                  <label>Image URL (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="Unsplash image link"
-                    value={newProdImg}
-                    onChange={(e) => setNewProdImg(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group flex-1">
-                  <label>Stock Qty</label>
-                  <input
-                    type="number"
-                    placeholder="20"
-                    value={newProdStock}
-                    onChange={(e) => setNewProdStock(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Short Description</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Recommended for positive aura"
-                  value={newProdDesc}
-                  onChange={(e) => setNewProdDesc(e.target.value)}
-                />
-              </div>
-
-              <button type="submit" className="add-product-submit-btn">
-                <FaPlusCircle /> Publish to Shop Catalog
-              </button>
-            </form>
-          </div>
-
-          <div
-            className="super-card animate-fade-in-delayed"
-            style={{ animationDelay: "0.2s" }}
-          >
-            <div className="super-card-header">
-              <div className="header-accent-title">
-                <div className="title-vertical-bar purple"></div>
-                <h2>
-                  <FaShippingFast style={{ marginRight: 8 }} />
-                  Incoming Cosmic Orders
-                </h2>
-              </div>
-            </div>
-
-            <div className="orders-list">
-              {orders.map((ord, idx) => (
-                <div
-                  className="order-item animate-slide-up"
-                  style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
-                  key={ord.id}
-                >
-                  <div className="order-meta">
-                    <span className="order-id">{ord.id}</span>
-                    <span
-                      className={`order-status-badge ${ord.status.toLowerCase()}`}
-                    >
-                      {ord.status}
-                    </span>
-                  </div>
-
-                  <div className="order-details-text">
-                    <p>
-                      <strong>{ord.user}</strong> ordered{" "}
-                      <strong>{ord.product}</strong>
-                    </p>
-                    <p className="rec-text">
-                      ✨ Recommended By:{" "}
-                      <span className="rec-tag">{ord.recommendedBy}</span>
-                    </p>
-                  </div>
-
-                  <div className="order-actions">
-                    {ord.status === "Processing" && (
-                      <button
-                        className="btn-ship"
-                        onClick={() =>
-                          handleUpdateOrderStatus(ord.id, "Shipped")
-                        }
-                      >
-                        <FaShippingFast /> Mark Shipped
-                      </button>
-                    )}
-                    {ord.status === "Shipped" && (
-                      <button
-                        className="btn-deliver"
-                        onClick={() =>
-                          handleUpdateOrderStatus(ord.id, "Delivered")
-                        }
-                      >
-                        <FaCheckCircle /> Mark Delivered
-                      </button>
-                    )}
-                    {ord.status === "Delivered" && (
-                      <span className="dispatch-success">
-                        <FaCheckCircle /> Dispatched & Delivered
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Pagination Logic Remains Same */}
+        <div className="table-pagination-footer">
+          <div className="pagination-container">
+            <button className="pagination-btn arrow-btn" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><FaChevronLeft /></button>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+              <button key={page} className={`pagination-btn number-btn ${currentPage === page ? "active" : ""}`} onClick={() => handlePageChange(page)}>{page}</button>
+            ))}
+            <button className="pagination-btn arrow-btn" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><FaChevronRight /></button>
           </div>
         </div>
       </div>
+
+      {/* Edit Modal - Logic updated to match Product fields */}
+      {showEditModal && formData && (
+        <div className="ultra-modal-backdrop" onClick={() => setShowEditModal(false)}>
+          <div className="ultra-modal-box edit-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="ultra-modal-header">
+              <h3>Edit Shop Specifications</h3>
+              <button className="modal-close-btn" onClick={() => setShowEditModal(false)}><FaTimes /></button>
+            </div>
+            <div className="edit-form-body">
+              <div className="form-group">
+                <label>Shop Name</label>
+                <input type="text" value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label>Selling Price (₹)</label>
+                <input type="text" value={formData.productPrice} onChange={(e) => setFormData({ ...formData, productPrice: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label>Original Price (₹)</label>
+                <input type="text" value={formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label>Stock Count</label>
+                <input type="number" value={formData.stockCount} onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+              </div>
+            </div>
+            <div className="modal-actions-row">
+              <button className="btn-modal-pro cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+              <button className="btn-modal-pro save" onClick={handleSaveSpecs}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="ultra-modal-backdrop" onClick={() => setShowDeleteModal(false)}>
+          <div className="ultra-modal-box delete-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="ultra-modal-header">
+              <h3>Delete Item</h3>
+              <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)}><FaTimes /></button>
+            </div>
+            <p className="delete-confirm-text">Are you sure? This action cannot be undone.</p>
+            <div className="modal-actions-row">
+              <button className="btn-modal-pro cancel" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="btn-modal-pro delete-confirm" style={{backgroundColor: '#ef4444', color: '#fff'}} onClick={confirmDeleteProduct}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AddProductModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddShop}
+        categories={categories}
+      />
     </div>
   );
 }

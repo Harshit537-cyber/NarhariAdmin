@@ -24,9 +24,6 @@
   --danger-red: #ef4444;
 }
 
-/* ==========================================
-   GLOBAL CONTAINER & BACKGROUND AMBIENCE
-   ========================================== */
 .an-orders-container {
   position: relative;
   padding: 40px 50px;
@@ -48,9 +45,6 @@
 .orb-2 { top: 300px; right: -80px; width: 500px; height: 500px; background: rgba(6, 182, 212, 0.1); }
 .orb-3 { bottom: 0; left: 30%; width: 400px; height: 400px; background: rgba(139, 92, 246, 0.08); }
 
-/* ==========================================
-   HEADER
-   ========================================== */
 .db-header {
   position: relative;
   z-index: 2;
@@ -137,9 +131,6 @@
   gap: 6px;
 }
 
-/* ==========================================
-   METRIC CARDS (SAME AS DASHBOARD)
-   ========================================== */
 .db-metrics-grid {
   position: relative;
   z-index: 2;
@@ -255,9 +246,6 @@
 .emerald-theme:hover { box-shadow: 0 25px 45px var(--neon-emerald-glow); border-color: var(--neon-emerald); }
 .gold-theme:hover { box-shadow: 0 25px 45px var(--neon-gold-glow); border-color: var(--neon-gold); }
 
-/* ==========================================
-   STATUS FILTER TABS
-   ========================================== */
 .logistics-tabs-container {
   position: relative;
   z-index: 2;
@@ -297,15 +285,15 @@
 }
 
 /* ==========================================
-   ORDER GLASS CARDS
+   ORDER GLASS CARDS — 2 PER ROW GRID (FIXED)
    ========================================== */
 .orders-list-grid {
   position: relative;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  max-width: 900px;
+  max-width: 100%;
 }
 
 .order-glass-card {
@@ -320,6 +308,8 @@
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   opacity: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .order-glass-card:hover {
@@ -330,7 +320,6 @@
 .order-glass-card.shipping { border-left: 4px solid var(--neon-gold); }
 .order-glass-card.delivered { border-left: 4px solid var(--neon-emerald); }
 
-/* Top Section */
 .order-top {
   display: flex;
   justify-content: space-between;
@@ -359,7 +348,6 @@
 
 .customer-name strong { color: var(--black-title); }
 
-/* Status Badges */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -382,13 +370,13 @@
   color: var(--neon-gold);
 }
 
-/* Card Body */
 .order-body {
   display: flex;
   gap: 22px;
   align-items: center;
   width: 100%;
   margin-bottom: 22px;
+  flex: 1;
 }
 
 .order-img-wrap {
@@ -399,6 +387,7 @@
   flex-shrink: 0;
   box-shadow: 0 10px 22px rgba(179, 140, 27, 0.15);
   border: 1.5px solid rgba(255,255,255,1);
+  background: #f1f5f9;
 }
 
 .order-img-wrap img {
@@ -418,6 +407,7 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  min-width: 0;
 }
 
 .info-row-header {
@@ -463,7 +453,6 @@
   letter-spacing: -0.5px;
 }
 
-/* Admin Action Row */
 .order-actions {
   display: flex;
   gap: 12px;
@@ -528,8 +517,8 @@
   border-radius: 14px;
 }
 
-/* No Orders State */
 .no-orders-box {
+  grid-column: 1 / -1;
   padding: 60px;
   text-align: center;
   color: var(--text-muted);
@@ -544,9 +533,6 @@
   margin-bottom: 14px;
 }
 
-/* ==========================================
-   INVOICE MODAL (same glass modal as Dashboard)
-   ========================================== */
 .ultra-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -618,6 +604,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 22px rgba(179, 140, 27, 0.15);
   flex-shrink: 0;
+  background: #f1f5f9;
 }
 
 .invoice-modal-details p {
@@ -664,9 +651,6 @@
   color: #ffffff;
 }
 
-/* ==========================================
-   ANIMATIONS
-   ========================================== */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 50% { transform: scale(1.15); opacity: 1; } }
@@ -678,9 +662,12 @@
   opacity: 0;
 }
 
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
+@media (max-width: 900px) {
+  .orders-list-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .an-orders-container { padding: 20px; }
   .wrapped-header-title { font-size: 28px; }

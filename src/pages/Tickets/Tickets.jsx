@@ -21,129 +21,85 @@ import {
   FaHourglassHalf,
   FaFire,
   FaTags,
-  FaCommentDots,
+  FaPaperclip,
+  FaPhoneAlt,
 } from "react-icons/fa";
-
-// ⚠️ DUMMY MODE — no backend/controller required.
-// Jab aapka real backend/API ready ho jaye, is section ko hata kar
-// upar wali line uncomment kar dein:
-// import { getAllTickets, deleteTicket, updateTicket } from "../../api/Controller/ticketController";
+import { getAllTickets , updateTicket } from "../../api/Controller/ticket";
 
 let DUMMY_TICKETS = [
   {
-    _id: "t1",
-    ticketId: "TCK-1001",
-    subject: "Unable to view my birth chart report",
-    description:
-      "I purchased the premium Kundli report but the PDF download button is not working on my account dashboard. Tried on both mobile and desktop.",
-    category: "Technical",
-    priority: "high",
-    status: "open",
-    assignedAgent: "Rahul Sharma",
-    adminReply: "",
-    user: { fullName: "Ananya Verma", email: "ananya.verma@example.com" },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    _id: "6a71ac6ec1b9e59c484ea61f",
+    raisedBy: {
+      _id: "6a6b1845ed0084ecb7ba17e3",
+      name: "Ab ",
+      email: null,
+      mobile: "+916395809794",
+      fullName: "Ab ",
+      profilePic: "https://res.cloudinary.com/dvumlrxml/image/upload/v1785746594/user_profiles/ql1hlpxwn4swgqhwwgdq.jpg",
+    },
+    raisedByModel: "User",
+    subject: "Payment Issue",
+    description: "My money was deducted but call was not connected.",
+    category: "Payment Issue",
+    priority: "High",
+    status: "Pending",
+    attachments: [
+      "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500",
+    ],
+    adminResponse: null,
+    resolvedAt: null,
+    createdAt: "2026-08-04T09:10:06.794Z",
+    updatedAt: "2026-08-04T09:10:06.794Z",
   },
   {
-    _id: "t2",
-    ticketId: "TCK-1002",
-    subject: "Wallet amount deducted twice for consultation",
-    description:
-      "I booked a 15-min call with an astrologer and my wallet was charged twice for the same session. Please refund the extra amount.",
-    category: "Billing",
-    priority: "urgent",
-    status: "in-progress",
-    assignedAgent: "Priya Nair",
-    adminReply: "We are checking with the payments team, refund will be processed in 24 hrs.",
-    user: { fullName: "Karan Mehta", email: "karan.mehta@example.com" },
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date().toISOString(),
+    _id: "6a71ac6ec1b9e59c484ea620",
+    raisedBy: {
+      _id: "6a6b1845ed0084ecb7ba17e4",
+      name: "Pooja Sharma",
+      email: "pooja@example.com",
+      mobile: "+919876543210",
+      fullName: "Pooja Sharma",
+      profilePic: null,
+    },
+    raisedByModel: "User",
+    subject: "Kundli Download Failed",
+    description: "Unable to download my kundli pdf report.",
+    category: "Technical Issue",
+    priority: "Medium",
+    status: "Resolved",
+    attachments: [],
+    adminResponse: "Issue resolved. PDF download re-enabled.",
+    resolvedAt: "2026-08-04T11:00:00.000Z",
+    createdAt: "2026-08-03T10:15:00.000Z",
+    updatedAt: "2026-08-04T11:00:00.000Z",
   },
   {
-    _id: "t3",
-    ticketId: "TCK-1003",
-    subject: "Wrong date of birth shown in profile",
-    description:
-      "My date of birth is showing one day earlier than what I entered during signup, which is affecting my zodiac and chart calculations.",
-    category: "Profile",
-    priority: "medium",
-    status: "open",
-    assignedAgent: "",
-    adminReply: "",
-    user: { fullName: "Simran Kaur", email: "simran.kaur@example.com" },
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  {
-    _id: "t4",
-    ticketId: "TCK-1004",
-    subject: "Astrologer did not join scheduled call",
-    description:
-      "I had booked a slot at 6 PM but the astrologer never joined. I want this session rescheduled or refunded.",
-    category: "Consultation",
-    priority: "high",
-    status: "resolved",
-    assignedAgent: "Rahul Sharma",
-    adminReply: "Session has been rescheduled for free and confirmation sent via email.",
-    user: { fullName: "Vikram Rao", email: "vikram.rao@example.com" },
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-  },
-  {
-    _id: "t5",
-    ticketId: "TCK-1005",
-    subject: "How to change my registered mobile number?",
-    description:
-      "I lost access to my old mobile number and want to update it in my account to receive OTPs properly.",
-    category: "Account",
-    priority: "low",
-    status: "closed",
-    assignedAgent: "Priya Nair",
-    adminReply: "Mobile number updated successfully after verification.",
-    user: { fullName: "Neha Joshi", email: "neha.joshi@example.com" },
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  {
-    _id: "t6",
-    ticketId: "TCK-1006",
-    subject: "App crashes on opening horoscope section",
-    description:
-      "Every time I tap on 'Daily Horoscope' the app crashes immediately. Using Android, latest app version.",
-    category: "Technical",
-    priority: "urgent",
-    status: "in-progress",
-    assignedAgent: "Rahul Sharma",
-    adminReply: "Bug identified, fix is being rolled out in next app update.",
-    user: { fullName: "Arjun Patel", email: "arjun.patel@example.com" },
-    createdAt: new Date(Date.now() - 6 * 3600000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 3600000).toISOString(),
-  },
-  {
-    _id: "t7",
-    ticketId: "TCK-1007",
-    subject: "Refund not received for cancelled session",
-    description:
-      "I cancelled my consultation 2 days ago within the free cancellation window but haven't received my refund yet.",
-    category: "Billing",
-    priority: "medium",
-    status: "open",
-    assignedAgent: "",
-    adminReply: "",
-    user: { fullName: "Pooja Iyer", email: "pooja.iyer@example.com" },
-    createdAt: new Date(Date.now() - 12 * 3600000).toISOString(),
-    updatedAt: new Date(Date.now() - 12 * 3600000).toISOString(),
+    _id: "6a71ac6ec1b9e59c484ea621",
+    raisedBy: {
+      _id: "6a6b1845ed0084ecb7ba17e5",
+      name: "Rohan Verma",
+      email: "rohan@example.com",
+      mobile: "+919123456789",
+      fullName: "Rohan Verma",
+      profilePic: null,
+    },
+    raisedByModel: "User",
+    subject: "Astrologer Not Available",
+    description: "Booked slot at 4 PM but astrologer was offline.",
+    category: "Consultation Issue",
+    priority: "High",
+    status: "In Progress",
+    attachments: [],
+    adminResponse: "Checking with astrologer team.",
+    resolvedAt: null,
+    createdAt: "2026-08-04T08:00:00.000Z",
+    updatedAt: "2026-08-04T08:30:00.000Z",
   },
 ];
 
-// Simulated network delay so loading states behave like a real API
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const getAllTickets = async () => {
-  await delay(500);
-  return { success: true, data: DUMMY_TICKETS };
-};
+
 
 const deleteTicket = async (id) => {
   await delay(300);
@@ -151,14 +107,7 @@ const deleteTicket = async (id) => {
   return { success: true };
 };
 
-const updateTicket = async (id, payload) => {
-  await delay(300);
-  DUMMY_TICKETS = DUMMY_TICKETS.map((t) =>
-    t._id === id ? { ...t, ...payload, updatedAt: new Date().toISOString() } : t
-  );
-  const updated = DUMMY_TICKETS.find((t) => t._id === id);
-  return { success: true, data: updated };
-};
+
 
 export default function Tickets() {
   const [tickets, setTickets] = useState([]);
@@ -168,9 +117,8 @@ export default function Tickets() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
-  // Modal States
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -182,14 +130,9 @@ export default function Tickets() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Form states for edit modal mapped with backend attributes
   const [editForm, setEditForm] = useState({
-    subject: "",
-    category: "",
-    priority: "",
     status: "",
-    assignedAgent: "",
-    adminReply: "",
+    adminResponse: "",
   });
 
   const fetchTickets = async () => {
@@ -197,11 +140,8 @@ export default function Tickets() {
     setError(null);
     try {
       const response = await getAllTickets();
-      // Mapped according to response structure: { success: true, data: [...] }
-      if (response && response.data) {
-        setTickets(response.data);
-      } else if (Array.isArray(response)) {
-        setTickets(response);
+      if (response && response.tickets) {
+        setTickets(response.tickets);
       } else {
         setTickets([]);
       }
@@ -217,13 +157,18 @@ export default function Tickets() {
     fetchTickets();
   }, []);
 
-  // ================= 2. Dynamic Stats Calculation =================
   const stats = useMemo(() => {
     const today = new Date().toDateString();
     const totalTickets = tickets.length;
-    const openCount = tickets.filter((t) => t.status === "open").length;
-    const resolvedCount = tickets.filter((t) => t.status === "resolved" || t.status === "closed").length;
-    const urgentCount = tickets.filter((t) => t.priority === "urgent" || t.priority === "high").length;
+    const openCount = tickets.filter(
+      (t) => (t.status || "").toLowerCase() === "pending" || (t.status || "").toLowerCase() === "open"
+    ).length;
+    const resolvedCount = tickets.filter(
+      (t) => (t.status || "").toLowerCase() === "resolved" || (t.status || "").toLowerCase() === "closed"
+    ).length;
+    const urgentCount = tickets.filter(
+      (t) => (t.priority || "").toLowerCase() === "urgent" || (t.priority || "").toLowerCase() === "high"
+    ).length;
     const newToday = tickets.filter((t) => {
       if (!t.createdAt) return false;
       return new Date(t.createdAt).toDateString() === today;
@@ -232,7 +177,6 @@ export default function Tickets() {
     return { totalTickets, openCount, resolvedCount, urgentCount, newToday };
   }, [tickets]);
 
-  // ================= 3. Handlers =================
   const handleView = (ticket) => {
     setSelectedTicket(ticket);
     setViewOpen(true);
@@ -241,37 +185,35 @@ export default function Tickets() {
   const handleEditInit = (ticket) => {
     setSelectedTicket(ticket);
     setEditForm({
-      subject: ticket.subject || "",
-      category: ticket.category || "",
-      priority: ticket.priority || "medium",
-      status: ticket.status || "open",
-      assignedAgent: ticket.assignedAgent || "",
-      adminReply: ticket.adminReply || "",
+      
+      status: ticket.status || "Pending",
+      adminResponse: ticket.adminResponse || ticket.adminReply || "",
     });
     setEditOpen(true);
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-
     try {
       const payload = {
-        subject: editForm.subject,
-        category: editForm.category,
-        priority: editForm.priority,
+       
         status: editForm.status,
-        assignedAgent: editForm.assignedAgent,
-        adminReply: editForm.adminReply,
+        adminResponse: editForm.adminResponse,
       };
 
-      const response = await updateTicket(selectedTicket._id, payload);
+    const response = await updateTicket(selectedTicket._id, payload);
 
-      setTickets((prev) =>
-        prev.map((ticket) =>
-          ticket._id === selectedTicket._id ? response.data : ticket
-        )
-      );
+if (response.success) {
+  setTickets((prev) =>
+    prev.map((t) =>
+      t._id === selectedTicket._id ? response.ticket : t
+    )
+  );
 
+  setEditOpen(false);
+  setSelectedTicket(null);
+  showToast("success", response.message);
+}
       setEditOpen(false);
       setSelectedTicket(null);
       showToast("success", "Ticket updated successfully!");
@@ -289,9 +231,7 @@ export default function Tickets() {
   const confirmDelete = async () => {
     try {
       await deleteTicket(selectedTicket._id);
-
       setTickets((prev) => prev.filter((t) => t._id !== selectedTicket._id));
-
       setDeleteOpen(false);
       setSelectedTicket(null);
       showToast("success", "Ticket deleted successfully!");
@@ -301,35 +241,38 @@ export default function Tickets() {
     }
   };
 
-  // ================= 4. Search and Filtering Logic =================
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
       const subject = (ticket.subject || "").toLowerCase();
-      const userName = (ticket.user?.fullName || ticket.user?.name || "").toLowerCase();
-      const email = (ticket.user?.email || "").toLowerCase();
+      const userObj = ticket.raisedBy || ticket.user || {};
+    const userName = (ticket.raisedBy?.fullName || ticket.raisedBy?.name || "").toLowerCase();
+const email = (ticket.raisedBy?.email || ticket.raisedBy?.mobile || "").toLowerCase();
+      const mobile = (userObj.mobile || "").toLowerCase();
       const category = (ticket.category || "").toLowerCase();
-      const ticketId = (ticket.ticketId || ticket._id || "").toLowerCase();
+      const ticketId = (ticket._id || "").toLowerCase();
+      const status = (ticket.status || "").toLowerCase();
+      const priority = (ticket.priority || "").toLowerCase();
       const query = searchTerm.toLowerCase();
 
       const matchesSearch =
         subject.includes(query) ||
         userName.includes(query) ||
         email.includes(query) ||
+        mobile.includes(query) ||
         category.includes(query) ||
         ticketId.includes(query);
 
       if (!matchesSearch) return false;
 
-      if (filterType === "open") return ticket.status === "open";
-      if (filterType === "progress") return ticket.status === "in-progress";
-      if (filterType === "resolved") return ticket.status === "resolved" || ticket.status === "closed";
-      if (filterType === "urgent") return ticket.priority === "urgent" || ticket.priority === "high";
+      if (filterType === "pending") return status === "pending" || status === "open";
+      if (filterType === "progress") return status === "in progress" || status === "in-progress";
+      if (filterType === "resolved") return status === "resolved" || status === "closed";
+      if (filterType === "urgent") return priority === "urgent" || priority === "high";
 
       return true;
     });
   }, [tickets, searchTerm, filterType]);
 
-  // ================= 5. Pagination =================
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -341,7 +284,6 @@ export default function Tickets() {
     }
   };
 
-  // Helpers
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     try {
@@ -367,39 +309,27 @@ export default function Tickets() {
     }
   };
 
-  const getPriorityIcon = (priority) => {
-    if (priority === "urgent") return <FaFire />;
-    if (priority === "high") return <FaExclamationCircle />;
+  const getPriorityIcon = (priority = "") => {
+    const p = priority.toLowerCase();
+    if (p === "urgent") return <FaFire />;
+    if (p === "high") return <FaExclamationCircle />;
     return <FaHourglassHalf />;
   };
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "open":
-        return "OPEN";
-      case "in-progress":
-        return "IN PROGRESS";
-      case "resolved":
-        return "RESOLVED";
-      case "closed":
-        return "CLOSED";
-      default:
-        return (status || "OPEN").toUpperCase();
-    }
+  const getPriorityClass = (priority = "") => {
+    const p = priority.toLowerCase();
+    if (p === "urgent") return "priority-urgent";
+    if (p === "high") return "priority-high";
+    if (p === "medium") return "priority-medium";
+    return "priority-low";
   };
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "open":
-        return "role-open";
-      case "in-progress":
-        return "role-progress";
-      case "resolved":
-      case "closed":
-        return "role-resolved";
-      default:
-        return "role-open";
-    }
+  const getStatusClass = (status = "") => {
+    const s = status.toLowerCase();
+    if (s === "pending" || s === "open") return "role-open";
+    if (s === "in progress" || s === "in-progress") return "role-progress";
+    if (s === "resolved" || s === "closed") return "role-resolved";
+    return "role-open";
   };
 
   return (
@@ -410,7 +340,7 @@ export default function Tickets() {
           <span>{toast.message}</span>
         </div>
       )}
-      {/* Background Orbs */}
+
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
@@ -438,7 +368,6 @@ export default function Tickets() {
         </div>
       </header>
 
-      {/* Metrics Grid */}
       <div className="db-metrics-grid">
         <div className="khatarnak-card cyan-theme animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="card-glass-shine"></div>
@@ -465,7 +394,7 @@ export default function Tickets() {
             <div className="big-icon-box gold-glow">
               <FaHourglassHalf />
             </div>
-            <span className="trend-badge gold-pill">OPEN</span>
+            <span className="trend-badge gold-pill">PENDING</span>
           </div>
           <div className="card-middle-data">
             <h2 className="giant-stat-number">{stats.openCount}</h2>
@@ -511,13 +440,12 @@ export default function Tickets() {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="pt-controls-bar animate-fade-in">
         <div className="search-box">
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Search by subject, user, email, category or ticket ID..."
+            placeholder="Search by subject, user, phone, email, category or ticket ID..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -534,10 +462,10 @@ export default function Tickets() {
             All ({tickets.length})
           </button>
           <button
-            className={`filter-btn ${filterType === "open" ? "active" : ""}`}
-            onClick={() => { setFilterType("open"); setCurrentPage(1); }}
+            className={`filter-btn ${filterType === "pending" ? "active" : ""}`}
+            onClick={() => { setFilterType("pending"); setCurrentPage(1); }}
           >
-            Open ({stats.openCount})
+            Pending ({stats.openCount})
           </button>
           <button
             className={`filter-btn ${filterType === "progress" ? "active" : ""}`}
@@ -560,14 +488,12 @@ export default function Tickets() {
         </div>
       </div>
 
-      {/* Error Message Display */}
       {error && (
         <div className="table-error-box" style={{ marginBottom: "20px" }}>
           Error: {error}
         </div>
       )}
 
-      {/* Main Grid content */}
       <div className="pt-content-grid animate-fade-in-delayed">
         {loading ? (
           <div className="khatarnak-loader">
@@ -577,98 +503,125 @@ export default function Tickets() {
         ) : filteredTickets.length === 0 ? (
           <div className="table-error-box">No tickets match your criteria.</div>
         ) : (
-          <div className="ticket-cards-grid">
-            {currentTickets.map((ticket) => {
-              const userName = ticket.user?.fullName || ticket.user?.name || "Unknown User";
+          <div className="custom-table-container">
+            <div className="table-responsive">
+              <table className="cosmic-table">
+                <thead>
+                  <tr>
+                    <th>Ticket ID & Subject</th>
+                    <th>Raised By</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentTickets.map((ticket) => {
+                    const userObj = ticket.raisedBy || ticket.user || {};
+const userName = ticket.raisedBy?.fullName || ticket.raisedBy?.name || "Unknown User";
+const userContact = ticket.raisedBy?.mobile || ticket.raisedBy?.email || "N/A";
+const profilePic = ticket.raisedBy?.profilePic || null;                  
+                    const hasAttachments = Array.isArray(ticket.attachments) && ticket.attachments.length > 0;
 
-              return (
-                <div className="khatarnak-card ticket-card-item" key={ticket._id}>
-                  <div className="card-glass-shine"></div>
+                    return (
+                      <tr key={ticket._id}>
+                        <td>
+                          <div className="cell-ticket-info">
+                            <span className="ticket-id-badge">#{ticket._id?.slice(-6).toUpperCase()}</span>
+                            <div className="ticket-subject-title">
+                              {ticket.subject || "No Subject"}
+                              {hasAttachments && (
+                                <span className="attachment-indicator" title="Has Attachments">
+                                  <FaPaperclip />
+                                </span>
+                              )}
+                            </div>
+                            <p className="ticket-sub-desc">
+                              {(ticket.description || "").slice(0, 50)}
+                              {(ticket.description || "").length > 50 ? "..." : ""}
+                            </p>
+                          </div>
+                        </td>
 
-                  <div className="ticket-card-header">
-                    <span className={`bold-role-tag ${getStatusClass(ticket.status)}`}>
-                      {getStatusLabel(ticket.status)}
-                    </span>
+                        <td>
+                          <div className="cell-user-info">
+                            {userObj.profilePic ? (
+                              <img src={userObj.profilePic} alt={userName} className="table-user-avatar" />
+                            ) : (
+                              <div className="table-avatar-placeholder">
+                                <FaUserCircle />
+                              </div>
+                            )}
+                            <div className="user-text-details">
+                              <span className="user-name">{userName}</span>
+                              <span className="user-contact">{userContact}</span>
+                            </div>
+                          </div>
+                        </td>
 
-                    <div className="badges-group">
-                      <span className={`priority-pill priority-${ticket.priority || "medium"}`}>
-                        {getPriorityIcon(ticket.priority)} {(ticket.priority || "medium").toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
+                        <td>
+                          <span className="table-category-tag">
+                            <FaTags style={{ marginRight: "4px" }} />
+                            {ticket.category || "General"}
+                          </span>
+                        </td>
 
-                  <div className="ticket-card-body">
-                    <p className="ticket-id-tag">#{ticket.ticketId || ticket._id?.slice(-6)}</p>
-                    <h3 className="ticket-subject">{ticket.subject || "No Subject"}</h3>
-                    <p className="ticket-description">
-                      {(ticket.description || "No description provided.").slice(0, 90)}
-                      {(ticket.description || "").length > 90 ? "..." : ""}
-                    </p>
+                        <td>
+                          <span className={`priority-pill ${getPriorityClass(ticket.priority)}`}>
+                            {getPriorityIcon(ticket.priority)} {(ticket.priority || "Medium").toUpperCase()}
+                          </span>
+                        </td>
 
-                    <div className="ticket-meta-row">
-                      {ticket.category && (
-                        <span className="meta-item">
-                          <FaTags /> {ticket.category}
-                        </span>
-                      )}
-                      <span className="meta-item">
-                        <FaUserCircle /> {userName}
-                      </span>
-                    </div>
+                        <td>
+                          <span className={`bold-role-tag ${getStatusClass(ticket.status)}`}>
+                            {(ticket.status || "Pending").toUpperCase()}
+                          </span>
+                        </td>
 
-                    <div className="ticket-meta-row">
-                      <span className="meta-item">
-                        <FaCalendarAlt /> {formatDate(ticket.createdAt)}
-                      </span>
-                      <span className="meta-item">
-                        <FaClock /> {formatTime(ticket.createdAt)}
-                      </span>
-                    </div>
-                  </div>
+                        <td>
+                          <div className="cell-date-info">
+                            <span><FaCalendarAlt /> {formatDate(ticket.createdAt)}</span>
+                            <small><FaClock /> {formatTime(ticket.createdAt)}</small>
+                          </div>
+                        </td>
 
-                  <div className="ticket-card-footer">
-                    <div className="rate-info">
-                      <span className="rate-amount replies-amount">
-                        <FaCommentDots style={{ fontSize: "14px", marginRight: "6px" }} />
-                        {ticket.assignedAgent || "Unassigned"}
-                      </span>
-                      <span className="rate-unit">agent</span>
-                    </div>
-
-                    <div className="card-right-controls">
-                      <div className="action-button-group">
-                        <button
-                          className="btn-square-icon"
-                          onClick={() => handleView(ticket)}
-                          title="View Ticket"
-                        >
-                          <FaEye />
-                        </button>
-                        <button
-                          className="btn-square-icon"
-                          onClick={() => handleEditInit(ticket)}
-                          title="Edit / Respond"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn-square-icon btn-delete-accent"
-                          onClick={() => handleDeleteInit(ticket)}
-                          title="Delete Ticket"
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                        <td>
+                          <div className="action-button-group">
+                            <button
+                              className="btn-square-icon"
+                              onClick={() => handleView(ticket)}
+                              title="View Details"
+                            >
+                              <FaEye />
+                            </button>
+                            <button
+                              className="btn-square-icon"
+                              onClick={() => handleEditInit(ticket)}
+                              title="Edit / Respond"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              className="btn-square-icon btn-delete-accent"
+                              onClick={() => handleDeleteInit(ticket)}
+                              title="Delete Ticket"
+                            >
+                              <FaTrashAlt />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Pagination Footer */}
       {!loading && filteredTickets.length > 0 && (
         <div className="table-pagination-footer">
           <div className="pagination-container">
@@ -701,7 +654,6 @@ export default function Tickets() {
         </div>
       )}
 
-      {/* View Ticket Detail Modal */}
       {viewOpen && selectedTicket && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content">
@@ -714,43 +666,72 @@ export default function Tickets() {
             <div className="modal-body">
               <div className="profile-detail-card">
                 <div className="modal-avatar-section" style={{ textAlign: "center", marginBottom: "16px" }}>
-                  <div className="giant-avatar ticket-avatar" style={{ margin: "0 auto" }}>
-                    <FaTicketAlt />
-                  </div>
+                  {(selectedTicket.raisedBy?.profilePic || selectedTicket.user?.profilePic) ? (
+                    <img
+                      src={selectedTicket.raisedBy?.profilePic || selectedTicket.user?.profilePic}
+                      alt="User Profile"
+                      className="giant-avatar-img"
+                    />
+                  ) : (
+                    <div className="giant-avatar ticket-avatar" style={{ margin: "0 auto" }}>
+                      <FaTicketAlt />
+                    </div>
+                  )}
                   <h3 style={{ marginTop: "10px" }}>{selectedTicket.subject || "No Subject"}</h3>
                   <p>
-                    <FaEnvelope /> {selectedTicket.user?.email || "No Email Mapped"}
+                    <FaUserCircle /> {selectedTicket.raisedBy?.fullName || selectedTicket.raisedBy?.name || selectedTicket.user?.fullName || "User"}
                   </p>
+                  {selectedTicket.raisedBy?.mobile && (
+                    <p><FaPhoneAlt /> {selectedTicket.raisedBy.mobile}</p>
+                  )}
+                  {selectedTicket.raisedBy?.email && (
+               
+<p>
+  <FaEnvelope /> {selectedTicket.raisedBy?.email || selectedTicket.raisedBy?.mobile || "N/A"}
+</p>
+                  )}
                 </div>
 
                 <div className="ticket-description-box">
-                  {selectedTicket.description || "No description provided."}
+                  <strong>Description:</strong>
+                  <p style={{ margin: "6px 0 0 0" }}>{selectedTicket.description || "No description provided."}</p>
                 </div>
 
                 <div className="modal-details-grid">
-                  <div className="detail-item"><strong>Ticket ID:</strong> {selectedTicket.ticketId || selectedTicket._id}</div>
-                  <div className="detail-item"><strong>Raised By:</strong> {selectedTicket.user?.fullName || selectedTicket.user?.name || "N/A"}</div>
+                  <div className="detail-item"><strong>Ticket ID:</strong> {selectedTicket._id}</div>
                   <div className="detail-item"><strong>Category:</strong> {selectedTicket.category || "N/A"}</div>
-                  <div className="detail-item"><strong>Priority:</strong> {(selectedTicket.priority || "medium").toUpperCase()}</div>
-                  <div className="detail-item"><strong>Status:</strong> {getStatusLabel(selectedTicket.status)}</div>
-                  <div className="detail-item"><strong>Assigned Agent:</strong> {selectedTicket.assignedAgent || "Unassigned"}</div>
-                  <div className="detail-item"><strong>Created At:</strong> {formatDate(selectedTicket.createdAt)}</div>
-                  <div className="detail-item"><strong>Updated At:</strong> {formatDate(selectedTicket.updatedAt)}</div>
+                  <div className="detail-item"><strong>Priority:</strong> {(selectedTicket.priority || "Medium").toUpperCase()}</div>
+                  <div className="detail-item"><strong>Status:</strong> {(selectedTicket.status || "Pending").toUpperCase()}</div>
+                  <div className="detail-item"><strong>Created At:</strong> {formatDate(selectedTicket.createdAt)} {formatTime(selectedTicket.createdAt)}</div>
+                  <div className="detail-item"><strong>Updated At:</strong> {formatDate(selectedTicket.updatedAt)} {formatTime(selectedTicket.updatedAt)}</div>
+                  <div className="detail-item"><strong>Raised By:</strong> {selectedTicket.raisedBy?.fullName || selectedTicket.raisedBy?.name || "N/A"}</div>
                 </div>
 
-                {selectedTicket.adminReply && (
-                  <div className="admin-reply-box">
-                    <strong>Admin Reply:</strong>
-                    <p>{selectedTicket.adminReply}</p>
+                {Array.isArray(selectedTicket.attachments) && selectedTicket.attachments.length > 0 && (
+                  <div className="attachments-section">
+                    <strong>Attachments:</strong>
+                    <div className="attachment-list">
+                      {selectedTicket.attachments.map((fileUrl, i) => (
+                        <a key={i} href={fileUrl} target="_blank" rel="noopener noreferrer" className="attachment-item">
+                          <FaPaperclip /> Attachment #{i + 1}
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
+
+               {(selectedTicket.adminResponse || selectedTicket.adminReply) && (
+  <div className="admin-reply-box">
+    <strong>Admin Response:</strong>
+    <p>{selectedTicket.adminResponse || selectedTicket.adminReply}</p>
+  </div>
+)}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
       {editOpen && selectedTicket && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content">
@@ -769,65 +750,31 @@ export default function Tickets() {
                   gap: "16px",
                 }}
               >
+               
+
+             
+
+               
+
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label>Subject</label>
-                  <input
-                    type="text"
-                    value={editForm.subject}
-                    onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Category</label>
-                  <input
-                    type="text"
-                    value={editForm.category}
-                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Assigned Agent</label>
-                  <input
-                    type="text"
-                    value={editForm.assignedAgent}
-                    onChange={(e) => setEditForm({ ...editForm, assignedAgent: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Priority</label>
-                  <select
-                    value={editForm.priority}
-                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
                   <label>Status</label>
                   <select
                     value={editForm.status}
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                   >
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
                   </select>
                 </div>
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label>Admin Reply</label>
+                  <label>Admin Response</label>
                   <textarea
                     rows={4}
-                    value={editForm.adminReply}
-                    onChange={(e) => setEditForm({ ...editForm, adminReply: e.target.value })}
+                    value={editForm.adminResponse}
+                    onChange={(e) => setEditForm({ ...editForm, adminResponse: e.target.value })}
                     placeholder="Write a response to the user..."
                   />
                 </div>
@@ -845,7 +792,6 @@ export default function Tickets() {
         </div>
       )}
 
-      {/* Delete Modal */}
       {deleteOpen && selectedTicket && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content confirm-danger">

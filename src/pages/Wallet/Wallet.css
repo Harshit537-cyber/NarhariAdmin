@@ -341,6 +341,7 @@
 }
 
 .payout-item:hover {
+   background: #fdf2f8;
   border-color: rgba(179, 140, 27, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -10px rgba(0,0,0,0.08);
@@ -466,6 +467,11 @@
   gap: 12px;
 }
 
+.activity-item:hover {
+  background: rgba(236, 72, 153, 0.08); /* light pink */
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
 .activity-item:last-child {
   border-bottom: none;
 }

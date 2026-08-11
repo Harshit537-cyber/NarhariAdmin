@@ -22,7 +22,7 @@ export default function Orders() {
       qty: 1,
       date: "24 Oct 2024",
       price: "799",
-      img: "https://images.unsplash.com/photo-1616628182509-6c0b5d0f4a55?w=500",
+      img: "https://picsum.photos/seed/healingcrystal/500/500",
       status: "Delivered",
     },
     {
@@ -33,8 +33,30 @@ export default function Orders() {
       qty: 2,
       date: "20 Oct 2024",
       price: "599",
-      img: "https://images.unsplash.com/photo-1605106702734-205df224ecce?w=500",
+      img: "https://picsum.photos/seed/rudrakshamala/500/500",
       status: "Shipping",
+    },
+    {
+      id: "AST1027",
+      customer: "Rohan Verma",
+      refPandit: "Acharya Rahul",
+      productName: "Kuber Yantra",
+      qty: 1,
+      date: "18 Oct 2024",
+      price: "1299",
+      img: "https://picsum.photos/seed/kuberyantra/500/500",
+      status: "Shipping",
+    },
+    {
+      id: "AST1028",
+      customer: "Sneha Rao",
+      refPandit: "Pandit Sharma",
+      productName: "Tulsi Mala",
+      qty: 3,
+      date: "15 Oct 2024",
+      price: "349",
+      img: "https://picsum.photos/seed/tulsimala/500/500",
+      status: "Delivered",
     },
   ]);
 
@@ -45,6 +67,13 @@ export default function Orders() {
     setOrders(
       orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
     );
+  };
+
+  // Fallback in case any image URL fails to load at runtime
+  const handleImgError = (e) => {
+    e.target.onerror = null;
+    e.target.src =
+      "https://placehold.co/500x500/f1f4f9/526075?text=No+Image";
   };
 
   const filteredOrders = orders.filter(
@@ -212,7 +241,11 @@ export default function Orders() {
             {/* Core Product Info and Referral Connection */}
             <div className="order-body">
               <div className="order-img-wrap">
-                <img src={order.img} alt={order.productName} />
+                <img
+                  src={order.img}
+                  alt={order.productName}
+                  onError={handleImgError}
+                />
               </div>
 
               <div className="order-info">
@@ -287,6 +320,7 @@ export default function Orders() {
                 src={selectedInvoice.img}
                 alt={selectedInvoice.productName}
                 className="invoice-modal-img"
+                onError={handleImgError}
               />
               <div className="invoice-modal-details">
                 <p>

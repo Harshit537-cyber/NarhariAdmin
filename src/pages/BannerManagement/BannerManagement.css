@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Banner Management Stylesheet — Light Theme (matches Category Management)
-   ========================================================================== */
+
 
 :root {
   --bm-black: #1e1b4b;
@@ -12,6 +10,8 @@
   --bm-green-bg: rgba(22, 163, 74, 0.1);
   --bm-red: #ef4444;
   --bm-red-bg: rgba(239, 68, 68, 0.1);
+  --neon-gold: #c9902a;
+  --black-title: #1e1b4b;
 }
 
 * {
@@ -21,11 +21,75 @@
 .banner-page {
   width: 100%;
   min-height: 100vh;
-  padding: 1.5rem;
+  padding: 2.8rem;
   background: #eef1f5;
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
 }
 
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px;
+  margin-bottom: 30px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ffffff 0%, #eef3ff 100%);
+}
+
+.product-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 18px;
+  border-radius: 30px;
+  background: #fff8e6;
+  color: #b8860b;
+  border: 1px solid #e8c96a;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.product-header-left h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(90deg, #1f2455, #c48a08);
+  padding: 18px 24px;
+  border-radius: 18px;
+  display: inline-block;
+  box-shadow: 0 12px 30px rgba(196, 138, 8, 0.3);
+}
+
+.product-header-left p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 15px;
+}
+
+.add-product-btn {
+  border: none;
+  background: linear-gradient(135deg, #d18a00, #b97300);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
 .banner-card {
   width: 100%;
   background: #ffffff;
@@ -385,8 +449,13 @@
   animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   max-height: 90vh;
   overflow-y: auto;
+  scrollbar-width: none;      
+  -ms-overflow-style: none;
 }
 
+.modal-box::-webkit-scrollbar {
+  display: none;             
+}
 .form-modal-box {
   max-width: 520px;
 }
