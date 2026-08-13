@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import SplashScreen from "./pages/SplashScreen";
 import Login from "./pages/Login/Login";
 import MainLayout from "./layouts/Mainlayout";
@@ -20,12 +26,13 @@ import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 import Complaints from "./pages/Complaints/Complaints";
 import Tickets from "./pages/Tickets/Tickets";
-import Category from "./pages/Category/Category.jsx"
+import Category from "./pages/Category/Category.jsx";
 import Rituals from "./pages/Rituals/Rituals.jsx";
-import MinRateAstrologer from "./pages/MinRateAstrologer/MinRateAstrologer.jsx"
-import Pandit from "./pages/Pandit/Pandit.jsx"
-import Commission from "./pages/Commission/Commission.jsx"
-import PushNotification from "./pages/Notitification/Notification.jsx"
+import MinRateAstrologer from "./pages/MinRateAstrologer/MinRateAstrologer.jsx";
+import Pandit from "./pages/Pandit/Pandit.jsx";
+import Commission from "./pages/Commission/Commission.jsx";
+import PushNotification from "./pages/Notitification/Notification.jsx";
+import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -50,7 +57,10 @@ const AppRoutes = () => {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/banners" element={<BannerManagement />} />
-              <Route path="/chats/user-astro-chats" element={<UserAstroChat />} />
+              <Route
+                path="/chats/user-astro-chats"
+                element={<UserAstroChat />}
+              />
               <Route path="/consultation" element={<Consultation />} />
               <Route path="/wallet" element={<Wallet />} />
               <Route path="/shop" element={<Shop />} />
@@ -58,10 +68,10 @@ const AppRoutes = () => {
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/partner" element={<Partner />} />
-              <Route path="/category" element={<Category/>}/>
+              <Route path="/category" element={<Category />} />
               <Route path="/rituals" element={<Rituals />} />
-                                     <Route path="/pandit" element={<Pandit />} />
-<Route path="push-notification"element={<PushNotification/>}/>
+              <Route path="/pandit" element={<Pandit />} />
+              <Route path="push-notification" element={<PushNotification />} />
 
               <Route
                 path="/partner/kyc-verification"
@@ -71,11 +81,15 @@ const AppRoutes = () => {
                 path="/partner/profile-approval"
                 element={<ProfileApproval />}
               />
-               <Route path="/partner/min-rate-astrologer" element={<MinRateAstrologer />} />
-               <Route path="/partner/commission" element={<Commission/>}/>
+              <Route
+                path="/partner/min-rate-astrologer"
+                element={<MinRateAstrologer />}
+              />
+              <Route path="/partner/commission" element={<Commission />} />
               <Route path="/user" element={<AllUsers />} />
               <Route path="/complaints" element={<Complaints />} />
               <Route path="/tickets" element={<Tickets />} />
+              <Route path="/keywords" element={<RestrictionKeywords />} />
             </Route>
           </Route>
 

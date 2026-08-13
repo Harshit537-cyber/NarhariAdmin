@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
 import { AlertCircle, Ticket, Bell } from "lucide-react";
+import { FaBan } from "react-icons/fa";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -194,6 +195,18 @@ export default function Sidebar() {
         >
           <IconBanner />
           <span className="an-nav-text">Banner Management</span>
+        </NavLink>
+
+
+
+        <NavLink
+          to="/keywords"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <FaBan />
+          <span className="an-nav-text">Restriction Keywords</span>
         </NavLink>
 
 

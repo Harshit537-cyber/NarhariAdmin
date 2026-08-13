@@ -9,113 +9,17 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaTimes,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaHourglassHalf,
+  FaTrash,
 } from "react-icons/fa";
 
-/* ---------------------------------------------------
-   DUMMY DATA (replace with real API calls when ready)
---------------------------------------------------- */
-const DUMMY_COMMISSIONS = [
-  {
-    _id: "c1",
-    astrologerName: "Pandit Ravi Shankar",
-    astrologerImage: "",
-    orderId: "ORD-10231",
-    ritualTitle: "Navgraha Shanti Puja",
-    orderAmount: 4999,
-    commissionPercent: 20,
-    commissionAmount: 999.8,
-    status: "paid",
-    payoutDate: "2026-08-01",
-  },
-  {
-    _id: "c2",
-    astrologerName: "Acharya Meera Joshi",
-    astrologerImage: "",
-    orderId: "ORD-10254",
-    ritualTitle: "Rudra Abhishek",
-    orderAmount: 2999,
-    commissionPercent: 15,
-    commissionAmount: 449.85,
-    status: "pending",
-    payoutDate: "2026-08-10",
-  },
-  {
-    _id: "c3",
-    astrologerName: "Pandit Suresh Tiwari",
-    astrologerImage: "",
-    orderId: "ORD-10267",
-    ritualTitle: "Career Success Havan",
-    orderAmount: 3499,
-    commissionPercent: 18,
-    commissionAmount: 629.82,
-    status: "pending",
-    payoutDate: "2026-08-12",
-  },
-  {
-    _id: "c4",
-    astrologerName: "Acharya Deepak Nair",
-    astrologerImage: "",
-    orderId: "ORD-10289",
-    ritualTitle: "Kaal Sarp Dosh Puja",
-    orderAmount: 5999,
-    commissionPercent: 20,
-    commissionAmount: 1199.8,
-    status: "paid",
-    payoutDate: "2026-07-28",
-  },
-  {
-    _id: "c5",
-    astrologerName: "Pandit Ravi Shankar",
-    astrologerImage: "",
-    orderId: "ORD-10301",
-    ritualTitle: "Griha Pravesh Puja",
-    orderAmount: 6499,
-    commissionPercent: 20,
-    commissionAmount: 1299.8,
-    status: "hold",
-    payoutDate: "2026-08-15",
-  },
-  {
-    _id: "c6",
-    astrologerName: "Acharya Meera Joshi",
-    astrologerImage: "",
-    orderId: "ORD-10318",
-    ritualTitle: "Manglik Dosh Nivaran",
-    orderAmount: 3999,
-    commissionPercent: 15,
-    commissionAmount: 599.85,
-    status: "paid",
-    payoutDate: "2026-08-05",
-  },
-];
+import { getAllPartners } from "../../api/Controller/partner.js";
 
-/* Dummy async helpers - simulate network latency.
-   Swap these out for real API calls (e.g. ../../api/Controller/commissions) later. */
-const getAllCommissionsDummy = () =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve({ data: DUMMY_COMMISSIONS }), 600);
-  });
-
-const addCommissionDummy = (payload) =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        data: {
-          _id: "c" + Math.random().toString(36).slice(2, 8),
-          ...payload,
-        },
-      });
-    }, 600);
-  });
-
-const STATUS_META = {
-  paid: { label: "Paid", icon: <FaCheckCircle />, cls: "active" },
-  pending: { label: "Pending", icon: <FaHourglassHalf />, cls: "pending" },
-  hold: { label: "On Hold", icon: <FaTimesCircle />, cls: "inactive" },
-};
+import {
+  getAllComissions,
+  setCommission,
+  updateCommission,
+  deleteCommission,
+} from "../../api/Controller/commision.js";
 
 export default function Commission() {
   const [commissions, setCommissions] = useState([]);
@@ -125,119 +29,191 @@ export default function Commission() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [formData, setFormData] = useState(null);
+
   const [addFormData, setAddFormData] = useState({
-    astrologerName: "",
-    orderId: "",
-    ritualTitle: "",
-    orderAmount: "",
-    commissionPercent: "",
-    status: "pending",
-    payoutDate: "",
+    partnerId: "",
+    commissionPercentage: "",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    fetchCommissions();
-  }, []);
+  const [allPartners, setAllPartners] = useState([]);
+
+  const fetchAllPartners = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllPartners();
+      setAllPartners(res.data.data || res.data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchCommissions = async () => {
-    setLoading(true);
     try {
-      const res = await getAllCommissionsDummy();
-      setCommissions(res.data || []);
-    } catch (err) {
-      toast.error(err.message || "Failed to load commissions");
+      setLoading(true);
+
+      const res = await getAllComissions();
+
+      if (res.data?.success) {
+        setCommissions(res.data.data || []);
+      } else {
+        setCommissions([]);
+        toast.error(res.data?.message || "Failed to load commissions");
+      }
+    } catch (error) {
+      console.error("Get all commissions error:", error);
+
+      setCommissions([]);
+      toast.error(
+        error.response?.data?.message || "Failed to load commissions",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const calcCommissionAmount = (orderAmount, percent) => {
-    const amt = parseFloat(orderAmount) || 0;
-    const pct = parseFloat(percent) || 0;
-    return +((amt * pct) / 100).toFixed(2);
-  };
+  useEffect(() => {
+    fetchAllPartners();
+    fetchCommissions();
+  }, []);
 
   const handleAddCommission = async () => {
-    if (!addFormData.astrologerName || !addFormData.orderId) {
-      toast.error("Astrologer name and Order ID are required");
+    if (!addFormData.partnerId) {
+      toast.error("Please select a partner");
+      return;
+    }
+
+    if (!addFormData.commissionPercentage) {
+      toast.error("Please enter commission percentage");
+      return;
+    }
+
+    const percentage = Number(addFormData.commissionPercentage);
+
+    if (percentage < 0 || percentage > 100) {
+      toast.error("Commission percentage must be between 0 and 100");
       return;
     }
 
     try {
-      const commissionAmount = calcCommissionAmount(
-        addFormData.orderAmount,
-        addFormData.commissionPercent
-      );
-
       const payload = {
-        astrologerName: addFormData.astrologerName,
-        orderId: addFormData.orderId,
-        ritualTitle: addFormData.ritualTitle,
-        orderAmount: parseFloat(addFormData.orderAmount) || 0,
-        commissionPercent: parseFloat(addFormData.commissionPercent) || 0,
-        commissionAmount,
-        status: addFormData.status,
-        payoutDate: addFormData.payoutDate,
+        partnerId: addFormData.partnerId,
+        commissionPercentage: percentage,
       };
 
-      const res = await addCommissionDummy(payload);
+      const res = await setCommission(payload);
 
-      setCommissions((prev) => [res.data, ...prev]);
-      toast.success("Commission added successfully!");
-      setShowAddModal(false);
-      setAddFormData({
-        astrologerName: "",
-        orderId: "",
-        ritualTitle: "",
-        orderAmount: "",
-        commissionPercent: "",
-        status: "pending",
-        payoutDate: "",
-      });
-    } catch (err) {
-      toast.error(err.message || "Failed to add commission");
+      if (res.data?.success) {
+        toast.success(res.data?.message || "Commission set successfully!");
+
+        setShowAddModal(false);
+
+        setAddFormData({
+          partnerId: "",
+          commissionPercentage: "",
+        });
+
+        fetchCommissions();
+      } else {
+        toast.error(res.data?.message || "Failed to set commission");
+      }
+    } catch (error) {
+      console.error("Set commission error:", error);
+
+      toast.error(error.response?.data?.message || "Failed to set commission");
+    }
+  };
+
+  const handleDelete = async (commissionId) => {
+    if (!commissionId) {
+      toast.error("Commission ID is missing");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this commission?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const res = await deleteCommission(commissionId);
+
+      if (res.data?.success) {
+        toast.success(res.data?.message || "Commission deleted successfully");
+
+        // Remove deleted commission immediately from UI
+        setCommissions((prev) =>
+          prev.filter((item) => item._id !== commissionId),
+        );
+
+        // Optional: refresh from backend
+        // await fetchCommissions();
+      } else {
+        toast.error(res.data?.message || "Failed to delete commission");
+      }
+    } catch (error) {
+      console.error("Delete commission error:", error);
+
+      toast.error(
+        error.response?.data?.message || "Failed to delete commission",
+      );
     }
   };
 
   // ---- UPDATE COMMISSION (dummy) ----
-  const handleSaveCommission = () => {
+  const handleSaveCommission = async () => {
     if (!formData) return;
 
-    const commissionAmount = calcCommissionAmount(
-      formData.orderAmount,
-      formData.commissionPercent
-    );
+    const percentage = Number(formData.commissionPercentage);
 
-    setCommissions((prev) =>
-      prev.map((item) =>
-        item._id === formData._id
-          ? {
-              ...item,
-              astrologerName: formData.astrologerName,
-              orderId: formData.orderId,
-              ritualTitle: formData.ritualTitle,
-              orderAmount: parseFloat(formData.orderAmount) || 0,
-              commissionPercent: parseFloat(formData.commissionPercent) || 0,
-              commissionAmount,
-              status: formData.status,
-              payoutDate: formData.payoutDate,
-            }
-          : item
-      )
-    );
+    if (formData.commissionPercentage === "" || Number.isNaN(percentage)) {
+      toast.error("Please enter commission percentage");
+      return;
+    }
 
-    toast.success("Commission updated successfully!");
-    setShowEditModal(false);
+    if (percentage < 0 || percentage > 100) {
+      toast.error("Commission percentage must be between 0 and 100");
+      return;
+    }
+
+    try {
+      const payload = {
+        commissionPercentage: percentage,
+      };
+
+      const res = await updateCommission(formData._id, payload);
+
+      if (res.data?.success) {
+        toast.success(res.data?.message || "Commission updated successfully");
+
+        setShowEditModal(false);
+        setFormData(null);
+
+        fetchCommissions();
+      } else {
+        toast.error(res.data?.message || "Failed to update commission");
+      }
+    } catch (error) {
+      console.error("Update commission error:", error);
+
+      toast.error(
+        error.response?.data?.message || "Failed to update commission",
+      );
+    }
   };
 
   // ---- Pagination ----
   const totalPages = Math.max(1, Math.ceil(commissions.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCommissions = commissions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentCommissions = commissions.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -248,17 +224,14 @@ export default function Commission() {
   const openEditModal = (item) => {
     setFormData({
       _id: item._id,
-      astrologerName: item.astrologerName || "",
-      orderId: item.orderId || "",
-      ritualTitle: item.ritualTitle || "",
-      orderAmount: item.orderAmount ?? "",
-      commissionPercent: item.commissionPercent ?? "",
-      status: item.status || "pending",
-      payoutDate: item.payoutDate || "",
+      partnerId: item.partnerId?._id || item.partnerId || "",
+      partnerName: item.partnerId?.fullName || "Unnamed Partner",
+      mobile: item.partnerId?.mobile || "",
+      commissionPercentage: item.commissionPercentage ?? "",
     });
+
     setShowEditModal(true);
   };
-
   // Totals for the summary strip
   const totalPaid = commissions
     .filter((c) => c.status === "paid")
@@ -284,13 +257,17 @@ export default function Commission() {
             <h1 className="wrapped-header-title">Commission Manager</h1>
           </div>
           <p className="header-subtitle">
-            Track astrologer commissions, payout status, and earnings across every order.
+            Track astrologer commissions, payout status, and earnings across
+            every order.
           </p>
         </div>
 
         <div className="db-header-right">
-          <button className="btn-add-cosmic" onClick={() => setShowAddModal(true)}>
-            <FaPlus /> Add Commission
+          <button
+            className="btn-add-cosmic"
+            onClick={() => setShowAddModal(true)}
+          >
+            <FaPlus /> Set Commission
           </button>
         </div>
       </header>
@@ -307,7 +284,9 @@ export default function Commission() {
         </div>
         <div className="summary-pill-card">
           <span className="summary-label">Total Pending</span>
-          <span className="summary-value pending">₹{totalPending.toFixed(2)}</span>
+          <span className="summary-value pending">
+            ₹{totalPending.toFixed(2)}
+          </span>
         </div>
       </div>
 
@@ -325,67 +304,135 @@ export default function Commission() {
           <table className="khatarnak-table">
             <thead>
               <tr>
-                <th>ASTROLOGER</th>
-                <th>ORDER / RITUAL</th>
-                <th>ORDER AMT</th>
+                <th>PARTNER</th>
+                <th>MOBILE</th>
                 <th>COMMISSION</th>
-                <th>STATUS</th>
+                <th>CREATED DATE</th>
+                <th>LAST UPDATED</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center", padding: "60px" }}>
+                  <td
+                    colSpan="6"
+                    style={{ textAlign: "center", padding: "60px" }}
+                  >
                     <div className="gold-loader"></div>
                   </td>
                 </tr>
               ) : commissions.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center", padding: "40px" }}>
+                  <td
+                    colSpan="6"
+                    style={{ textAlign: "center", padding: "40px" }}
+                  >
                     No commission records found.
                   </td>
                 </tr>
               ) : (
                 currentCommissions.map((item) => {
-                  const meta = STATUS_META[item.status] || STATUS_META.pending;
+                  const partner = item.partnerId || {};
+
                   return (
                     <tr key={item._id}>
+                      {/* Partner */}
                       <td>
-                        <span className="main-name">{item.astrologerName}</span>
+                        <div className="partner-table-info">
+                          <img
+                            src={
+                              partner.profilePic ||
+                              "https://via.placeholder.com/50"
+                            }
+                            alt={partner.fullName || "Partner"}
+                            className="partner-table-avatar"
+                          />
+
+                          <div>
+                            <span className="main-name">
+                              {partner.fullName || "Unnamed Partner"}
+                            </span>
+
+                            <span className="desc-cell">
+                              ID: {partner._id || "—"}
+                            </span>
+                          </div>
+                        </div>
                       </td>
 
+                      {/* Mobile */}
                       <td>
-                        <span className="main-name">{item.orderId}</span>
-                        <br />
-                        <span className="desc-cell">{item.ritualTitle || "—"}</span>
+                        <span className="desc-cell">
+                          {partner.mobile || "—"}
+                        </span>
                       </td>
 
+                      {/* Commission */}
                       <td>
-                        <span className="desc-cell">₹{item.orderAmount}</span>
-                      </td>
-
-                      <td>
-                        <span className="main-name">
-                          ₹{item.commissionAmount}{" "}
-                          <span className="desc-cell">
-                            ({item.commissionPercent}%)
+                        <div className="commission-value">
+                          <span className="commission-percentage">
+                            {item.commissionPercentage}%
                           </span>
-                        </span>
+                          <span className="commission-label">Commission</span>
+                        </div>
                       </td>
 
+                      {/* Created Date */}
                       <td>
-                        <span className={`status-pill ${meta.cls}`}>
-                          {meta.icon} {meta.label}
+                        <span className="desc-cell">
+                          {item.createdAt
+                            ? new Date(item.createdAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )
+                            : "—"}
                         </span>
                       </td>
 
-                      <td style={{ textAlign: "right" }}>
+                      {/* Updated Date */}
+                      <td>
+                        <span className="desc-cell">
+                          {item.updatedAt
+                            ? new Date(item.updatedAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )
+                            : "—"}
+                        </span>
+                      </td>
+
+                      {/* Action */}
+                      <td
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-end",
+                          gap: "8px",
+                        }}
+                      >
                         <button
                           className="btn-pro btn-pro-edit"
                           onClick={() => openEditModal(item)}
+                          title="Edit Commission"
                         >
-                          <FaEdit /> Edit
+                          <FaEdit />
+                        </button>
+
+                        <button
+                          className="btn-pro btn-pro-delete"
+                          onClick={() => handleDelete(item._id)}
+                          title="Delete Commission"
+                        >
+                          <FaTrash />
                         </button>
                       </td>
                     </tr>
@@ -407,17 +454,19 @@ export default function Commission() {
               <FaChevronLeft />
             </button>
 
-            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-              <button
-                key={page}
-                className={`pagination-btn number-btn ${
-                  currentPage === page ? "active" : ""
-                }`}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  className={`pagination-btn number-btn ${
+                    currentPage === page ? "active" : ""
+                  }`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ),
+            )}
 
             <button
               className="pagination-btn arrow-btn"
@@ -432,14 +481,17 @@ export default function Commission() {
 
       {/* Add Commission Modal */}
       {showAddModal && (
-        <div className="ultra-modal-backdrop" onClick={() => setShowAddModal(false)}>
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setShowAddModal(false)}
+        >
           <div
             className="ultra-modal-box edit-modal-box"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="ultra-modal-header">
               <div className="modal-header-top">
-                <h3>Add New Commission</h3>
+                <h3>Set New Commission</h3>
                 <button
                   className="modal-close-btn"
                   onClick={() => setShowAddModal(false)}
@@ -451,99 +503,50 @@ export default function Commission() {
             </div>
 
             <div className="edit-form-body">
-              <div className="form-group">
-                <label>Astrologer Name</label>
-                <input
-                  type="text"
-                  value={addFormData.astrologerName}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, astrologerName: e.target.value })
-                  }
-                />
-              </div>
+              <div className="edit-form-body">
+                {/* Partner */}
+                <div className="form-group">
+                  <label>Partner</label>
 
-              <div className="form-group">
-                <label>Order ID</label>
-                <input
-                  type="text"
-                  value={addFormData.orderId}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, orderId: e.target.value })
-                  }
-                />
-              </div>
+                  <select
+                    value={addFormData.partnerId}
+                    onChange={(e) =>
+                      setAddFormData({
+                        ...addFormData,
+                        partnerId: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select Partner</option>
 
-              <div className="form-group">
-                <label>Ritual / Service</label>
-                <input
-                  type="text"
-                  value={addFormData.ritualTitle}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, ritualTitle: e.target.value })
-                  }
-                />
-              </div>
+                    {allPartners.map((partner) => (
+                      <option key={partner._id} value={partner._id}>
+                        {partner.fullName ||
+                          partner.mobile ||
+                          "Unnamed Partner"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="form-group">
-                <label>Order Amount (₹)</label>
-                <input
-                  type="text"
-                  value={addFormData.orderAmount}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, orderAmount: e.target.value })
-                  }
-                />
-              </div>
+                {/* Commission Percentage */}
+                <div className="form-group">
+                  <label>Commission Percentage (%)</label>
 
-              <div className="form-group">
-                <label>Commission (%)</label>
-                <input
-                  type="text"
-                  value={addFormData.commissionPercent}
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      commissionPercent: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Computed Commission Amount</label>
-                <input
-                  type="text"
-                  disabled
-                  value={`₹${calcCommissionAmount(
-                    addFormData.orderAmount,
-                    addFormData.commissionPercent
-                  )}`}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Status</label>
-                <select
-                  value={addFormData.status}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, status: e.target.value })
-                  }
-                >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="hold">On Hold</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Payout Date</label>
-                <input
-                  type="date"
-                  value={addFormData.payoutDate}
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, payoutDate: e.target.value })
-                  }
-                />
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Enter commission percentage"
+                    value={addFormData.commissionPercentage}
+                    onChange={(e) =>
+                      setAddFormData({
+                        ...addFormData,
+                        commissionPercentage: e.target.value,
+                      })
+                    }
+                  />
+                </div>
               </div>
             </div>
 
@@ -554,8 +557,11 @@ export default function Commission() {
               >
                 Cancel
               </button>
-              <button className="btn-modal-pro save" onClick={handleAddCommission}>
-                Add Commission
+              <button
+                className="btn-modal-pro save"
+                onClick={handleAddCommission}
+              >
+                Set Commission
               </button>
             </div>
           </div>
@@ -564,14 +570,23 @@ export default function Commission() {
 
       {/* Edit Commission Modal */}
       {showEditModal && formData && (
-        <div className="ultra-modal-backdrop" onClick={() => setShowEditModal(false)}>
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setShowEditModal(false)}
+        >
           <div
             className="ultra-modal-box edit-modal-box"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="ultra-modal-header">
               <div className="modal-header-top">
-                <h3>Edit Commission</h3>
+                <div>
+                  <h3>Edit Commission</h3>
+                  <p className="modal-subtitle">
+                    Update commission percentage for this partner
+                  </p>
+                </div>
+
                 <button
                   className="modal-close-btn"
                   onClick={() => setShowEditModal(false)}
@@ -579,98 +594,45 @@ export default function Commission() {
                   <FaTimes />
                 </button>
               </div>
+
               <div className="modal-title-underline"></div>
             </div>
 
             <div className="edit-form-body">
-              <div className="form-group">
-                <label>Astrologer Name</label>
-                <input
-                  type="text"
-                  value={formData.astrologerName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, astrologerName: e.target.value })
-                  }
-                />
+              {/* Partner */}
+              <div className="partner-preview-card">
+                <div className="partner-preview-avatar">
+                  <span>
+                    {formData.partnerName?.charAt(0)?.toUpperCase() || "P"}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="partner-preview-name">
+                    {formData.partnerName}
+                  </span>
+
+                  <span className="partner-preview-mobile">
+                    {formData.mobile || "No mobile"}
+                  </span>
+                </div>
               </div>
 
+              {/* Commission */}
               <div className="form-group">
-                <label>Order ID</label>
-                <input
-                  type="text"
-                  value={formData.orderId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, orderId: e.target.value })
-                  }
-                />
-              </div>
+                <label>Commission Percentage (%)</label>
 
-              <div className="form-group">
-                <label>Ritual / Service</label>
                 <input
-                  type="text"
-                  value={formData.ritualTitle}
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Enter commission percentage"
+                  value={formData.commissionPercentage}
                   onChange={(e) =>
-                    setFormData({ ...formData, ritualTitle: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Order Amount (₹)</label>
-                <input
-                  type="text"
-                  value={formData.orderAmount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, orderAmount: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Commission (%)</label>
-                <input
-                  type="text"
-                  value={formData.commissionPercent}
-                  onChange={(e) =>
-                    setFormData({ ...formData, commissionPercent: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Computed Commission Amount</label>
-                <input
-                  type="text"
-                  disabled
-                  value={`₹${calcCommissionAmount(
-                    formData.orderAmount,
-                    formData.commissionPercent
-                  )}`}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="hold">On Hold</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Payout Date</label>
-                <input
-                  type="date"
-                  value={formData.payoutDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, payoutDate: e.target.value })
+                    setFormData({
+                      ...formData,
+                      commissionPercentage: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -683,7 +645,11 @@ export default function Commission() {
               >
                 Cancel
               </button>
-              <button className="btn-modal-pro save" onClick={handleSaveCommission}>
+
+              <button
+                className="btn-modal-pro save"
+                onClick={handleSaveCommission}
+              >
                 Save Changes
               </button>
             </div>
