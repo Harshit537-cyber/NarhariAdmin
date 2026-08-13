@@ -677,15 +677,18 @@
   width: 90%;
   max-width: 460px;
   max-height: 85vh;
-  overflow-y: auto;
-  background: #ffffff;
+overflow-y: scroll;
+scrollbar-width: none; /* Firefox */
+-ms-overflow-style: none;  background: #ffffff;
   border-radius: 24px;
   padding: 32px;
   box-shadow: 0 30px 60px rgba(11, 15, 25, 0.3);
   border: 1.5px solid rgba(255, 255, 255, 1);
   animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
+.pandit-modal-box::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
+}
 .pandit-modal-close {
   position: absolute;
   top: 18px;
@@ -854,7 +857,7 @@
   .pandit-form-row { grid-template-columns: 1fr; }
 }
 .add-ritual-btn{
-  background:linear-gradient(135deg,#b38c1b,#d97706);
+  background:linear-gradient(135deg,#ddb53f,#ac8f33);
   color:white;
   border:none;
   padding:14px 28px;
@@ -869,4 +872,191 @@
 .add-ritual-btn:hover{
  transform:translateY(-3px);
  box-shadow:0 18px 35px rgba(179,140,27,.35);
+}
+
+/* ================= EDIT MODAL PREMIUM DESIGN ================= */
+
+.pandit-modal-box {
+  width: 720px;
+  max-width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.18);
+}
+
+
+/* Modal Heading */
+.pandit-modal-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 25px;
+  background: linear-gradient(90deg,#746c32,#2e2207);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+
+/* Form Layout */
+
+.pandit-form-group {
+  margin-bottom: 18px;
+}
+
+
+.pandit-form-group label {
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:8px;
+  color:#334155;
+}
+
+
+/* Input Design */
+
+.pandit-form-group input,
+.pandit-form-group select,
+.pandit-form-group textarea {
+
+  width:100%;
+  padding:13px 15px;
+  border-radius:14px;
+  border:1px solid #e2e8f0;
+  background:#f8fafc;
+  font-size:14px;
+  outline:none;
+  transition:0.3s;
+}
+
+
+.pandit-form-group input:focus,
+.pandit-form-group select:focus,
+.pandit-form-group textarea:focus {
+
+  border-color:#8b5cf6;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(139,92,246,0.12);
+
+}
+
+
+/* Textarea */
+
+.pandit-form-group textarea {
+  min-height:110px;
+  resize:none;
+}
+
+
+
+/* Two column fields */
+
+.pandit-form-row {
+
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:18px;
+
+}
+
+
+
+/* Buttons */
+
+.pandit-modal-actions {
+
+ display:flex;
+ justify-content:flex-end;
+ gap:14px;
+ margin-top:25px;
+
+}
+
+
+.pandit-btn-primary {
+
+ background:linear-gradient(135deg,#614b10,#35301b);
+ color:white;
+ border:none;
+ padding:12px 25px;
+ border-radius:14px;
+ font-weight:700;
+ cursor:pointer;
+ transition:.3s;
+
+}
+
+
+.pandit-btn-primary:hover {
+
+ transform:translateY(-2px);
+ box-shadow:0 10px 25px rgba(124,58,237,.35);
+
+}
+
+
+
+.pandit-btn-secondary {
+
+ background:#f1f5f9;
+ color:#796d09;
+ border:none;
+ padding:12px 25px;
+ border-radius:14px;
+ font-weight:700;
+ cursor:pointer;
+
+}
+
+
+/* Close Button */
+
+.pandit-modal-close {
+
+ width:38px;
+ height:38px;
+ border-radius:50%;
+ border:none;
+ background:#f1f5f9;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ cursor:pointer;
+ transition:.3s;
+
+}
+
+
+.pandit-modal-close:hover {
+
+ background:#fee2e2;
+ color:#ef4444;
+
+}
+
+
+/* Mobile */
+
+@media(max-width:600px){
+
+.pandit-modal-box{
+ padding:20px;
+}
+
+.pandit-form-row{
+ grid-template-columns:1fr;
+}
+
+.pandit-modal-actions{
+ flex-direction:column;
+}
+
+.pandit-btn-primary,
+.pandit-btn-secondary{
+ width:100%;
+}
+
 }

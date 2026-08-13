@@ -24,6 +24,8 @@ import Category from "./pages/Category/Category.jsx"
 import Rituals from "./pages/Rituals/Rituals.jsx";
 import MinRateAstrologer from "./pages/MinRateAstrologer/MinRateAstrologer.jsx"
 import Pandit from "./pages/Pandit/Pandit.jsx"
+import Commission from "./pages/Commission/Commission.jsx"
+import PushNotification from "./pages/Notitification/Notification.jsx"
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -59,7 +61,7 @@ const AppRoutes = () => {
               <Route path="/category" element={<Category/>}/>
               <Route path="/rituals" element={<Rituals />} />
                                      <Route path="/pandit" element={<Pandit />} />
-
+<Route path="push-notification"element={<PushNotification/>}/>
 
               <Route
                 path="/partner/kyc-verification"
@@ -70,6 +72,7 @@ const AppRoutes = () => {
                 element={<ProfileApproval />}
               />
                <Route path="/partner/min-rate-astrologer" element={<MinRateAstrologer />} />
+               <Route path="/partner/commission" element={<Commission/>}/>
               <Route path="/user" element={<AllUsers />} />
               <Route path="/complaints" element={<Complaints />} />
               <Route path="/tickets" element={<Tickets />} />

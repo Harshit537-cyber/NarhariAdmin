@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
-import { AlertCircle, Ticket } from "lucide-react";
+import { AlertCircle, Ticket, Bell } from "lucide-react";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -19,15 +19,15 @@ export default function Sidebar() {
     location.pathname.startsWith("/chats")
   );
 
-  
+
   const handleLogoutConfirm = () => {
-  
+
     localStorage.clear();
 
-  
+
     setShowModal(false);
 
-  
+
     navigate("/login", { replace: true });
   };
 
@@ -74,9 +74,8 @@ export default function Sidebar() {
         {/* Collapsible Partner Menu */}
         <div className="an-nav-group">
           <button
-            className={`an-nav-item an-nav-parent ${
-              partnerOpen ? "is-open" : ""
-            }`}
+            className={`an-nav-item an-nav-parent ${partnerOpen ? "is-open" : ""
+              }`}
             onClick={() => setPartnerOpen((prev) => !prev)}
           >
             <IconPartner />
@@ -113,13 +112,23 @@ export default function Sidebar() {
               </NavLink>
 
               <NavLink
-  to="/partner/min-rate-astrologer"
-  className={({ isActive }) =>
-    `an-nav-subitem ${isActive ? "is-active" : ""}`
-  }
->
-  <span>Min Rate Astrologer</span>
-</NavLink>
+                to="/partner/min-rate-astrologer"
+                className={({ isActive }) =>
+                  `an-nav-subitem ${isActive ? "is-active" : ""}`
+                }
+              >
+                <span>Min Rate Astrologer</span>
+              </NavLink>
+
+
+              <NavLink
+                to="/partner/commission"
+                className={({ isActive }) =>
+                  `an-nav-subitem ${isActive ? "is-active" : ""}`
+                }
+              >
+                <span>Commission</span>
+              </NavLink>
             </div>
           )}
         </div>
@@ -127,9 +136,8 @@ export default function Sidebar() {
         {/* Collapsible User Menu */}
         <div className="an-nav-group">
           <button
-            className={`an-nav-item an-nav-parent ${
-              userOpen ? "is-open" : ""
-            }`}
+            className={`an-nav-item an-nav-parent ${userOpen ? "is-open" : ""
+              }`}
             onClick={() => setUserOpen((prev) => !prev)}
           >
             <IconUser />
@@ -153,26 +161,30 @@ export default function Sidebar() {
 
         </div>
 
-        {/* Pandit Ji */}
-<NavLink
-  to="/pandit"
-  className={({ isActive }) =>
-    `an-nav-item ${isActive ? "is-active" : ""}`
-  }
->
-  <IconPartner />
-  <span className="an-nav-text">Pandit Ji</span>
-</NavLink>
-{/* Rituals */}
-<NavLink
-  to="/rituals"
-  className={({ isActive }) =>
-    `an-nav-item ${isActive ? "is-active" : ""}`
-  }
->
-  <IconRituals />
-  <span className="an-nav-text">Rituals</span>
-</NavLink>
+        <NavLink
+          to="/pandit"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconPartner />
+          <span className="an-nav-text">Pandit Ji</span>
+        </NavLink>
+
+
+        {/* Rituals */}
+        <NavLink
+          to="/rituals"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconRituals />
+          <span className="an-nav-text">Rituals</span>
+        </NavLink>
+
+
+
         {/* Banner Management */}
         <NavLink
           to="/banners"
@@ -184,12 +196,14 @@ export default function Sidebar() {
           <span className="an-nav-text">Banner Management</span>
         </NavLink>
 
+
+
+
         {/* Collapsible Chats Menu */}
         <div className="an-nav-group">
           <button
-            className={`an-nav-item an-nav-parent ${
-              chatsOpen ? "is-open" : ""
-            }`}
+            className={`an-nav-item an-nav-parent ${chatsOpen ? "is-open" : ""
+              }`}
             onClick={() => setChatsOpen((prev) => !prev)}
           >
             <IconChat />
@@ -232,16 +246,16 @@ export default function Sidebar() {
           <IconBox />
           <span className="an-nav-text">Product</span>
         </NavLink>
-{/* Category */}
-<NavLink
-  to="/category"
-  className={({ isActive }) =>
-    `an-nav-item ${isActive ? "is-active" : ""}`
-  }
->
-  <IconCategory />
-  <span className="an-nav-text">Category</span>
-</NavLink>
+        {/* Category */}
+        <NavLink
+          to="/category"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <IconCategory />
+          <span className="an-nav-text">Category</span>
+        </NavLink>
         {/* Wallet */}
         <NavLink
           to="/wallet"
@@ -285,6 +299,19 @@ export default function Sidebar() {
           <IconList />
           <span className="an-nav-text">Orders</span>
         </NavLink>
+
+
+
+        <NavLink
+          to="/push-notification"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+       <Bell />
+          <span className="an-nav-text">Push Notification</span>
+        </NavLink>
+
 
         {/* Complaints */}
         <NavLink

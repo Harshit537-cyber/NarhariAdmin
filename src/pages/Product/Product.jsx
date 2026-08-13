@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { getProductList, addProduct, updateProduct,deleteProduct  } from "../../api/Controller/product";
+import { getProductList, addProduct, updateProduct,deleteProduct,getProductCategories  } from "../../api/Controller/product";
 import "./Product.css";
 import AddProductModal from "./AddProductModal";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,15 +23,24 @@ export default function Product() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState(null);
 const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [productCategories, setProductCategories] = useState([]);
 const [deleteId, setDeleteId] = useState(null);
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+useEffect(() => {
+  fetchCategories();
+  fetchProductCategories();
+}, []);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
+const fetchProductCategories = async () => {
+  try {
+    const response = await getProductCategories();
+    setProductCategories(response.data || []);
+  } catch (error) {
+    console.log(error);
+  }
+};
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -342,9 +351,7 @@ const confirmDeleteProduct = async () => {
     <h3>Edit Product Specifications</h3>
   </div>
 
-  <button className="modal-close-btn">
-    ×
-  </button>
+ 
 </div>
     
 
@@ -384,11 +391,24 @@ const confirmDeleteProduct = async () => {
 
               <div className="form-group">
                 <label>Category</label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                />
+               <select
+  value={formData.category}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      category: e.target.value
+    })
+  }
+>
+  <option value="">Select Category</option>
+
+  {productCategories.map((cat) => (
+    <option key={cat._id} value={cat._id}>
+      {cat.name}
+    </option>
+  ))}
+
+</select>
               </div>
 
               <div className="form-group">

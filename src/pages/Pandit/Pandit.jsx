@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Pandit.css";
+import { getAllPandits, deletePandit ,updatePandit  } from "../../api/Controller/pandit";
 import {
   FaEye,
   FaEdit,
@@ -18,157 +19,14 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaTimes,
+  FaLanguage,
+  FaWallet,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
-/* ---------------------------------------------------
-   DUMMY DATA (replace this with your API response later)
---------------------------------------------------- */
-const DUMMY_PANDITS = [
-  {
-    _id: "1",
-    fullName: "Pandit Ravi Shankar Sharma",
-    mobile: "9876543210",
-    city: "Varanasi",
-    experience: 18,
-    specialties: ["Vedic Astrology", "Vastu", "Kundli Matching"],
-    minRate: 35,
-    averageRating: "4.8",
-    isActive: true,
-    isVerified: true,
-    isOnline: true,
-    profilePic: "",
-    kycStatus: "approved",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "2",
-    fullName: "Pandit Mahesh Trivedi",
-    mobile: "9812345678",
-    city: "Haridwar",
-    experience: 12,
-    specialties: ["Numerology", "Palmistry"],
-    minRate: 25,
-    averageRating: "4.5",
-    isActive: false,
-    isVerified: true,
-    isOnline: false,
-    profilePic: "",
-    kycStatus: "pending",
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    _id: "3",
-    fullName: "Pandit Suresh Chandra Joshi",
-    mobile: "9900112233",
-    city: "Ujjain",
-    experience: 25,
-    specialties: ["Vedic Astrology", "Horoscope", "Gemology"],
-    minRate: 45,
-    averageRating: "4.9",
-    isActive: true,
-    isVerified: true,
-    isOnline: true,
-    profilePic: "",
-    kycStatus: "approved",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "4",
-    fullName: "Pandit Deepak Upadhyay",
-    mobile: "9765432190",
-    city: "Ayodhya",
-    experience: 8,
-    specialties: ["Tarot Reading"],
-    minRate: 20,
-    averageRating: "4.2",
-    isActive: true,
-    isVerified: false,
-    isOnline: false,
-    profilePic: "",
-    kycStatus: "pending",
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  {
-    _id: "5",
-    fullName: "Pandit Ashok Kumar Pandey",
-    mobile: "9911223344",
-    city: "Rishikesh",
-    experience: 30,
-    specialties: ["Vedic Astrology", "Vastu", "Pooja Vidhi"],
-    minRate: 50,
-    averageRating: "5.0",
-    isActive: true,
-    isVerified: true,
-    isOnline: true,
-    profilePic: "",
-    kycStatus: "approved",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "6",
-    fullName: "Pandit Vinod Shastri",
-    mobile: "9822334455",
-    city: "Nashik",
-    experience: 15,
-    specialties: ["Kundli Matching", "Numerology"],
-    minRate: 30,
-    averageRating: "4.6",
-    isActive: false,
-    isVerified: true,
-    isOnline: false,
-    profilePic: "",
-    kycStatus: "approved",
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  {
-    _id: "7",
-    fullName: "Pandit Ramesh Dubey",
-    mobile: "9888776655",
-    city: "Prayagraj",
-    experience: 10,
-    specialties: ["Vastu", "Face Reading"],
-    minRate: 22,
-    averageRating: "4.1",
-    isActive: true,
-    isVerified: false,
-    isOnline: true,
-    profilePic: "",
-    kycStatus: "pending",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "8",
-    fullName: "Pandit Girish Bhatt",
-    mobile: "9765123489",
-    city: "Mathura",
-    experience: 20,
-    specialties: ["Vedic Astrology", "Gemology", "Pooja Vidhi"],
-    minRate: 40,
-    averageRating: "4.7",
-    isActive: true,
-    isVerified: true,
-    isOnline: false,
-    profilePic: "",
-    kycStatus: "approved",
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  {
-    _id: "9",
-    fullName: "Pandit Naresh Tiwari",
-    mobile: "9654321870",
-    city: "Vrindavan",
-    experience: 6,
-    specialties: ["Tarot Reading", "Numerology"],
-    minRate: 18,
-    averageRating: "3.9",
-    isActive: false,
-    isVerified: false,
-    isOnline: false,
-    profilePic: "",
-    kycStatus: "pending",
-    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
-  },
-];
+
+
+const API_URL = "/api/admin/pandits"; // apna real endpoint yahan daal dena
 
 /* ---------------------------------------------------
    DELETE MODAL
@@ -200,53 +58,153 @@ function DeleteModal({ isOpen, onClose, onConfirm }) {
 }
 
 /* ---------------------------------------------------
-   VIEW MODAL
+   VIEW MODAL — sab real fields dikhane ke liye
 --------------------------------------------------- */
 function ViewPanditModal({ isOpen, onClose, pandit }) {
   if (!isOpen || !pandit) return null;
+
+  const dob = pandit.dateOfBirth
+    ? new Date(pandit.dateOfBirth).toLocaleDateString()
+    : "—";
+  const joined = pandit.createdAt
+    ? new Date(pandit.createdAt).toLocaleDateString()
+    : "—";
+
   return (
     <div className="pandit-modal-overlay" onClick={onClose}>
       <div className="pandit-modal-box" onClick={(e) => e.stopPropagation()}>
         <button className="pandit-modal-close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="pandit-modal-title">{pandit.fullName}</h3>
+        <h3 className="pandit-modal-title">
+          {pandit.fullName || "Profile Incomplete"}
+        </h3>
+
         <div className="pandit-modal-grid">
           <div>
             <span className="pandit-modal-label">Mobile</span>
-            <p>{pandit.mobile}</p>
+            <p>{pandit.mobile || "—"}</p>
           </div>
           <div>
             <span className="pandit-modal-label">City</span>
-            <p>{pandit.city}</p>
+            <p>{pandit.city || "—"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Gender</span>
+            <p>{pandit.gender || "—"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Date of Birth</span>
+            <p>{dob}</p>
           </div>
           <div>
             <span className="pandit-modal-label">Experience</span>
-            <p>{pandit.experience} Yrs</p>
+            <p>{pandit.experience ?? 0} Yrs</p>
           </div>
           <div>
-            <span className="pandit-modal-label">Rate</span>
-            <p>₹{pandit.minRate}/min</p>
+            <span className="pandit-modal-label">Vedic Education</span>
+            <p>{pandit.vedicEducation || "—"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Primary Category</span>
+            <p>{pandit.primaryCategory || "—"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Pooja Service Mode</span>
+            <p>{pandit.poojaServiceMode || "—"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Min Pooja Fee</span>
+            <p>₹{pandit.minPoojaFee ?? 0}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Expected Monthly Earning</span>
+            <p>₹{(pandit.expectedMonthlyEarnings ?? 0).toLocaleString()}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Wallet Balance</span>
+            <p>₹{pandit.walletBalance ?? 0}</p>
           </div>
           <div>
             <span className="pandit-modal-label">Rating</span>
-            <p>{pandit.averageRating}</p>
+            <p>
+              {pandit.averageRating ?? 0} ({pandit.totalReviews ?? 0} reviews)
+            </p>
           </div>
           <div>
-            <span className="pandit-modal-label">KYC Status</span>
-            <p>{pandit.kycStatus}</p>
+            <span className="pandit-modal-label">Approval Status</span>
+            <p>{pandit.profileApprovalStatus || "Pending"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Can Arrange Samagri</span>
+            <p>{pandit.canArrangeSamagri ? "Yes" : "No"}</p>
+          </div>
+          <div>
+            <span className="pandit-modal-label">Joined On</span>
+            <p>{joined}</p>
           </div>
         </div>
+
+        {pandit.bio && (
+          <>
+            <div className="pandit-modal-label" style={{ marginTop: 14 }}>
+              Bio
+            </div>
+            <p style={{ marginTop: 6 }}>{pandit.bio}</p>
+          </>
+        )}
+
         <div className="pandit-modal-label" style={{ marginTop: 14 }}>
-          Specialties
+          Expertise
         </div>
         <div className="specialties-row" style={{ marginTop: 8 }}>
-          {(pandit.specialties || []).map((s, i) => (
-            <span key={i} className="spec-tag">
-              {s}
-            </span>
-          ))}
+          {pandit.expertise && pandit.expertise.length > 0 ? (
+            pandit.expertise.map((s, i) => (
+              <span key={i} className="spec-tag">
+                {s}
+              </span>
+            ))
+          ) : (
+            <span className="spec-tag empty">Not added yet</span>
+          )}
         </div>
+
+        <div className="pandit-modal-label" style={{ marginTop: 14 }}>
+          Languages
+        </div>
+        <div className="specialties-row" style={{ marginTop: 8 }}>
+          {pandit.languages && pandit.languages.length > 0 ? (
+            pandit.languages.map((l, i) => (
+              <span key={i} className="spec-tag">
+                <FaLanguage style={{ marginRight: 4 }} />
+                {l}
+              </span>
+            ))
+          ) : (
+            <span className="spec-tag empty">Not added yet</span>
+          )}
+        </div>
+
+        {pandit.certificatePhotos && pandit.certificatePhotos.length > 0 && (
+          <>
+            <div className="pandit-modal-label" style={{ marginTop: 14 }}>
+              Certificates
+            </div>
+            <div className="specialties-row" style={{ marginTop: 8 }}>
+              {pandit.certificatePhotos.map((url, i) => (
+                <a
+                  key={i}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="spec-tag"
+                >
+                  Certificate {i + 1}
+                </a>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -255,33 +213,86 @@ function ViewPanditModal({ isOpen, onClose, pandit }) {
 /* ---------------------------------------------------
    EDIT MODAL
 --------------------------------------------------- */
-function EditPanditModal({ isOpen, onClose, pandit, onUpdated }) {
-  const [form, setForm] = useState({
-    fullName: "",
-    mobile: "",
-    city: "",
-    experience: 0,
-    minRate: 0,
-  });
+function EditPanditModal({ isOpen, onClose, pandit, onUpdated, showToast }) {
+const [form, setForm] = useState({
+  fullName: "",
+  mobile: "",
+  dateOfBirth: "",
+  gender: "",
+  city: "",
+  poojaServiceMode: "Online",
+  primaryCategory: "",
+  experience: 0,
+  vedicEducation: "",
+  canArrangeSamagri: false,
+  expectedMonthlyEarnings: 0,
+  minPoojaFee: 0,
+  bio: "",
+  isVerified: false,
+  isProfileComplete: false,
+  profileApprovalStatus: "Pending",
+  isOnline: false,
+  expertise: [],
+  languages: [],
+  certificatePhotos: [],
+});
 
   useEffect(() => {
     if (pandit) {
-      setForm({
-        fullName: pandit.fullName || "",
-        mobile: pandit.mobile || "",
-        city: pandit.city || "",
-        experience: pandit.experience || 0,
-        minRate: pandit.minRate || 0,
-      });
+     setForm({
+  fullName: pandit.fullName || "",
+  mobile: pandit.mobile || "",
+  dateOfBirth: pandit.dateOfBirth || "",
+  gender: pandit.gender || "",
+  city: pandit.city || "",
+  poojaServiceMode: pandit.poojaServiceMode || "Online",
+  primaryCategory: pandit.primaryCategory || "",
+  experience: pandit.experience || 0,
+  vedicEducation: pandit.vedicEducation || "",
+  canArrangeSamagri: pandit.canArrangeSamagri || false,
+  expectedMonthlyEarnings: pandit.expectedMonthlyEarnings || 0,
+  minPoojaFee: pandit.minPoojaFee || 0,
+  bio: pandit.bio || "",
+  isVerified: pandit.isVerified || false,
+  isProfileComplete: pandit.isProfileComplete || false,
+  profileApprovalStatus: pandit.profileApprovalStatus || "Pending",
+  isOnline: pandit.isOnline || false,
+  expertise: pandit.expertise || [],
+  languages: pandit.languages || [],
+  certificatePhotos: pandit.certificatePhotos || [],
+});
     }
   }, [pandit]);
 
   if (!isOpen || !pandit) return null;
 
-  const handleSave = () => {
-    onUpdated({ ...pandit, ...form });
+ const handleSave = async () => {
+  try {
+
+    const formData = new FormData();
+
+    Object.keys(form).forEach((key) => {
+      if (Array.isArray(form[key])) {
+        formData.append(key, JSON.stringify(form[key]));
+      } else {
+        formData.append(key, form[key]);
+      }
+    });
+
+
+    const response = await updatePandit(pandit._id, formData);
+
+    onUpdated(response.data || { ...pandit, ...form });
+
+    showToast("Pandit updated successfully");
+
     onClose();
-  };
+
+  } catch (error) {
+    console.log("Update Pandit Error:", error);
+    showToast("Failed to update pandit", "error");
+  }
+};
 
   return (
     <div className="pandit-modal-overlay" onClick={onClose}>
@@ -324,17 +335,188 @@ function EditPanditModal({ isOpen, onClose, pandit, onUpdated }) {
             />
           </div>
           <div className="pandit-form-group">
-            <label>Rate (₹/min)</label>
+            <label>Min Pooja Fee (₹)</label>
             <input
               type="number"
-              value={form.minRate}
+              value={form.minPoojaFee}
               onChange={(e) =>
-                setForm({ ...form, minRate: Number(e.target.value) })
+                setForm({ ...form, minPoojaFee: Number(e.target.value) })
               }
             />
           </div>
         </div>
+        <div className="pandit-form-row">
+        
+         
+        </div>
+        <div className="pandit-form-row">
+       
+      
+        </div>
+       <div className="pandit-form-group">
+  <label>Date of Birth</label>
+  <input
+    type="date"
+    value={form.dateOfBirth}
+    onChange={(e) =>
+      setForm({ ...form, dateOfBirth: e.target.value })
+    }
+  />
+</div>
 
+<div className="pandit-form-group">
+  <label>Expected Monthly Earnings</label>
+  <input
+    type="number"
+    value={form.expectedMonthlyEarnings}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        expectedMonthlyEarnings: Number(e.target.value),
+      })
+    }
+  />
+</div>
+
+<div className="pandit-form-group">
+  <label>Can Arrange Samagri</label>
+  <select
+    value={form.canArrangeSamagri}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        canArrangeSamagri: e.target.value === "true",
+      })
+    }
+  >
+    <option value="true">Yes</option>
+    <option value="false">No</option>
+  </select>
+</div>
+
+<div className="pandit-form-group">
+  <label>Profile Approval Status</label>
+  <select
+    value={form.profileApprovalStatus}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        profileApprovalStatus: e.target.value,
+      })
+    }
+  >
+    <option value="Pending">Pending</option>
+    <option value="approved">Approved</option>
+    <option value="Rejected">Rejected</option>
+  </select>
+</div>
+<div className="pandit-form-group">
+  <label>Gender</label>
+  <select
+    value={form.gender}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        gender: e.target.value,
+      })
+    }
+  >
+    <option value="">Select Gender</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+
+<div className="pandit-form-group">
+  <label>Pooja Service Mode</label>
+  <select
+    value={form.poojaServiceMode}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        poojaServiceMode: e.target.value,
+      })
+    }
+  >
+    <option value="Online">Online</option>
+    <option value="Offline">Offline</option>
+    <option value="Both">Both</option>
+  </select>
+</div>
+
+<div className="pandit-form-group">
+  <label>Primary Category</label>
+  <input
+    type="text"
+    value={form.primaryCategory}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        primaryCategory: e.target.value,
+      })
+    }
+  />
+</div>
+
+<div className="pandit-form-group">
+  <label>Vedic Education</label>
+  <input
+    type="text"
+    value={form.vedicEducation}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        vedicEducation: e.target.value,
+      })
+    }
+  />
+</div>
+
+<div className="pandit-form-group">
+  <label>Bio</label>
+  <textarea
+    value={form.bio}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        bio: e.target.value,
+      })
+    }
+  />
+</div>
+
+<div className="pandit-form-group">
+  <label>Is Verified</label>
+  <select
+    value={form.isVerified}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        isVerified: e.target.value === "true",
+      })
+    }
+  >
+    <option value="true">Yes</option>
+    <option value="false">No</option>
+  </select>
+</div>
+
+<div className="pandit-form-group">
+  <label>Online Status</label>
+  <select
+    value={form.isOnline}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        isOnline: e.target.value === "true",
+      })
+    }
+  >
+    <option value="true">Online</option>
+    <option value="false">Offline</option>
+  </select>
+</div>
         <div className="pandit-modal-actions">
           <button className="pandit-btn-secondary" onClick={onClose}>
             Cancel
@@ -349,8 +531,7 @@ function EditPanditModal({ isOpen, onClose, pandit, onUpdated }) {
 }
 
 /* ---------------------------------------------------
-   SIMPLE TOAST (replaces react-toastify so the file has
-   zero external service/API dependency)
+   SIMPLE TOAST
 --------------------------------------------------- */
 function useSimpleToast() {
   const [toastMsg, setToastMsg] = useState(null);
@@ -369,13 +550,18 @@ function useSimpleToast() {
   return { show, ToastUI };
 }
 
+/* ---------------------------------------------------
+   ADD MODAL
+--------------------------------------------------- */
 function AddPanditModal({ isOpen, onClose, onAdd }) {
   const [form, setForm] = useState({
     fullName: "",
     mobile: "",
     city: "",
     experience: 0,
-    minRate: 0,
+    minPoojaFee: 0,
+    primaryCategory: "",
+    poojaServiceMode: "Both",
   });
 
   if (!isOpen) return null;
@@ -384,121 +570,100 @@ function AddPanditModal({ isOpen, onClose, onAdd }) {
     onAdd({
       _id: Date.now().toString(),
       ...form,
-      isActive: true,
+      role: "pandit",
       isVerified: false,
+      isProfileComplete: false,
+      profileApprovalStatus: "Pending",
       isOnline: false,
-      kycStatus: "pending",
-      averageRating: "0.0",
-      specialties: [],
+      averageRating: 0,
+      totalReviews: 0,
+      walletBalance: 0,
+      expertise: [],
+      languages: [],
+      certificatePhotos: [],
+      canArrangeSamagri: false,
       createdAt: new Date().toISOString(),
     });
-
     onClose();
   };
 
   return (
     <div className="pandit-modal-overlay" onClick={onClose}>
-      <div
-        className="pandit-modal-box"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="pandit-modal-box" onClick={(e) => e.stopPropagation()}>
         <button className="pandit-modal-close" onClick={onClose}>
           <FaTimes />
         </button>
-
-        <h3 className="pandit-modal-title">
-          Add New Pandit
-        </h3>
+        <h3 className="pandit-modal-title">Add New Pandit</h3>
 
         <div className="pandit-form-group">
           <label>Full Name</label>
           <input
             value={form.fullName}
-            onChange={(e)=>
-              setForm({...form,fullName:e.target.value})
-            }
+            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
           />
         </div>
-
-
         <div className="pandit-form-group">
           <label>Mobile</label>
           <input
             value={form.mobile}
-            onChange={(e)=>
-              setForm({...form,mobile:e.target.value})
-            }
+            onChange={(e) => setForm({ ...form, mobile: e.target.value })}
           />
         </div>
-
-
         <div className="pandit-form-group">
           <label>City</label>
           <input
             value={form.city}
-            onChange={(e)=>
-              setForm({...form,city:e.target.value})
-            }
+            onChange={(e) => setForm({ ...form, city: e.target.value })}
           />
         </div>
-
-
         <div className="pandit-form-row">
-
           <div className="pandit-form-group">
             <label>Experience</label>
             <input
               type="number"
               value={form.experience}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  experience:Number(e.target.value)
-                })
+              onChange={(e) =>
+                setForm({ ...form, experience: Number(e.target.value) })
               }
             />
           </div>
-
-
           <div className="pandit-form-group">
-            <label>Rate ₹/min</label>
+            <label>Min Pooja Fee (₹)</label>
             <input
               type="number"
-              value={form.minRate}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  minRate:Number(e.target.value)
-                })
+              value={form.minPoojaFee}
+              onChange={(e) =>
+                setForm({ ...form, minPoojaFee: Number(e.target.value) })
               }
             />
           </div>
-
         </div>
-
+        <div className="pandit-form-group">
+          <label>Primary Category</label>
+          <input
+            value={form.primaryCategory}
+            onChange={(e) =>
+              setForm({ ...form, primaryCategory: e.target.value })
+            }
+          />
+        </div>
 
         <div className="pandit-modal-actions">
-
-          <button
-            className="pandit-btn-secondary"
-            onClick={onClose}
-          >
+          <button className="pandit-btn-secondary" onClick={onClose}>
             Cancel
           </button>
-
-          <button
-            className="pandit-btn-primary"
-            onClick={handleSave}
-          >
+          <button className="pandit-btn-primary" onClick={handleSave}>
             Add Pandit
           </button>
-
         </div>
-
       </div>
     </div>
   );
 }
+
+/* ---------------------------------------------------
+   MAIN COMPONENT
+--------------------------------------------------- */
 export default function Pandit() {
   const [pandits, setPandits] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -514,24 +679,31 @@ export default function Pandit() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const itemsPerPage = 8;
 
   const { show: showToast, ToastUI } = useSimpleToast();
+useEffect(() => {
+  const fetchPandits = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+const data = await getAllPandits(currentPage, itemsPerPage);
 
-  // simulate initial fetch with dummy data
-  useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      try {
-        setPandits(DUMMY_PANDITS);
-      } catch (err) {
-        setError("Failed to load pandits");
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
-  }, []);
+setPandits(data?.pandits || []);
+setTotalPages(data?.totalPages || 1);
 
+    } catch (error) {
+      setError(error.message || "Failed to load pandits");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPandits();
+
+}, [currentPage]);
   const handleEdit = (pandit) => {
     setSelectedPandit(pandit);
     setEditOpen(true);
@@ -548,51 +720,88 @@ export default function Pandit() {
     );
     showToast("Pandit updated successfully");
   };
-const handleAddPandit = (newPandit) => {
-  setPandits((prev)=>[newPandit,...prev]);
-  showToast("Pandit added successfully");
-};
-  const handleToggleStatus = (pandit) => {
-    const isCurrentlyActive = !!pandit.isActive;
+
+  const handleAddPandit = (newPandit) => {
+    setPandits((prev) => [newPandit, ...prev]);
+    showToast("Pandit added successfully");
+  };
+
+  // isVerified ko toggle karta hai (API me "isActive" naam ka field nahi hai)
+  const handleToggleVerified = (pandit) => {
     setTogglingId(pandit._id);
 
     setPandits((prev) =>
       prev.map((p) =>
-        p._id === pandit._id ? { ...p, isActive: !isCurrentlyActive } : p
+        p._id === pandit._id ? { ...p, isVerified: !p.isVerified } : p
       )
     );
 
-    // simulate network delay
     setTimeout(() => {
       showToast(
-        isCurrentlyActive
-          ? "Pandit deactivated successfully"
-          : "Pandit activated successfully"
+        pandit.isVerified
+          ? "Pandit unverified"
+          : "Pandit verified successfully"
       );
       setTogglingId(null);
     }, 400);
   };
 
-  const confirmDelete = () => {
+  const handleApprove = (pandit) => {
+    setPandits((prev) =>
+      prev.map((p) =>
+        p._id === pandit._id ? { ...p, profileApprovalStatus: "Approved" } : p
+      )
+    );
+    showToast("Pandit approved");
+  };
+
+  const handleReject = (pandit) => {
+    setPandits((prev) =>
+      prev.map((p) =>
+        p._id === pandit._id ? { ...p, profileApprovalStatus: "Rejected" } : p
+      )
+    );
+    showToast("Pandit rejected", "error");
+  };
+const confirmDelete = async () => {
+  console.log("selectedPandit:", selectedPandit);
+
+  try {
+    await deletePandit(selectedPandit._id);
+
     setPandits((prev) =>
       prev.filter((pandit) => pandit._id !== selectedPandit._id)
     );
+
     showToast("Pandit deleted successfully");
+
+  } catch (error) {
+    console.log("Delete error:", error);
+    showToast("Failed to delete pandit", "error");
+  } finally {
     setDeleteOpen(false);
     setSelectedPandit(null);
-  };
+  }
+};
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
     const totalPandits = pandits.length;
     const verifiedCount = pandits.filter((p) => p.isVerified).length;
-    const kycPendingCount = pandits.filter(
-      (p) => (p.kycStatus || "").toLowerCase() === "pending"
+    const pendingApprovalCount = pandits.filter(
+      (p) => (p.profileApprovalStatus || "Pending") === "Pending"
     ).length;
+    const incompleteCount = pandits.filter((p) => !p.isProfileComplete).length;
     const newToday = pandits.filter(
-      (p) => new Date(p.createdAt).toDateString() === today
+      (p) => p.createdAt && new Date(p.createdAt).toDateString() === today
     ).length;
-    return { totalPandits, verifiedCount, kycPendingCount, newToday };
+    return {
+      totalPandits,
+      verifiedCount,
+      pendingApprovalCount,
+      incompleteCount,
+      newToday,
+    };
   }, [pandits]);
 
   const filteredPandits = useMemo(() => {
@@ -607,19 +816,16 @@ const handleAddPandit = (newPandit) => {
 
       if (!matchesSearch) return false;
 
-      if (filterType === "active") return pandit.isActive;
       if (filterType === "verified") return pandit.isVerified;
-      if (filterType === "kycPending")
-        return (pandit.kycStatus || "").toLowerCase() === "pending";
+      if (filterType === "pending")
+        return (pandit.profileApprovalStatus || "Pending") === "Pending";
+      if (filterType === "incomplete") return !pandit.isProfileComplete;
 
       return true;
     });
   }, [pandits, searchTerm, filterType]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredPandits.length / itemsPerPage)
-  );
+ 
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -636,6 +842,14 @@ const handleAddPandit = (newPandit) => {
   };
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
+
+  const approvalBadgeStyle = (status) => {
+    if (status === "Approved")
+      return { background: "rgba(16,185,129,0.15)", color: "#10b981" };
+    if (status === "Rejected")
+      return { background: "rgba(239,68,68,0.15)", color: "#ef4444" };
+    return { background: "rgba(234,179,8,0.15)", color: "#eab308" }; // Pending
+  };
 
   return (
     <div className="an-pandit-container">
@@ -654,24 +868,25 @@ const handleAddPandit = (newPandit) => {
             <h1 className="wrapped-header-title">Pandit Management</h1>
           </div>
           <p className="header-subtitle">
-            Real-time telemetry, profiles, and status controls for celestial guides.
+            Real-time profiles, approvals, and verification controls for
+            registered pandits.
           </p>
         </div>
 
         <div className="db-header-right">
-<button
- className="add-ritual-btn"
- onClick={()=>setAddOpen(true)}
->
- + Add Pandit
-</button>            <div className="pulse-ring"></div>
-            <span className="status-text"><FaBolt /> SYSTEM LIVE</span>
-        
+         
+          <div className="pulse-ring"></div>
+          <span className="status-text">
+            <FaBolt /> SYSTEM LIVE
+          </span>
         </div>
       </header>
 
       <div className="db-metrics-grid">
-        <div className="khatarnak-card cyan-theme animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <div
+          className="khatarnak-card cyan-theme animate-slide-up"
+          style={{ animationDelay: "0.1s" }}
+        >
           <div className="card-glass-shine"></div>
           <div className="card-top-bar">
             <div className="big-icon-box cyan-glow">
@@ -681,18 +896,21 @@ const handleAddPandit = (newPandit) => {
               <FaArrowUp /> +{stats.newToday} TODAY
             </span>
           </div>
-
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.totalPandits.toLocaleString()}</h2>
-            <p className="giant-stat-label">Total Active Pandits</p>
+            <h2 className="giant-stat-number">
+              {stats.totalPandits.toLocaleString()}
+            </h2>
+            <p className="giant-stat-label">Total Registered Pandits</p>
           </div>
-
           <div className="card-bottom-accent">
             <div className="glow-bar cyan-bar"></div>
           </div>
         </div>
 
-        <div className="khatarnak-card emerald-theme animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <div
+          className="khatarnak-card emerald-theme animate-slide-up"
+          style={{ animationDelay: "0.2s" }}
+        >
           <div className="card-glass-shine"></div>
           <div className="card-top-bar">
             <div className="big-icon-box emerald-glow">
@@ -702,18 +920,21 @@ const handleAddPandit = (newPandit) => {
               <FaCheckCircle /> VERIFIED
             </span>
           </div>
-
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.verifiedCount.toLocaleString()}</h2>
+            <h2 className="giant-stat-number">
+              {stats.verifiedCount.toLocaleString()}
+            </h2>
             <p className="giant-stat-label">Verified Profiles</p>
           </div>
-
           <div className="card-bottom-accent">
             <div className="glow-bar emerald-bar"></div>
           </div>
         </div>
 
-        <div className="khatarnak-card gold-theme animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <div
+          className="khatarnak-card gold-theme animate-slide-up"
+          style={{ animationDelay: "0.3s" }}
+        >
           <div className="card-glass-shine"></div>
           <div className="card-top-bar">
             <div className="big-icon-box gold-glow">
@@ -723,14 +944,36 @@ const handleAddPandit = (newPandit) => {
               <FaBolt /> ACTION NEEDED
             </span>
           </div>
-
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.kycPendingCount.toLocaleString()}</h2>
-            <p className="giant-stat-label">KYC Verification Pending</p>
+            <h2 className="giant-stat-number">
+              {stats.pendingApprovalCount.toLocaleString()}
+            </h2>
+            <p className="giant-stat-label">Approval Pending</p>
           </div>
-
           <div className="card-bottom-accent">
             <div className="glow-bar gold-bar"></div>
+          </div>
+        </div>
+
+        <div
+          className="khatarnak-card cyan-theme animate-slide-up"
+          style={{ animationDelay: "0.4s" }}
+        >
+          <div className="card-glass-shine"></div>
+          <div className="card-top-bar">
+            <div className="big-icon-box cyan-glow">
+              <FaExclamationTriangle />
+            </div>
+            <span className="trend-badge cyan-pill">INCOMPLETE</span>
+          </div>
+          <div className="card-middle-data">
+            <h2 className="giant-stat-number">
+              {stats.incompleteCount.toLocaleString()}
+            </h2>
+            <p className="giant-stat-label">Profiles Incomplete</p>
+          </div>
+          <div className="card-bottom-accent">
+            <div className="glow-bar cyan-bar"></div>
           </div>
         </div>
       </div>
@@ -754,22 +997,28 @@ const handleAddPandit = (newPandit) => {
             All ({pandits.length})
           </button>
           <button
-            className={`filter-btn ${filterType === "active" ? "active" : ""}`}
-            onClick={() => setFilterType("active")}
-          >
-            Active
-          </button>
-          <button
-            className={`filter-btn ${filterType === "verified" ? "active" : ""}`}
+            className={`filter-btn ${
+              filterType === "verified" ? "active" : ""
+            }`}
             onClick={() => setFilterType("verified")}
           >
             Verified
           </button>
           <button
-            className={`filter-btn ${filterType === "kycPending" ? "active" : ""}`}
-            onClick={() => setFilterType("kycPending")}
+            className={`filter-btn ${
+              filterType === "pending" ? "active" : ""
+            }`}
+            onClick={() => setFilterType("pending")}
           >
-            KYC Pending
+            Approval Pending
+          </button>
+          <button
+            className={`filter-btn ${
+              filterType === "incomplete" ? "active" : ""
+            }`}
+            onClick={() => setFilterType("incomplete")}
+          >
+            Incomplete Profile
           </button>
         </div>
       </div>
@@ -778,148 +1027,197 @@ const handleAddPandit = (newPandit) => {
         {loading ? (
           <div className="khatarnak-loader">
             <div className="glowing-spinner"></div>
-            <p>Fetching Cosmic Pandits Database...</p>
+            <p>Fetching Pandits Database...</p>
           </div>
         ) : error ? (
           <div className="table-error-box">{error}</div>
         ) : filteredPandits.length === 0 ? (
-          <div className="table-error-box">No pandits found matching your search criteria.</div>
+          <div className="table-error-box">
+            No pandits found matching your search criteria.
+          </div>
         ) : (
           <div className="pandit-cards-grid">
-            {currentPandits.map((pandit) => (
-              <div className="khatarnak-card pandit-card-item" key={pandit._id}>
-                <div className="card-glass-shine"></div>
+            {currentPandits.map((pandit) => {
+              const approvalStatus = pandit.profileApprovalStatus || "Pending";
+              return (
+                <div
+                  className="khatarnak-card pandit-card-item"
+                  key={pandit._id}
+                >
+                  <div className="card-glass-shine"></div>
 
-                <div className="pandit-card-header">
-                  <span className={`bold-role-tag ${pandit.isActive ? "role-user" : "role-admin"}`}>
-                    {pandit.isActive ? "ACTIVE" : "INACTIVE"}
-                  </span>
-
-                  <div className="badges-group">
-                    {pandit.isVerified && (
-                      <span className="trend-badge cyan-pill">
-                        <FaCheckCircle /> Verified
-                      </span>
-                    )}
-                    <span className="trend-badge gold-pill">
-                      <FaStar /> {pandit.averageRating || "0.0"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pandit-card-body">
-                  <div className="avatar-wrapper">
-                    {pandit.profilePic ? (
-                      <img
-                        src={pandit.profilePic}
-                        alt={pandit.fullName || "Pandit"}
-                        className="pandit-avatar-img"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="giant-avatar"
-                      style={{
-                        display: pandit.profilePic ? "none" : "flex",
-                      }}
-                    >
-                      {getInitial(pandit.fullName)}
-                    </div>
+                  <div className="pandit-card-header">
                     <span
-                      className={`online-status-dot ${pandit.isOnline ? "online" : "offline"}`}
-                      title={pandit.isOnline ? "Online" : "Offline"}
-                    ></span>
-                  </div>
-
-                  <h3 className="pandit-name">
-                    {pandit.fullName || "Name Not Set"}
-                  </h3>
-
-                  <p className="pandit-mobile">
-                    <FaPhoneAlt /> {pandit.mobile || "No Mobile"}
-                  </p>
-
-                  <div className="pandit-meta-row">
-                    {pandit.city && (
-                      <span className="meta-item">
-                        <FaMapMarkerAlt /> {pandit.city}
-                      </span>
-                    )}
-                    <span className="meta-item">
-                      <FaBriefcase /> {pandit.experience || 0} Yrs Exp
+                      className="bold-role-tag"
+                      style={approvalBadgeStyle(approvalStatus)}
+                    >
+                      {approvalStatus.toUpperCase()}
                     </span>
-                  </div>
 
-                  <div className="specialties-row">
-                    {pandit.specialties && pandit.specialties.length > 0 ? (
-                      pandit.specialties.slice(0, 3).map((spec, i) => (
-                        <span key={i} className="spec-tag">
-                          {spec}
+                    <div className="badges-group">
+                      {pandit.isVerified && (
+                        <span className="trend-badge cyan-pill">
+                          <FaCheckCircle /> Verified
                         </span>
-                      ))
-                    ) : (
-                      <span className="spec-tag empty">General Astrology</span>
+                      )}
+                      <span className="trend-badge gold-pill">
+                        <FaStar /> {pandit.averageRating ?? 0} (
+                        {pandit.totalReviews ?? 0})
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pandit-card-body">
+                    <div className="avatar-wrapper">
+                      {pandit.profilePic ? (
+                        <img
+                          src={pandit.profilePic}
+                          alt={pandit.fullName || "Pandit"}
+                          className="pandit-avatar-img"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="giant-avatar"
+                        style={{ display: pandit.profilePic ? "none" : "flex" }}
+                      >
+                        {getInitial(pandit.fullName)}
+                      </div>
+                      <span
+                        className={`online-status-dot ${
+                          pandit.isOnline ? "online" : "offline"
+                        }`}
+                        title={pandit.isOnline ? "Online" : "Offline"}
+                      ></span>
+                    </div>
+
+                    <h3 className="pandit-name">
+                      {pandit.fullName || "Profile Incomplete"}
+                    </h3>
+
+                    <p className="pandit-mobile">
+                      <FaPhoneAlt /> {pandit.mobile || "No Mobile"}
+                    </p>
+
+                    <div className="pandit-meta-row">
+                      {pandit.city && (
+                        <span className="meta-item">
+                          <FaMapMarkerAlt /> {pandit.city}
+                        </span>
+                      )}
+                      <span className="meta-item">
+                        <FaBriefcase /> {pandit.experience ?? 0} Yrs Exp
+                      </span>
+                    </div>
+
+                    {pandit.primaryCategory && (
+                      <div className="pandit-meta-row">
+                        <span className="meta-item">
+                          {pandit.primaryCategory}
+                        </span>
+                        {pandit.poojaServiceMode && (
+                          <span className="meta-item">
+                            {pandit.poojaServiceMode}
+                          </span>
+                        )}
+                      </div>
                     )}
+
+                    <div className="specialties-row">
+                      {pandit.expertise && pandit.expertise.length > 0 ? (
+                        pandit.expertise.slice(0, 3).map((spec, i) => (
+                          <span key={i} className="spec-tag">
+                            {spec}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="spec-tag empty">
+                          No expertise added
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="pandit-card-footer">
-                  <div className="rate-info">
-                    <span className="rate-amount">₹{pandit.minRate || 25}</span>
-                    <span className="rate-unit">/min</span>
-                  </div>
+                  <div className="pandit-card-footer">
+                    <div className="rate-info">
+                      <span className="rate-amount">
+                        ₹{pandit.minPoojaFee ?? 0}
+                      </span>
+                      <span className="rate-unit">/pooja</span>
+                    </div>
 
-                  <div className="card-right-controls">
-                    <label className="toggle-switch" title="Toggle Active Status">
-                      <input
-                        type="checkbox"
-                        checked={!!pandit.isActive}
-                        disabled={togglingId === pandit._id}
-                        onChange={() => handleToggleStatus(pandit)}
-                      />
-                      <span className="toggle-slider"></span>
-                    </label>
+                    <div className="card-right-controls">
+                      <label
+                        className="toggle-switch"
+                        title="Toggle Verified Status"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!pandit.isVerified}
+                          disabled={togglingId === pandit._id}
+                          onChange={() => handleToggleVerified(pandit)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
 
-                    <div className="action-button-group">
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleView(pandit)}
-                        title="View Full Profile"
-                      >
-                        <FaEye />
-                      </button>
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleEdit(pandit)}
-                        title="Edit Pandit"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="btn-square-icon btn-delete-accent"
-                        onClick={() => {
-                          setSelectedPandit(pandit);
-                          setDeleteOpen(true);
-                        }}
-                        title="Delete Pandit"
-                      >
-                        <FaTrashAlt />
-                      </button>
+                      <div className="action-button-group">
+                        {approvalStatus === "Pending" && (
+                          <>
+                            <button
+                              className="btn-square-icon"
+                              onClick={() => handleApprove(pandit)}
+                              title="Approve Pandit"
+                            >
+                              <FaCheckCircle />
+                            </button>
+                            <button
+                              className="btn-square-icon btn-delete-accent"
+                              onClick={() => handleReject(pandit)}
+                              title="Reject Pandit"
+                            >
+                              <FaTimes />
+                            </button>
+                          </>
+                        )}
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleView(pandit)}
+                          title="View Full Profile"
+                        >
+                          <FaEye />
+                        </button>
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleEdit(pandit)}
+                          title="Edit Pandit"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn-square-icon btn-delete-accent"
+                          onClick={() => {
+                            setSelectedPandit(pandit);
+                            setDeleteOpen(true);
+                          }}
+                          title="Delete Pandit"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-
       </div>
+
       <div className="table-pagination-footer">
         <div className="pagination-container">
-
           <button
             className="pagination-btn arrow-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -927,7 +1225,6 @@ const handleAddPandit = (newPandit) => {
           >
             <FaChevronLeft />
           </button>
-
 
           {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
             (page) => (
@@ -943,7 +1240,6 @@ const handleAddPandit = (newPandit) => {
             )
           )}
 
-
           <button
             className="pagination-btn arrow-btn"
             onClick={() => handlePageChange(currentPage + 1)}
@@ -951,32 +1247,34 @@ const handleAddPandit = (newPandit) => {
           >
             <FaChevronRight />
           </button>
-
         </div>
       </div>
+
       <DeleteModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={confirmDelete}
       />
 
-      <EditPanditModal
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-        pandit={selectedPandit}
-        onUpdated={handleUpdated}
-      />
+    <EditPanditModal
+  isOpen={editOpen}
+  onClose={() => setEditOpen(false)}
+  pandit={selectedPandit}
+  onUpdated={handleUpdated}
+  showToast={showToast}
+/>
 
       <ViewPanditModal
         isOpen={viewOpen}
         onClose={() => setViewOpen(false)}
         pandit={selectedPandit}
       />
+
       <AddPanditModal
- isOpen={addOpen}
- onClose={()=>setAddOpen(false)}
- onAdd={handleAddPandit}
-/>
+        isOpen={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdd={handleAddPandit}
+      />
     </div>
   );
 }
