@@ -38,3 +38,26 @@ export const getAllRituals = async () => {
     );
   }
 };
+
+
+export const updateRitual = async (id, formData) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.put(
+      `/rituals/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Update Ritual API Error:", error);
+    throw error.response?.data || error;
+  }
+};

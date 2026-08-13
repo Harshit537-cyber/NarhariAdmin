@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Rituals.css";
-import { getAllRituals, addRitual } from "../../api/Controller/rituals";
+import { getAllRituals, addRitual, updateRitual } from "../../api/Controller/rituals";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -28,7 +28,8 @@ export default function Rituals() {
   const [formData, setFormData] = useState(null);
   const [addFormData, setAddFormData] = useState({
     title: "",
-    tagline: "",
+    slug: "",
+   
     price: "",
     originalPrice: "",
     discount: "",
@@ -56,8 +57,8 @@ export default function Rituals() {
   const fetchRituals = async () => {
     setLoading(true);
     try {
-      const res = await getAllRituals();
-      setRituals(res.data || []);
+ const res = await getAllRituals();
+setRituals((res.data || []).reverse());
     } catch (err) {
       toast.error(err.message || "Failed to load rituals");
     } finally {
@@ -73,7 +74,7 @@ export default function Rituals() {
     try {
       const payload = new FormData();
       payload.append("title", addFormData.title);
-      payload.append("tagline", addFormData.tagline);
+      payload.append("slug", addFormData.slug);
       payload.append("price", addFormData.price);
       payload.append("originalPrice", addFormData.originalPrice);
       payload.append("discount", addFormData.discount);
@@ -97,7 +98,7 @@ export default function Rituals() {
       setShowAddModal(false);
       setAddFormData({
         title: "",
-        tagline: "",
+   
         price: "",
         originalPrice: "",
         discount: "",
@@ -116,30 +117,34 @@ export default function Rituals() {
       toast.error(err.message || "Failed to add ritual");
     }
   };
-  // ---- UPDATE RITUAL (dummy) ----
-  const handleSaveSpecs = () => {
+const handleSaveSpecs = async () => {
     if (!formData) return;
 
-    setRituals((prev) =>
-      prev.map((item) =>
-        item._id === formData._id
-          ? {
-            ...item,
-            name: formData.ritualName,
-            shortDescription: formData.shortDescription,
-            description: formData.description,
-            duration: formData.duration,
-            price: formData.ritualPrice,
-            salePrice: formData.originalPrice,
-            isFeatured: formData.isFeatured,
-            isActive: formData.isActive,
-          }
-          : item
-      )
-    );
+    try {
+      const payload = new FormData();
+      payload.append("title", formData.title);
+      payload.append("slug", formData.slug);
+      payload.append("about", formData.about);
+      payload.append("price", formData.price);
+      payload.append("originalPrice", formData.originalPrice);
+      payload.append("discount", formData.discount);
+      payload.append("format", formData.format);
+      payload.append("category", formData.category);
+      payload.append("duration", formData.duration);
 
-    toast.success("Ritual updated successfully!");
-    setShowEditModal(false);
+      const res = await updateRitual(formData._id, payload);
+
+      setRituals((prev) =>
+        prev.map((item) =>
+          item._id === formData._id ? (res.data || res.ritual) : item
+        )
+      );
+
+      toast.success(res.message || "Ritual updated successfully!");
+      setShowEditModal(false);
+    } catch (err) {
+      toast.error(err.message || "Failed to update ritual");
+    }
   };
 
   // ---- DELETE RITUAL (dummy) ----
@@ -172,6 +177,7 @@ export default function Rituals() {
     setFormData({
       _id: item._id,
       title: item.title || "",
+      slug: item.slug || "",
       tagline: item.tagline || "",
       about: item.about || "",
       price: item.price ?? "",
@@ -383,17 +389,17 @@ export default function Rituals() {
                   }
                 />
               </div>
-
               <div className="form-group">
-                <label>Tagline</label>
+                <label>Slug</label>
                 <input
                   type="text"
-                  value={addFormData.tagline}
+                  value={addFormData.slug}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, tagline: e.target.value })
+                    setAddFormData({ ...addFormData, slug: e.target.value })
                   }
                 />
               </div>
+             
 
               <div className="form-group">
                 <label>About</label>
@@ -721,7 +727,16 @@ export default function Rituals() {
                   }
                 />
               </div>
-
+              <div className="form-group">
+                <label>Slug</label>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
+                />
+              </div>
               <div className="form-group">
                 <label>Tagline</label>
                 <input
@@ -822,52 +837,11 @@ export default function Rituals() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={formData.isFeatured}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        isFeatured: e.target.checked,
-                      })
-                    }
-                  />{" "}
-                  Featured
-                </label>
-              </div>
+              
 
-              <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) =>
-                      setFormData({ ...formData, isActive: e.target.checked })
-                    }
-                  />{" "}
-                  Active
-                </label>
-              </div>
+              
 
-              <div className="form-group">
-                <label>Ritual Image</label>
-                {formData.image && (
-                  <img
-                    src={formData.image}
-                    alt="Ritual"
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
-                    }}
-                  />
-                )}
-                <input type="file" accept="image/*" multiple />
-              </div>
+             
             </div>
 
             <div className="modal-actions-row">
