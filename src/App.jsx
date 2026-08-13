@@ -33,6 +33,7 @@ import Pandit from "./pages/Pandit/Pandit.jsx";
 import Commission from "./pages/Commission/Commission.jsx";
 import PushNotification from "./pages/Notitification/Notification.jsx";
 import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
+import Gifts from "./pages/Gifts/Gifts.jsx"
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -68,10 +69,11 @@ const AppRoutes = () => {
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/partner" element={<Partner />} />
-              <Route path="/category" element={<Category />} />
+              <Route path="/category" element={<Category  />}  />
               <Route path="/rituals" element={<Rituals />} />
               <Route path="/pandit" element={<Pandit />} />
               <Route path="push-notification" element={<PushNotification />} />
+              <Route path="/gifts" element={<Gifts />} />
 
               <Route
                 path="/partner/kyc-verification"
@@ -81,10 +83,7 @@ const AppRoutes = () => {
                 path="/partner/profile-approval"
                 element={<ProfileApproval />}
               />
-              <Route
-                path="/partner/min-rate-astrologer"
-                element={<MinRateAstrologer />}
-              />
+              <Route path="/partner/min-rate-astrologer" element={<MinRateAstrologer />} />
               <Route path="/partner/commission" element={<Commission />} />
               <Route path="/user" element={<AllUsers />} />
               <Route path="/complaints" element={<Complaints />} />

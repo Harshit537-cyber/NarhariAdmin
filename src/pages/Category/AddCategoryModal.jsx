@@ -88,7 +88,7 @@ const handleSubmit = () => {
   color:transparent;
 }
 
-.close-btn{
+.add-modal-close-btn{
   width:40px;
   height:40px;
   border:none;
@@ -100,10 +100,9 @@ const handleSubmit = () => {
   transition:.25s;
 }
 
-.close-btn:hover{
+.add-modal-close-btn:hover{
   background:#e8ebef;
 }
-
 /* BODY */
 
 .add-modal-body{
@@ -244,7 +243,7 @@ const handleSubmit = () => {
           <div className="add-modal-header">
             <h2>Add Category</h2>
 
-            <button className="close-btn" onClick={onClose}>
+            <button className="add-modal-close-btn" onClick={onClose}>
               ×
             </button>
           </div>

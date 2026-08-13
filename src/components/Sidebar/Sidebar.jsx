@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
-import { AlertCircle, Ticket, Bell } from "lucide-react";
+import { AlertCircle, Ticket, Bell, Gift } from "lucide-react";
 import { FaBan } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -269,6 +269,18 @@ export default function Sidebar() {
           <IconCategory />
           <span className="an-nav-text">Category</span>
         </NavLink>
+
+        {/* Gifts */}
+        <NavLink
+          to="/gifts"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <Gift />
+          <span className="an-nav-text">Gifts</span>
+        </NavLink>
+
         {/* Wallet */}
         <NavLink
           to="/wallet"
@@ -321,7 +333,7 @@ export default function Sidebar() {
             `an-nav-item ${isActive ? "is-active" : ""}`
           }
         >
-       <Bell />
+          <Bell />
           <span className="an-nav-text">Push Notification</span>
         </NavLink>
 
