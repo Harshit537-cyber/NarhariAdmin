@@ -8,7 +8,7 @@ import {
   createArticle,
   updateArticle,
   deleteArticle,
-} from "../../API/Controller/blogs";
+} from "../../api/Controller/blogs";
 import ViewBlogModal from "./ViewBlog";
 
 const BlogInsights = () => {
