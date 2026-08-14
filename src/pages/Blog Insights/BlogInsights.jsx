@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Crown, Plus, CheckCircle2, Pencil, Trash2, X, AlertTriangle } from "lucide-react";
 
 import "./BlogInsights.css";
-
+import { ToastContainer, toast } from "react-toastify";
 import {
   getAdminArticles,
   createArticle,
@@ -32,7 +32,6 @@ const BlogInsights = () => {
     mainContent: "",
     category: "",
     readTime: "",
-   
     publishedDate: "",
     isPublished: true,
     isFeatured: false,
@@ -52,9 +51,69 @@ const BlogInsights = () => {
     authorProfilePic: null,
   };
 
+  // Raw text kept separately for comma-separated fields so the input
+  // isn't fighting React on every keystroke (see handleArrayChange below).
+  const initialArrayText = {
+    tags: "",
+    ritual: "",
+    keyTakeaways: "",
+  };
+
   const [formData, setFormData] = useState(initialForm);
+  const [arrayText, setArrayText] = useState(initialArrayText);
 
   const [viewBlogId, setViewBlogId] = useState(null);
+
+  // ================= IMAGE PREVIEW STATE =================
+  // Holds preview URLs for the three image inputs. Values are either
+  // an existing image URL (when editing) or a local object URL for a
+  // freshly selected file.
+  const [previews, setPreviews] = useState({
+    thumbnail: null,
+    bannerImage: null,
+    authorProfilePic: null,
+  });
+
+  // Track which preview URLs were created locally via createObjectURL
+  // so we know which ones need to be revoked (existing remote URLs
+  // from the server should never be revoked).
+  const objectUrlsRef = useRef({});
+
+  const setPreviewFor = (name, url, isObjectUrl) => {
+    // Revoke the previous object URL for this field, if any.
+    if (objectUrlsRef.current[name]) {
+      URL.revokeObjectURL(objectUrlsRef.current[name]);
+      objectUrlsRef.current[name] = null;
+    }
+
+    if (isObjectUrl) {
+      objectUrlsRef.current[name] = url;
+    }
+
+    setPreviews((prev) => ({ ...prev, [name]: url }));
+  };
+
+  const clearAllPreviews = () => {
+    Object.keys(objectUrlsRef.current).forEach((key) => {
+      if (objectUrlsRef.current[key]) {
+        URL.revokeObjectURL(objectUrlsRef.current[key]);
+      }
+    });
+    objectUrlsRef.current = {};
+
+    setPreviews({ thumbnail: null, bannerImage: null, authorProfilePic: null });
+  };
+
+  // Revoke any lingering object URLs when the component unmounts.
+  useEffect(() => {
+    return () => {
+      Object.keys(objectUrlsRef.current).forEach((key) => {
+        if (objectUrlsRef.current[key]) {
+          URL.revokeObjectURL(objectUrlsRef.current[key]);
+        }
+      });
+    };
+  }, []);
 
   // ================= DELETE POPUP STATE =================
   const [deleteTarget, setDeleteTarget] = useState(null); // { id, title } | null
@@ -62,28 +121,37 @@ const BlogInsights = () => {
 
   // ================= GET BLOGS =================
 
-  const fetchBlogs = async () => {
-    try {
-      setLoading(true);
+const fetchBlogs = async () => {
+  try {
+    setLoading(true);
 
-      const response = await getAdminArticles({
-        page,
-        limit,
-      });
+    const response = await getAdminArticles({
+      page,
+      limit,
+    });
 
-      if (response?.data?.success) {
-        setBlogs(response.data.data || []);
-        setTotalPages(response.data.totalPages || 1);
-      } else {
-        setBlogs([]);
-      }
-    } catch (error) {
-      console.error("Get Blogs Error:", error);
+    if (response?.data?.success) {
+      setBlogs(response.data.data || []);
+      setTotalPages(response.data.totalPages || 1);
+    } else {
       setBlogs([]);
-    } finally {
-      setLoading(false);
+      toast.error(
+        response?.data?.message || "Failed to fetch blogs"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Get Blogs Error:", error);
+
+    setBlogs([]);
+
+    toast.error(
+      error?.response?.data?.message ||
+        "Something went wrong while fetching blogs"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchBlogs();
@@ -96,10 +164,20 @@ const BlogInsights = () => {
     const { name, value, type, checked, files } = e.target;
 
     if (type === "file") {
+      const file = files?.[0] || null;
+
       setFormData((prev) => ({
         ...prev,
-        [name]: files?.[0] || null,
+        [name]: file,
       }));
+
+      if (file) {
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewFor(name, objectUrl, true);
+      } else {
+        setPreviewFor(name, null, false);
+      }
+
       return;
     }
 
@@ -110,29 +188,34 @@ const BlogInsights = () => {
   };
 
   // ================= ARRAY CHANGE =================
+  // Previously this parsed + re-joined the string on every keystroke,
+  // which stripped trailing commas/spaces as soon as they were typed
+  // (e.g. typing "a," would instantly collapse back to "a"), making it
+  // impossible to type a comma. Now we keep the raw text as the input's
+  // value and only derive the parsed array alongside it.
 
-  const handleArrayChange = (name, value) => {
+  const handleArrayChange = (name, rawValue) => {
+    setArrayText((prev) => ({
+      ...prev,
+      [name]: rawValue,
+    }));
+
+    const parsedItems = rawValue
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
     if (name === "keyTakeaways") {
       setFormData((prev) => ({
         ...prev,
-        keyTakeaways: value
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean)
-          .map((item) => ({
-            point: item,
-          })),
+        keyTakeaways: parsedItems.map((item) => ({ point: item })),
       }));
-
       return;
     }
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
+      [name]: parsedItems,
     }));
   };
 
@@ -141,6 +224,8 @@ const BlogInsights = () => {
   const handleAddBlog = () => {
     setEditId(null);
     setFormData(initialForm);
+    setArrayText(initialArrayText);
+    clearAllPreviews();
     setShowModal(true);
   };
 
@@ -164,6 +249,12 @@ const BlogInsights = () => {
       return [];
     };
 
+    const ritualArray = normalizeArray(blog.ritual);
+    const tagsArray = normalizeArray(blog.tags);
+    const keyTakeawaysArray = Array.isArray(blog.keyTakeaways)
+      ? blog.keyTakeaways
+      : [];
+
     setFormData({
       title: blog.title || "",
       subtitle: blog.subtitle || "",
@@ -177,6 +268,7 @@ const BlogInsights = () => {
 
       isPublished: blog.isPublished ?? true,
       isFeatured: blog.isFeatured ?? false,
+      slug: blog.slug || "",
 
       authorName: blog.author?.name || "",
       authorDesignation: blog.author?.designation || "",
@@ -184,15 +276,30 @@ const BlogInsights = () => {
       quoteText: blog.quote?.text || "",
       quoteAuthor: blog.quote?.author || "",
 
-      keyTakeaways: Array.isArray(blog.keyTakeaways) ? blog.keyTakeaways : [],
+      keyTakeaways: keyTakeawaysArray,
 
-      ritual: normalizeArray(blog.ritual),
+      ritual: ritualArray,
 
-      tags: normalizeArray(blog.tags),
+      tags: tagsArray,
 
       thumbnail: null,
       bannerImage: null,
       authorProfilePic: null,
+    });
+
+    setArrayText({
+      tags: tagsArray.join(", "),
+      ritual: ritualArray.join(", "),
+      keyTakeaways: keyTakeawaysArray.map((item) => item.point).join(", "),
+    });
+
+    // Seed previews with the existing (remote) images so the admin can
+    // see what's currently set, not just a blank uploader.
+    clearAllPreviews();
+    setPreviews({
+      thumbnail: blog.thumbnail || null,
+      bannerImage: blog.bannerImage || null,
+      authorProfilePic: blog.author?.profilePic || null,
     });
 
     setShowModal(true);
@@ -206,85 +313,114 @@ const BlogInsights = () => {
     setShowModal(false);
     setEditId(null);
     setFormData(initialForm);
+    setArrayText(initialArrayText);
+    clearAllPreviews();
   };
 
   // ================= CREATE / UPDATE =================
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      setSubmitLoading(true);
+  try {
+    setSubmitLoading(true);
 
-      const data = new FormData();
+    const data = new FormData();
 
-      data.append("title", formData.title);
-      data.append("subtitle", formData.subtitle);
-      data.append("summary", formData.summary);
-      data.append("mainContent", formData.mainContent);
-      data.append("category", formData.category);
-      data.append("readTime", formData.readTime);
-      data.append("publishedDate", formData.publishedDate);
-      // data.append("slug", formData.slug);
+    data.append("title", formData.title);
+    data.append("subtitle", formData.subtitle);
+    data.append("summary", formData.summary);
+    data.append("mainContent", formData.mainContent);
+    data.append("category", formData.category);
+    data.append("readTime", formData.readTime);
+    data.append("publishedDate", formData.publishedDate);
+    data.append("slug", formData.slug);
 
-      data.append("isPublished", formData.isPublished);
-      data.append("isFeatured", formData.isFeatured);
+    data.append("isPublished", formData.isPublished);
+    data.append("isFeatured", formData.isFeatured);
 
-      data.append("authorName", formData.authorName);
-      data.append("authorDesignation", formData.authorDesignation);
+    data.append("authorName", formData.authorName);
+    data.append("authorDesignation", formData.authorDesignation);
 
-      data.append("quoteText", formData.quoteText);
-      data.append("quoteAuthor", formData.quoteAuthor);
+    data.append("quoteText", formData.quoteText);
+    data.append("quoteAuthor", formData.quoteAuthor);
 
-      data.append("keyTakeaways", JSON.stringify(formData.keyTakeaways));
+    data.append(
+      "keyTakeaways",
+      JSON.stringify(formData.keyTakeaways)
+    );
 
-      data.append("ritual", JSON.stringify(formData.ritual));
+    data.append(
+      "ritual",
+      JSON.stringify(formData.ritual)
+    );
 
-      data.append("tags", JSON.stringify(formData.tags));
+    data.append(
+      "tags",
+      JSON.stringify(formData.tags)
+    );
 
-      // Images
-      if (formData.thumbnail) {
-        data.append("thumbnail", formData.thumbnail);
-      }
-
-      if (formData.bannerImage) {
-        data.append("bannerImage", formData.bannerImage);
-      }
-
-      if (formData.authorProfilePic) {
-        data.append("authorProfilePic", formData.authorProfilePic);
-      }
-
-      let response;
-
-      if (editId) {
-        response = await updateArticle(editId, data);
-      } else {
-        response = await createArticle(data);
-      }
-
-      if (response?.data?.success) {
-        closeModal();
-
-        if (!editId) {
-          setPage(1);
-        }
-
-        await fetchBlogs();
-      }
-    } catch (error) {
-      console.error(
-        editId ? "Update Blog Error:" : "Create Blog Error:",
-        error,
-      );
-    } finally {
-      setSubmitLoading(false);
+    if (formData.thumbnail) {
+      data.append("thumbnail", formData.thumbnail);
     }
-  };
+
+    if (formData.bannerImage) {
+      data.append("bannerImage", formData.bannerImage);
+    }
+
+    if (formData.authorProfilePic) {
+      data.append("authorProfilePic", formData.authorProfilePic);
+    }
+
+    let response;
+
+    if (editId) {
+      response = await updateArticle(editId, data);
+    } else {
+      response = await createArticle(data);
+    }
+
+    if (response?.data?.success) {
+      toast.success(
+        editId
+          ? "Blog updated successfully!"
+          : "Blog created successfully!"
+      );
+
+      closeModal();
+
+      if (!editId) {
+        setPage(1);
+      }
+
+      await fetchBlogs();
+    } else {
+      toast.error(
+        response?.data?.message ||
+          (editId
+            ? "Failed to update blog"
+            : "Failed to create blog")
+      );
+    }
+  } catch (error) {
+    console.error(
+      editId ? "Update Blog Error:" : "Create Blog Error:",
+      error
+    );
+
+    toast.error(
+      error?.response?.data?.message ||
+        (editId
+          ? "Something went wrong while updating the blog"
+          : "Something went wrong while creating the blog")
+    );
+  } finally {
+    setSubmitLoading(false);
+  }
+};
 
   // ================= DELETE (custom popup) =================
 
-  // Opens the confirmation popup instead of window.confirm
   const requestDelete = (blog) => {
     setDeleteTarget({ id: blog._id, title: blog.title || "this blog" });
   };
@@ -294,31 +430,42 @@ const BlogInsights = () => {
     setDeleteTarget(null);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteTarget) return;
+ const confirmDelete = async () => {
+  if (!deleteTarget) return;
 
-    const id = deleteTarget.id;
+  const id = deleteTarget.id;
 
-    try {
-      setDeletingId(id);
+  try {
+    setDeletingId(id);
 
-      const response = await deleteArticle(id);
+    const response = await deleteArticle(id);
 
-      if (response?.data?.success) {
-        setDeleteTarget(null);
+    if (response?.data?.success) {
+      toast.success("Blog deleted successfully!");
 
-        if (blogs.length === 1 && page > 1) {
-          setPage((prev) => prev - 1);
-        } else {
-          await fetchBlogs();
-        }
+      setDeleteTarget(null);
+
+      if (blogs.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
+      } else {
+        await fetchBlogs();
       }
-    } catch (error) {
-      console.error("Delete Blog Error:", error);
-    } finally {
-      setDeletingId(null);
+    } else {
+      toast.error(
+        response?.data?.message || "Failed to delete blog"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Delete Blog Error:", error);
+
+    toast.error(
+      error?.response?.data?.message ||
+        "Something went wrong while deleting the blog"
+    );
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   return (
     <div className="blog-page">
@@ -578,7 +725,7 @@ const BlogInsights = () => {
                     />
                   </div>
 
-                  {/* <div className="blog-form-group">
+                  <div className="blog-form-group">
                     <label>Slug</label>
 
                     <input
@@ -588,7 +735,7 @@ const BlogInsights = () => {
                       onChange={handleChange}
                       placeholder="Example: my-blog-post"
                     />
-                  </div> */}
+                  </div>
 
                   <div className="blog-form-group full-width">
                     <label>Description</label>
@@ -655,6 +802,8 @@ const BlogInsights = () => {
                       accept="image/*"
                       onChange={handleChange}
                     />
+
+                    <ImagePreview src={previews.authorProfilePic} round />
                   </div>
                 </div>
               </div>
@@ -675,6 +824,8 @@ const BlogInsights = () => {
                       onChange={handleChange}
                       required={!editId}
                     />
+
+                    <ImagePreview src={previews.thumbnail} />
                   </div>
 
                   <div className="blog-form-group">
@@ -687,6 +838,8 @@ const BlogInsights = () => {
                       onChange={handleChange}
                       required={!editId}
                     />
+
+                    <ImagePreview src={previews.bannerImage} wide />
                   </div>
                 </div>
               </div>
@@ -734,7 +887,7 @@ const BlogInsights = () => {
 
                     <input
                       type="text"
-                      value={formData.tags.join(", ")}
+                      value={arrayText.tags}
                       onChange={(e) =>
                         handleArrayChange("tags", e.target.value)
                       }
@@ -747,9 +900,7 @@ const BlogInsights = () => {
 
                     <input
                       type="text"
-                      value={formData.keyTakeaways
-                        .map((item) => item.point)
-                        .join(", ")}
+                      value={arrayText.keyTakeaways}
                       onChange={(e) =>
                         handleArrayChange("keyTakeaways", e.target.value)
                       }
@@ -762,11 +913,7 @@ const BlogInsights = () => {
 
                     <input
                       type="text"
-                      value={
-                        Array.isArray(formData.ritual)
-                          ? formData.ritual.join(", ")
-                          : ""
-                      }
+                      value={arrayText.ritual}
                       onChange={(e) =>
                         handleArrayChange("ritual", e.target.value)
                       }
@@ -921,4 +1068,43 @@ const BlogInsights = () => {
   );
 };
 
-export default BlogInsights
+// Small inline preview shown under a file input. Not styled via the
+// external CSS file so it can't clash with the existing design; kept
+// visually minimal (thumbnail-sized, subtle border) so it doesn't
+// disrupt the rest of the layout.
+const ImagePreview = ({ src, round = false, wide = false }) => {
+  if (!src) return null;
+
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        width: wide ? "100%" : round ? 64 : 96,
+        height: round ? 64 : 64,
+        maxWidth: wide ? 220 : undefined,
+        borderRadius: round ? "50%" : 8,
+        overflow: "hidden",
+        border: "1px solid rgba(0,0,0,0.1)",
+        background: "#f3f4f6",
+      }}
+    >
+      <img
+        src={src}
+        alt="preview"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
+  );
+};
+
+export default BlogInsights;
