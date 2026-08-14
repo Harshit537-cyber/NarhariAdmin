@@ -34,6 +34,7 @@ import Commission from "./pages/Commission/Commission.jsx";
 import PushNotification from "./pages/Notitification/Notification.jsx";
 import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
 import Gifts from "./pages/Gifts/Gifts.jsx"
+import BlogInsights from "./pages/Blog Insights/BlogInsights.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -74,6 +75,7 @@ const AppRoutes = () => {
               <Route path="/pandit" element={<Pandit />} />
               <Route path="push-notification" element={<PushNotification />} />
               <Route path="/gifts" element={<Gifts />} />
+              <Route path="/blog" element={<BlogInsights />} />
 
               <Route
                 path="/partner/kyc-verification"

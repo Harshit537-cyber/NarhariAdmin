@@ -349,7 +349,9 @@ export default function Commission() {
                           />
 
                           <div>
-                            <span className="main-name text-center">
+                            <span className="main-name text-center
+                            
+                            ">
                               {partner.fullName || "Unnamed Partner"}
                             </span>
 

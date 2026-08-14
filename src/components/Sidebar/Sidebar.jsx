@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
 import { AlertCircle, Ticket, Bell, Gift } from "lucide-react";
-import { FaBan } from "react-icons/fa";
+import { FaBan, FaBlog } from "react-icons/fa";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -301,6 +301,18 @@ export default function Sidebar() {
         >
           <IconStore />
           <span className="an-nav-text">Shop</span>
+        </NavLink>
+
+
+
+        <NavLink
+          to="/blog"
+          className={({ isActive }) =>
+            `an-nav-item ${isActive ? "is-active" : ""}`
+          }
+        >
+          <FaBlog/>
+          <span className="an-nav-text">Blog Insights</span>
         </NavLink>
 
         {/* Shopping */}
