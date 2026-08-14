@@ -310,14 +310,14 @@ const handlePageChange = (pageNumber) => {
                   {currentUsers.map((user) => (
                     <tr key={user._id}>
                       <td>
-                        <div className="large-user-profile">
-                          <div className="giant-avatar">{getInitial(user.name)}</div>
+                        <div className=" flex items-center gap-3">
+                          <div className="border rounded-full w-10 h-10 flex items-center justify-center bg-gradient-to-br from-orange-300 to-yellow-500 shadow-xl shadow-yellow-200">{user?.name?.charAt(0) || "N/A"}</div>
                           <div className="profile-names">
                             <span className="main-name">{user.name || "N/A"}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="bold-email">{user.email || "—"}</td>
+                      <td className="bold-email">{user.email || "Not available"}</td>
                       <td>
                         <span className={`bold-role-tag role-${user.role}`}>
                           {user.role}

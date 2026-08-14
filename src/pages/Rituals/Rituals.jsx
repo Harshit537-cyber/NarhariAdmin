@@ -132,6 +132,14 @@ const handleSaveSpecs = async () => {
       payload.append("category", formData.category);
       payload.append("duration", formData.duration);
 
+      // Only append the image if the user picked a new file.
+      // If formData.image is still a string (the existing image URL),
+      // the user didn't change it, so we don't send it and the
+      // backend should keep the current image.
+      if (formData.image instanceof File) {
+        payload.append("image", formData.image);
+      }
+
       const res = await updateRitual(formData._id, payload);
 
       setRituals((prev) =>
@@ -140,7 +148,7 @@ const handleSaveSpecs = async () => {
         )
       );
 
-      toast.success(res.message || "Ritual updated successfully!");
+      toast.success( "Ritual updated successfully!");
       setShowEditModal(false);
     } catch (err) {
       toast.error(err.message || "Failed to update ritual");
@@ -197,6 +205,8 @@ const handleSaveSpecs = async () => {
       },
       isActive: item.isLive !== undefined ? item.isLive : true,
       isFeatured: !!item.isFeatured,
+      // Existing image URL (string). Gets replaced with a File object
+      // if the user picks a new image in the edit modal.
       image: item.image || "",
     });
     setShowEditModal(true);
@@ -837,11 +847,41 @@ const handleSaveSpecs = async () => {
                 />
               </div>
 
-              
+              {/* ---- Ritual Image (upload new / preview current) ---- */}
+              <div className="form-group">
+                <label>Ritual Image</label>
 
-              
+                {formData.image && typeof formData.image === "string" && (
+                  <div className="category-img-container" style={{ marginBottom: "8px" }}>
+                    <img
+                      className="category-img"
+                      src={formData.image}
+                      alt={formData.title || "Ritual"}
+                    />
+                  </div>
+                )}
 
-             
+                {formData.image instanceof File && (
+                  <div className="category-img-container" style={{ marginBottom: "8px" }}>
+                    <img
+                      className="category-img"
+                      src={URL.createObjectURL(formData.image)}
+                      alt="New ritual preview"
+                    />
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      image: e.target.files[0],
+                    })
+                  }
+                />
+              </div>
             </div>
 
             <div className="modal-actions-row">

@@ -614,21 +614,37 @@ export default function RestrictionKeywords() {
                       {/* ACTION */}
 
                       <td>
-                        <div className="restriction-action-buttons">
+                        <div className="flex items-center gap-3">
                           <button
-                            className="btn-pro btn-pro-edit"
+                            style={{
+                              padding: "10px 16px",
+                              margin: 0,
+                              minWidth: "90px",
+                              height: "42px",
+                              boxSizing: "border-box",
+                            }}
+                            className="flex items-center justify-center gap-2 rounded-lg bg-blue-100 text-sm font-medium text-blue-600 transition-all duration-300 hover:bg-blue-500 hover:text-white"
                             onClick={() => openEditModal(item)}
                             title="Edit Keyword"
                           >
-                            <FaEdit />
+                            <FaEdit size={18} />
+                            Edit
                           </button>
 
                           <button
-                            className="btn-pro btn-pro-delete"
+                            style={{
+                              padding: "10px 16px",
+                              margin: 0,
+                              minWidth: "90px",
+                              height: "42px",
+                              boxSizing: "border-box",
+                            }}
+                            className="flex items-center justify-center gap-2 rounded-lg bg-red-100 text-sm font-medium text-red-600 transition-all duration-300 hover:bg-red-500 hover:text-white"
                             onClick={() => openDeleteModal(item)}
                             title="Delete Keyword"
                           >
-                            <FaTrash />
+                            <FaTrash size={18} />
+                            Del
                           </button>
                         </div>
                       </td>

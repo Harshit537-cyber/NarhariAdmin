@@ -499,7 +499,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  /* gap: 8px; */
 }
 
 .btn-pro {
@@ -529,6 +529,7 @@
 .btn-pro-delete {
   background: rgba(239, 68, 68, 0.1);
   color: var(--danger-red);
+  padding:10px;
 }
 
 .btn-pro-delete:hover {

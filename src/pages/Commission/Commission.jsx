@@ -342,21 +342,20 @@ export default function Commission() {
                         <div className="partner-table-info">
                           <img
                             src={
-                              partner.profilePic ||
-                              "https://via.placeholder.com/50"
+                              partner.profilePic || "data:image/jpeg;base64,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"
                             }
                             alt={partner.fullName || "Partner"}
-                            className="partner-table-avatar"
+                            className="h-10"
                           />
 
                           <div>
-                            <span className="main-name">
+                            <span className="main-name text-center">
                               {partner.fullName || "Unnamed Partner"}
                             </span>
 
-                            <span className="desc-cell">
+                            {/* <span className="desc-cell">
                               ID: {partner._id || "—"}
-                            </span>
+                            </span> */}
                           </div>
                         </div>
                       </td>
@@ -419,21 +418,54 @@ export default function Commission() {
                           gap: "8px",
                         }}
                       >
+
+                        <div className="flex gap-3">
+
+                        
                         <button
-                          className="btn-pro btn-pro-edit"
                           onClick={() => openEditModal(item)}
                           title="Edit Commission"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "40px",
+                            height: "40px",
+                            padding: "10px",
+                            margin: "0",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#dbeafe",
+                            color: "#2563eb",
+                            cursor: "pointer",
+                            boxSizing: "border-box",
+                          }}
                         >
-                          <FaEdit />
+                          <FaEdit size={18} />
                         </button>
 
                         <button
-                          className="btn-pro btn-pro-delete"
                           onClick={() => handleDelete(item._id)}
                           title="Delete Commission"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "40px",
+                            height: "40px",
+                            padding: "10px",
+                            margin: "0",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#fee2e2",
+                            color: "#dc2626",
+                            cursor: "pointer",
+                            boxSizing: "border-box",
+                          }}
                         >
-                          <FaTrash />
+                          <FaTrash size={18} />
                         </button>
+                        </div>
                       </td>
                     </tr>
                   );
