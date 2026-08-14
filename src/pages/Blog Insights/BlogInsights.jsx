@@ -32,7 +32,7 @@ const BlogInsights = () => {
     mainContent: "",
     category: "",
     readTime: "",
-    slug: "",
+   
     publishedDate: "",
     isPublished: true,
     isFeatured: false,
@@ -177,7 +177,6 @@ const BlogInsights = () => {
 
       isPublished: blog.isPublished ?? true,
       isFeatured: blog.isFeatured ?? false,
-      slug: blog.slug || "",
 
       authorName: blog.author?.name || "",
       authorDesignation: blog.author?.designation || "",
@@ -226,7 +225,7 @@ const BlogInsights = () => {
       data.append("category", formData.category);
       data.append("readTime", formData.readTime);
       data.append("publishedDate", formData.publishedDate);
-      data.append("slug", formData.slug);
+      // data.append("slug", formData.slug);
 
       data.append("isPublished", formData.isPublished);
       data.append("isFeatured", formData.isFeatured);
@@ -579,7 +578,7 @@ const BlogInsights = () => {
                     />
                   </div>
 
-                  <div className="blog-form-group">
+                  {/* <div className="blog-form-group">
                     <label>Slug</label>
 
                     <input
@@ -589,7 +588,7 @@ const BlogInsights = () => {
                       onChange={handleChange}
                       placeholder="Example: my-blog-post"
                     />
-                  </div>
+                  </div> */}
 
                   <div className="blog-form-group full-width">
                     <label>Description</label>
