@@ -922,4 +922,4 @@ const BlogInsights = () => {
   );
 };
 
-export default BlogInsights;
+export default BlogInsights
