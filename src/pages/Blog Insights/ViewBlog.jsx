@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { getArticleById } from "../../API/Controller/blogs";
+import { getArticleById } from "../../api/Controller/blogs";
 
 import "./ViewBlogModal.css";
 
