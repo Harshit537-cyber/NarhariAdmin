@@ -388,13 +388,6 @@
   width: 100%;
 }
 
-.modal-title-underline {
-  width: 60px;
-  height: 4px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #0b0f19 0%, #06b6d4 100%);
-  margin-top: -12px;
-}
 
 .modal-close-btn {
   background: #f1f5f9;

@@ -44,7 +44,7 @@
 .blog-title {
   width: fit-content;
   max-width: 100%;
-  margin: 0;
+  margin-top: 10px;
   padding: 20px 30px;
   border-radius: 16px;
   background: linear-gradient(
@@ -62,10 +62,12 @@
 
 .blog-subtitle {
   max-width: 420px;
-  margin: 7px 0 0;
   color: #58667c;
   font-size: 12px;
   line-height: 17px;
+  margin-bottom: 15px;
+  margin-left: 10px;
+  margin-top: 10px;
 }
 
 .add-blog-btn {
@@ -188,11 +190,12 @@
 }
 
 .name-column {
-  width: 125px;
+  width: 200px;
+
 }
 
 .description-column {
-  width: auto;
+  width: 200px;
 }
 
 .status-column {
@@ -239,11 +242,8 @@
   color: #627087;
   font-size: 15px;
   font-weight: 600;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
-
 /* ================= STATUS ================= */
 
 .blog-status {
@@ -725,4 +725,37 @@
 
 .view-blog-btn:hover {
   background: #e0e7ff;
+}
+
+/* ================= CUSTOM SCROLLBAR ================= */
+
+/* Table horizontal scroll + Modal vertical scroll */
+.blog-table-wrapper,
+.blog-modal {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: #d7dbe3 transparent; /* thumb color | track color - Firefox */
+}
+
+.blog-table-wrapper::-webkit-scrollbar,
+.blog-modal::-webkit-scrollbar {
+  width: 8px;      /* vertical scrollbar (modal) */
+  height: 8px;      /* horizontal scrollbar (table) */
+}
+
+.blog-table-wrapper::-webkit-scrollbar-track,
+.blog-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.blog-table-wrapper::-webkit-scrollbar-thumb,
+.blog-modal::-webkit-scrollbar-thumb {
+  background-color: #d7dbe3;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.blog-table-wrapper::-webkit-scrollbar-thumb:hover,
+.blog-modal::-webkit-scrollbar-thumb:hover {
+  background-color: #b9c0cc;
 }

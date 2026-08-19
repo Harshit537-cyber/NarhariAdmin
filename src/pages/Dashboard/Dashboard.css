@@ -697,14 +697,25 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
 .recent-signups-scroll {
-  max-height: 520px; 
+  max-height: 520px;
+  overflow-x: auto;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
 }
 
 .recent-signups-scroll::-webkit-scrollbar {
-  display: none; /* Chrome */
+  width: 0px;      
+  height: 8px;    
+}
+
+.recent-signups-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.recent-signups-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 /* Responsive */
 @media (max-width: 1100px) {

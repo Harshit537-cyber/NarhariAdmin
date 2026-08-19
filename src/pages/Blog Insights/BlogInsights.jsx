@@ -187,12 +187,13 @@ const fetchBlogs = async () => {
     }));
   };
 
-  // ================= ARRAY CHANGE =================
-  // Previously this parsed + re-joined the string on every keystroke,
-  // which stripped trailing commas/spaces as soon as they were typed
-  // (e.g. typing "a," would instantly collapse back to "a"), making it
-  // impossible to type a comma. Now we keep the raw text as the input's
-  // value and only derive the parsed array alongside it.
+// Truncates text to a max word count, adding "..." if it exceeds it
+const truncateWords = (text, maxWords = 7) => {
+  if (!text) return "";
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(" ") + "...";
+};
 
   const handleArrayChange = (name, rawValue) => {
     setArrayText((prev) => ({
@@ -544,16 +545,14 @@ const fetchBlogs = async () => {
                         </span>
                       </td>
 
-                      <td>
-                        <p
-                          className="blog-description"
-                          title={blog.summary || blog.subtitle || ""}
-                        >
-                          {blog.summary ||
-                            blog.subtitle ||
-                            "No description available"}
-                        </p>
-                      </td>
+                    <td>
+  <p
+    className="blog-description"
+    title={blog.summary || blog.subtitle || ""}
+  >
+    {truncateWords(blog.summary || blog.subtitle || "No description available", 7)}
+  </p>
+</td>
 
                       <td>
                         <span

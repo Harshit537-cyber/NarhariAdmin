@@ -12,7 +12,7 @@ import {
   FaTimes,
   FaTrash,
   FaCheckCircle,
-  FaTimesCircle,
+  FaTimesCircle, FaEye,
 } from "react-icons/fa";
 
 
@@ -23,13 +23,13 @@ export default function Rituals() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  // const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+ const [showViewModal, setShowViewModal] = useState(false);
+const [viewData, setViewData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [addFormData, setAddFormData] = useState({
     title: "",
     slug: "",
-   
+
     price: "",
     originalPrice: "",
     discount: "",
@@ -57,13 +57,31 @@ export default function Rituals() {
   const fetchRituals = async () => {
     setLoading(true);
     try {
- const res = await getAllRituals();
-setRituals((res.data || []).reverse());
+      const res = await getAllRituals();
+      setRituals((res.data || []).reverse());
     } catch (err) {
       toast.error(err.message || "Failed to load rituals");
     } finally {
       setLoading(false);
     }
+  };
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const handleNumericInput = (value, fieldName, setStateFn, currentState) => {
+    if (value === "") {
+      setStateFn({ ...currentState, [fieldName]: value });
+      setFieldErrors((prev) => ({ ...prev, [fieldName]: "" }));
+      return;
+    }
+    if (!/^\d*\.?\d*$/.test(value)) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [fieldName]: "Only numbers are allowed",
+      }));
+      return; // invalid char ko state mein set hi nahi karenge
+    }
+    setFieldErrors((prev) => ({ ...prev, [fieldName]: "" }));
+    setStateFn({ ...currentState, [fieldName]: value });
   };
   const handleAddRitual = async () => {
     if (!addFormData.title) {
@@ -98,7 +116,7 @@ setRituals((res.data || []).reverse());
       setShowAddModal(false);
       setAddFormData({
         title: "",
-   
+
         price: "",
         originalPrice: "",
         discount: "",
@@ -117,7 +135,7 @@ setRituals((res.data || []).reverse());
       toast.error(err.message || "Failed to add ritual");
     }
   };
-const handleSaveSpecs = async () => {
+  const handleSaveSpecs = async () => {
     if (!formData) return;
 
     try {
@@ -148,7 +166,7 @@ const handleSaveSpecs = async () => {
         )
       );
 
-      toast.success( "Ritual updated successfully!");
+      toast.success("Ritual updated successfully!");
       setShowEditModal(false);
     } catch (err) {
       toast.error(err.message || "Failed to update ritual");
@@ -180,7 +198,10 @@ const handleSaveSpecs = async () => {
       setCurrentPage(pageNumber);
     }
   };
-
+const openViewModal = (item) => {
+  setViewData(item);
+  setShowViewModal(true);
+};
   const openEditModal = (item) => {
     setFormData({
       _id: item._id,
@@ -314,12 +335,18 @@ const handleSaveSpecs = async () => {
                       </span>
                     </td>
 
-                    <td style={{ textAlign: "right" }}>
+                    <td style={{ textAlign: "right", gap:"5px" }}>
+
+                      <button
+                        className="btn-pro btn-pro-view"
+                        onClick={() => openViewModal(item)}>
+                       View
+                      </button>
                       <button
                         className="btn-pro btn-pro-edit"
                         onClick={() => openEditModal(item)}
                       >
-                        <FaEdit /> Edit
+                       Edit
                       </button>
                       {/* <button
                         className="btn-pro btn-pro-delete"
@@ -409,7 +436,7 @@ const handleSaveSpecs = async () => {
                   }
                 />
               </div>
-             
+
 
               <div className="form-group">
                 <label>About</label>
@@ -425,36 +452,42 @@ const handleSaveSpecs = async () => {
                 <label>Price (₹)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={addFormData.price}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, price: e.target.value })
+                    handleNumericInput(e.target.value, "price", setAddFormData, addFormData)
                   }
+                  className={fieldErrors.price ? "input-error" : ""}
                 />
+                {fieldErrors.price && <span className="error-text">{fieldErrors.price}</span>}
               </div>
 
               <div className="form-group">
                 <label>Original Price (₹)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={addFormData.originalPrice}
                   onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      originalPrice: e.target.value,
-                    })
+                    handleNumericInput(e.target.value, "originalPrice", setAddFormData, addFormData)
                   }
+                  className={fieldErrors.originalPrice ? "input-error" : ""}
                 />
+                {fieldErrors.originalPrice && <span className="error-text">{fieldErrors.originalPrice}</span>}
               </div>
 
               <div className="form-group">
                 <label>Discount (%)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={addFormData.discount}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, discount: e.target.value })
+                    handleNumericInput(e.target.value, "discount", setAddFormData, addFormData)
                   }
+                  className={fieldErrors.discount ? "input-error" : ""}
                 />
+                {fieldErrors.discount && <span className="error-text">{fieldErrors.discount}</span>}
               </div>
 
               <div className="form-group">
@@ -898,7 +931,273 @@ const handleSaveSpecs = async () => {
           </div>
         </div>
       )}
+      {/* View Ritual Modal */}
+      {showViewModal && viewData && (
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setShowViewModal(false)}
+        >
+          <div
+            className="ultra-modal-box edit-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <div className="modal-header-top">
+                <h3>Ritual Details</h3>
 
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            </div>
+
+            <div className="edit-form-body">
+
+              {/* Image */}
+              {viewData.image && (
+                <div
+                  className="category-img-container"
+                  style={{ marginBottom: "20px" }}
+                >
+                  <img
+                    className="category-img"
+                    src={viewData.image}
+                    alt={viewData.title || "Ritual"}
+                  />
+                </div>
+              )}
+
+              {/* Title */}
+              <div className="form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  value={viewData.title || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Slug */}
+              <div className="form-group">
+                <label>Slug</label>
+                <input
+                  type="text"
+                  value={viewData.slug || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Tagline */}
+              <div className="form-group">
+                <label>Tagline</label>
+                <input
+                  type="text"
+                  value={viewData.tagline || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* About */}
+              <div className="form-group">
+                <label>About</label>
+                <textarea
+                  value={viewData.about || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Price */}
+              <div className="form-group">
+                <label>Price (₹)</label>
+                <input
+                  type="text"
+                  value={viewData.price ?? "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Original Price */}
+              <div className="form-group">
+                <label>Original Price (₹)</label>
+                <input
+                  type="text"
+                  value={viewData.originalPrice ?? "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Discount */}
+              <div className="form-group">
+                <label>Discount (%)</label>
+                <input
+                  type="text"
+                  value={viewData.discount || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Duration */}
+              <div className="form-group">
+                <label>Duration</label>
+                <input
+                  type="text"
+                  value={viewData.duration || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Format */}
+              <div className="form-group">
+                <label>Format</label>
+                <input
+                  type="text"
+                  value={viewData.format || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Category */}
+              <div className="form-group">
+                <label>Category</label>
+                <input
+                  type="text"
+                  value={viewData.category || "—"}
+                  readOnly
+                />
+              </div>
+
+              {/* Status */}
+              <div className="form-group">
+                <label>Status</label>
+                <input
+                  type="text"
+                  value={viewData.isLive ? "Active" : "Inactive"}
+                  readOnly
+                />
+              </div>
+
+              {/* Benefits */}
+              <div className="form-group">
+                <label>Benefits</label>
+
+                {viewData.benefits?.length ? (
+                  viewData.benefits.map((benefit, index) => (
+                    <div
+                      key={benefit._id || index}
+                      style={{
+                        marginBottom: "10px",
+                        padding: "12px",
+                        border: "1px solid #ddd",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <strong>{benefit.title || "—"}</strong>
+
+                      <p style={{ margin: "5px 0 0" }}>
+                        {benefit.description || "—"}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p>—</p>
+                )}
+              </div>
+
+              {/* What's Included */}
+              <div className="form-group">
+                <label>What's Included</label>
+
+                {viewData.whatsIncluded?.length ? (
+                  viewData.whatsIncluded.map((item, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      value={item}
+                      readOnly
+                      style={{ marginBottom: "8px" }}
+                    />
+                  ))
+                ) : (
+                  <p>—</p>
+                )}
+              </div>
+
+              {/* Form Config */}
+              <div className="form-group">
+                <label>Form Configuration</label>
+
+                <div
+                  style={{
+                    padding: "15px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <p>
+                    Ask Sankalp:{" "}
+                    <strong>
+                      {viewData.formConfig?.askSankalp ? "Yes" : "No"}
+                    </strong>
+                  </p>
+
+                  <p>
+                    Ask Birth Details:{" "}
+                    <strong>
+                      {viewData.formConfig?.askBirthDetails ? "Yes" : "No"}
+                    </strong>
+                  </p>
+
+                  <p>
+                    Ask Prasad Address:{" "}
+                    <strong>
+                      {viewData.formConfig?.askPrasadAddress ? "Yes" : "No"}
+                    </strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Created / Updated */}
+              <div className="form-group">
+                <label>Created At</label>
+                <input
+                  type="text"
+                  value={
+                    viewData.createdAt
+                      ? new Date(viewData.createdAt).toLocaleString()
+                      : "—"
+                  }
+                  readOnly
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Updated At</label>
+                <input
+                  type="text"
+                  value={
+                    viewData.updatedAt
+                      ? new Date(viewData.updatedAt).toLocaleString()
+                      : "—"
+                  }
+                  readOnly
+                />
+              </div>
+            </div>
+
+            <div className="modal-actions-row">
+              <button
+                className="btn-modal-pro cancel"
+                onClick={() => setShowViewModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* {showDeleteModal && (
         <div
           className="ultra-modal-backdrop"

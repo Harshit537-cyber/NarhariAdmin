@@ -15,7 +15,7 @@ import {
   FaLink,
   FaCheckCircle,
   FaTimesCircle,
-  FaEdit,
+  FaEdit,FaEye,
   FaChevronLeft,
   FaChevronRight, FaCrown,
 } from "react-icons/fa";
@@ -26,7 +26,9 @@ export default function BannerManagement() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
+const [showViewModal, setShowViewModal] = useState(false);
 
+const[viewBanner, setViewbanner]=useState(null);
   const [bannerId, setBannerId] = useState("");
   const [bannerSlug, setBannerSlug] = useState("");
   const [bannerTitle, setBannerTitle] = useState("");
@@ -123,6 +125,11 @@ export default function BannerManagement() {
     setExistingImageUrl(banner.imageUrl);
 
     setShowEditModal(true);
+  };
+
+  const handleViewBanner=(banner)=>{
+    setViewbanner(banner);
+    setShowViewModal(true);
   };
   const confirmDelete = (banner) => {
     setSelectedBanner(banner);
@@ -343,6 +350,13 @@ export default function BannerManagement() {
                         >
                           <FaTrashAlt /> Delete
                         </button>
+                       <button
+  className="btn-action btn-view"
+  onClick={() => handleViewBanner(banner)}
+  title="View Banner"
+>
+  <FaEye />
+</button>
                       </div>
                     </td>
                   </tr>
@@ -726,6 +740,132 @@ export default function BannerManagement() {
           </div>
         </div>
       )}
+
+      {/* View Banner Modal */}
+{showViewModal && viewBanner && (
+  <div
+    className="modal-overlay"
+    onClick={() => setShowViewModal(false)}
+  >
+    <div
+      className="modal-box view-banner-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="form-modal-header">
+        <span className="form-modal-icon">
+          <FaEye />
+        </span>
+
+        <h3 className="form-modal-title">
+          Banner Details
+        </h3>
+      </div>
+
+      <div className="view-banner-content">
+
+        {/* Banner Image */}
+        <div className="view-banner-image">
+        <img
+  src={viewBanner.imageUrl || viewBanner.image}
+  alt={viewBanner.title}
+  onError={(e) => {
+    e.target.style.display = "none";
+  }}
+/>
+        </div>
+
+        {/* Banner Information */}
+        <div className="banner-info-grid">
+
+          <div className="banner-info-item">
+            <span>Title</span>
+            <strong>{viewBanner.title || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Slug</span>
+            <strong>{viewBanner.slug || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Type</span>
+            <strong>{viewBanner.type || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Banner For</span>
+            <strong>{viewBanner.bannerFor || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Redirect Type</span>
+            <strong>{viewBanner.redirectType || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Redirect ID</span>
+            <strong>{viewBanner.redirectId || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Redirect URL</span>
+            <strong>{viewBanner.redirectUrl || "N/A"}</strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Status</span>
+
+            <strong
+              className={
+                viewBanner.isActive || viewBanner.status === "active"
+                  ? "view-status-active"
+                  : "view-status-inactive"
+              }
+            >
+              {viewBanner.isActive || viewBanner.status === "active"
+                ? "ACTIVE"
+                : "INACTIVE"}
+            </strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Created At</span>
+            <strong>
+              {viewBanner.createdAt
+                ? new Date(viewBanner.createdAt).toLocaleString()
+                : "N/A"}
+            </strong>
+          </div>
+
+          <div className="banner-info-item">
+            <span>Updated At</span>
+            <strong>
+              {viewBanner.updatedAt
+                ? new Date(viewBanner.updatedAt).toLocaleString()
+                : "N/A"}
+            </strong>
+          </div>
+
+         
+
+        </div>
+      </div>
+
+      <div className="modal-actions-row">
+        <button
+          type="button"
+          className="btn-modal-pro cancel"
+          onClick={() => {
+            setShowViewModal(false);
+            setViewBanner(null);
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Delete Banner Modal */}
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>

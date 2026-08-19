@@ -26,17 +26,22 @@ export const addGift = async (formData) => {
     const token = localStorage.getItem("token");
 
     const response = await apiClient.post(
+
       `/gift/admin/add-gift`,
+
       formData,
       {
         headers: {
+
           Authorization: `Bearer ${token}`,
+
           "Content-Type": "multipart/form-data",
         },
       }
     );
 
     return response.data;
+    
   } catch (error) {
     console.error("Add Gift API Error:", error);
     throw error.response?.data || error;

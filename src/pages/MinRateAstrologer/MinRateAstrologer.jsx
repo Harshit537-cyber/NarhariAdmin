@@ -94,7 +94,7 @@ const [loading, setLoading] = useState(true);
 
   const filteredAstrologers = useMemo(() => {
     return astrologers.filter((ast) =>
-      ast.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+      (ast.fullName || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [astrologers, searchTerm]);
 
@@ -183,7 +183,14 @@ const [loading, setLoading] = useState(true);
 
               <div className="user-card-body">
                 <div className="avatar-wrapper">
-                  <img src={astro.profilePic} alt={astro.fullName} className="user-avatar-img" />
+                  <img
+  src={astro.profilePic || "/dummyimage.png"}
+  alt={astro.fullName || "Astrologer"}
+  className="user-avatar-img"
+  onError={(e) => {
+    e.currentTarget.src = "/dummyimage.png";
+  }}
+/>
                 </div>
                 <h3 className="user-name">{astro.fullName}</h3>
                 <div className="user-meta-row">

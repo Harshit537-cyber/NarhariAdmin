@@ -9,7 +9,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaTimes,
-  FaTrash,
+  FaTrash, FaEye,
 } from "react-icons/fa";
 
 import { getAllPartners } from "../../api/Controller/partner.js";
@@ -27,7 +27,8 @@ export default function Commission() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
+const [showViewModal, setShowViewModal] = useState(false);
+const [selectedCommission, setSelectedCommission] = useState(null);
   const [formData, setFormData] = useState(null);
 
   const [addFormData, setAddFormData] = useState({
@@ -232,6 +233,11 @@ export default function Commission() {
 
     setShowEditModal(true);
   };
+
+  const openViewModal = (item) => {
+  setSelectedCommission(item);
+  setShowViewModal(true);
+};
   // Totals for the summary strip
   const totalPaid = commissions
     .filter((c) => c.status === "paid")
@@ -384,13 +390,13 @@ export default function Commission() {
                         <span className="desc-cell">
                           {item.createdAt
                             ? new Date(item.createdAt).toLocaleDateString(
-                                "en-IN",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
                             : "—"}
                         </span>
                       </td>
@@ -400,13 +406,13 @@ export default function Commission() {
                         <span className="desc-cell">
                           {item.updatedAt
                             ? new Date(item.updatedAt).toLocaleDateString(
-                                "en-IN",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
                             : "—"}
                         </span>
                       </td>
@@ -423,50 +429,71 @@ export default function Commission() {
 
                         <div className="flex gap-3">
 
-                        
-                        <button
-                          onClick={() => openEditModal(item)}
-                          title="Edit Commission"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "40px",
-                            height: "40px",
-                            padding: "10px",
-                            margin: "0",
-                            border: "none",
-                            borderRadius: "8px",
-                            backgroundColor: "#dbeafe",
-                            color: "#2563eb",
-                            cursor: "pointer",
-                            boxSizing: "border-box",
-                          }}
-                        >
-                          <FaEdit size={18} />
-                        </button>
 
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          title="Delete Commission"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "40px",
-                            height: "40px",
-                            padding: "10px",
-                            margin: "0",
-                            border: "none",
-                            borderRadius: "8px",
-                            backgroundColor: "#fee2e2",
-                            color: "#dc2626",
-                            cursor: "pointer",
-                            boxSizing: "border-box",
-                          }}
-                        >
-                          <FaTrash size={18} />
-                        </button>
+                          <button
+                            onClick={() => openEditModal(item)}
+                            title="Edit Commission"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "40px",
+                              height: "40px",
+                              padding: "10px",
+                              margin: "0",
+                              border: "none",
+                              borderRadius: "8px",
+                              backgroundColor: "#dbeafe",
+                              color: "#2563eb",
+                              cursor: "pointer",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            <FaEdit size={18} />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            title="Delete Commission"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "40px",
+                              height: "40px",
+                              padding: "10px",
+                              margin: "0",
+                              border: "none",
+                              borderRadius: "8px",
+                              backgroundColor: "#fee2e2",
+                              color: "#dc2626",
+                              cursor: "pointer",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            <FaTrash size={18} />
+                          </button>
+                          <button
+                         onClick={() => openViewModal(item)}
+                            title="View Commission"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "40px",
+                              height: "40px",
+                              padding: "10px",
+                              margin: "0",
+                              border: "none",
+                              borderRadius: "8px",
+                              backgroundColor: "#ede9fe",
+                              color: "#7c3aed",
+                              cursor: "pointer",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            <FaEye size={18} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -492,9 +519,8 @@ export default function Commission() {
               (page) => (
                 <button
                   key={page}
-                  className={`pagination-btn number-btn ${
-                    currentPage === page ? "active" : ""
-                  }`}
+                  className={`pagination-btn number-btn ${currentPage === page ? "active" : ""
+                    }`}
                   onClick={() => handlePageChange(page)}
                 >
                   {page}
@@ -533,7 +559,7 @@ export default function Commission() {
                   <FaTimes />
                 </button>
               </div>
-              <div className="modal-title-underline"></div>
+           
             </div>
 
             <div className="edit-form-body">
@@ -690,7 +716,124 @@ export default function Commission() {
           </div>
         </div>
       )}
+{/* View Commission Modal */}
+{showViewModal && selectedCommission && (
+  <div
+    className="ultra-modal-backdrop"
+    onClick={() => setShowViewModal(false)}
+  >
+    <div
+      className="ultra-modal-box edit-modal-box"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="ultra-modal-header">
+        <div className="modal-header-top">
+          <div>
+            <h3>Commission Details</h3>
+            <p className="modal-subtitle">
+              Complete commission information
+            </p>
+          </div>
 
+          <button
+            className="modal-close-btn"
+            onClick={() => setShowViewModal(false)}
+          >
+            <FaTimes />
+          </button>
+        </div>
+
+       
+      </div>
+
+      <div className="edit-form-body">
+
+        <div className="partner-preview-card">
+          <div className="partner-preview-avatar">
+            <span>
+              {selectedCommission.partnerId?.fullName
+                ?.charAt(0)
+                ?.toUpperCase() || "P"}
+            </span>
+          </div>
+
+          <div>
+            <span className="partner-preview-name">
+              {selectedCommission.partnerId?.fullName || "Unnamed Partner"}
+            </span>
+
+            <span className="partner-preview-mobile">
+              {selectedCommission.partnerId?.mobile || "No mobile"}
+            </span>
+          </div>
+        </div>
+
+      
+
+        
+
+        <div className="form-group">
+          <label>Commission Percentage</label>
+          <input
+            type="text"
+            value={`${selectedCommission.commissionPercentage ?? 0}%`}
+            disabled
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Created Date</label>
+          <input
+            type="text"
+            value={
+              selectedCommission.createdAt
+                ? new Date(
+                    selectedCommission.createdAt
+                  ).toLocaleString("en-IN")
+                : "—"
+            }
+            disabled
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Last Updated</label>
+          <input
+            type="text"
+            value={
+              selectedCommission.updatedAt
+                ? new Date(
+                    selectedCommission.updatedAt
+                  ).toLocaleString("en-IN")
+                : "—"
+            }
+            disabled
+          />
+        </div>
+
+        
+
+        <div className="form-group">
+          <label>Version</label>
+          <input
+            type="text"
+            value={selectedCommission.__v ?? "0"}
+            disabled
+          />
+        </div>
+      </div>
+
+      <div className="modal-actions-row">
+        <button
+          className="btn-modal-pro cancel"
+          onClick={() => setShowViewModal(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
