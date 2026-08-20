@@ -18,10 +18,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// ======================================================
-// API IMPORTS
-// Connect these functions with your actual API
-// ======================================================
+
 
 import {
   getAllRestrictionKeywords,
@@ -31,9 +28,7 @@ import {
   //   toggleRestrictionKeywordStatus,
 } from "../../api/Controller/restrictionKeyword.js";
 
-// ======================================================
-// CONSTANTS
-// ======================================================
+
 
 const ITEMS_PER_PAGE = 7;
 
@@ -70,7 +65,8 @@ export default function RestrictionKeywords() {
   // ======================================================
   // FETCH ALL KEYWORDS
   // ======================================================
-
+const [showViewModal, setShowViewModal] = useState(false);
+const [viewKeyword, setViewKeyword] = useState(null);
   const fetchKeywords = async () => {
     try {
       setLoading(true);
@@ -203,7 +199,14 @@ export default function RestrictionKeywords() {
 
     setShowModal(true);
   };
-
+ const openViewModal=(item)=>{
+  setViewKeyword(item);
+  setShowViewModal(true);
+ };
+ const closeViewModal=()=>{
+  setViewKeyword(null);
+  setShowViewModal(false);
+ };
   // ======================================================
   // CLOSE MODAL
   // ======================================================
@@ -284,9 +287,9 @@ export default function RestrictionKeywords() {
       if (res?.data?.success) {
         toast.success(
           res.data.message ||
-            (editingKeyword
-              ? "Restriction keyword updated successfully"
-              : "Restriction keyword created successfully"),
+          (editingKeyword
+            ? "Restriction keyword updated successfully"
+            : "Restriction keyword created successfully"),
         );
 
         closeModal();
@@ -344,7 +347,7 @@ export default function RestrictionKeywords() {
 
       toast.error(
         error?.response?.data?.message ||
-          "Failed to delete restriction keyword",
+        "Failed to delete restriction keyword",
       );
     } finally {
       setDeleteLoading(false);
@@ -576,9 +579,8 @@ export default function RestrictionKeywords() {
 
                       <td>
                         <button
-                          className={`status-pill ${
-                            isActive ? "active" : "inactive"
-                          } restriction-status-btn`}
+                          className={`status-pill ${isActive ? "active" : "inactive"
+                            } restriction-status-btn`}
                           title="Click to change status"
                         >
                           {isActive ? (
@@ -614,12 +616,12 @@ export default function RestrictionKeywords() {
                       {/* ACTION */}
 
                       <td>
-                        <div className="flex items-center gap-3">
+                        <div className="restriction-action-buttons">
                           <button
                             style={{
                               padding: "10px 16px",
                               margin: 0,
-                              minWidth: "90px",
+                              minWidth: "50px",
                               height: "42px",
                               boxSizing: "border-box",
                             }}
@@ -628,14 +630,14 @@ export default function RestrictionKeywords() {
                             title="Edit Keyword"
                           >
                             <FaEdit size={18} />
-                            Edit
+                        
                           </button>
 
                           <button
                             style={{
                               padding: "10px 16px",
                               margin: 0,
-                              minWidth: "90px",
+                              minWidth: "50px",
                               height: "42px",
                               boxSizing: "border-box",
                             }}
@@ -644,7 +646,21 @@ export default function RestrictionKeywords() {
                             title="Delete Keyword"
                           >
                             <FaTrash size={18} />
-                            Del
+                          </button>
+
+                          <button
+                            style={{
+                              padding: "10px 16px",
+                              margin: 0,
+                              minWidth: "50px",
+                              height: "42px",
+                              boxSizing: "border-box",
+                            }}
+                            className="flex items-center justify-center gap-2 rounded-lg bg-green-100 text-sm font-medium text-green-600 transition-all duration-300 hover:bg-green-500 hover:text-white"
+                            onClick={() => openViewModal(item)}
+                            title="View Keyword"
+                          >
+                            View
                           </button>
                         </div>
                       </td>
@@ -674,9 +690,8 @@ export default function RestrictionKeywords() {
               (page) => (
                 <button
                   key={page}
-                  className={`pagination-btn number-btn ${
-                    currentPage === page ? "active" : ""
-                  }`}
+                  className={`pagination-btn number-btn ${currentPage === page ? "active" : ""
+                    }`}
                   onClick={() => handlePageChange(page)}
                 >
                   {page}
@@ -857,6 +872,75 @@ export default function RestrictionKeywords() {
       )}
 
       <ToastContainer position="top-right" autoClose={1000} />
+   {showViewModal && viewKeyword && (
+  <div className="ultra-modal-backdrop" onClick={closeViewModal}>
+    <div
+      className="ultra-modal-box view-keyword-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="ultra-modal-header">
+        <div className="modal-header-top">
+          <div>
+            <h3>Restriction Keyword Details</h3>
+            <p className="modal-subtitle">
+              View restriction keyword information
+            </p>
+          </div>
+
+          <button className="modal-close-btn" onClick={closeViewModal}>
+            <FaTimes />
+          </button>
+        </div>
+
+      </div>
+
+      <div className="view-keyword-details">
+        <div className="view-detail-item">
+          <span>Keyword</span>
+          <strong>{viewKeyword.keyword || "—"}</strong>
+        </div>
+
+        <div className="view-detail-item">
+          <span>Action</span>
+          <strong>{viewKeyword.action || "—"}</strong>
+        </div>
+
+        <div className="view-detail-item">
+          <span>Status</span>
+          <strong>
+            {viewKeyword.isActive ? "Active" : "Inactive"}
+          </strong>
+        </div>
+
+        <div className="view-detail-item">
+          <span>Created Date</span>
+          <strong>{formatDate(viewKeyword.createdAt)}</strong>
+        </div>
+
+        <div className="view-detail-item">
+          <span>Last Updated</span>
+          <strong>{formatDate(viewKeyword.updatedAt)}</strong>
+        </div>
+
+        <div className="view-detail-item">
+          <span>Created By</span>
+          <strong>{viewKeyword.createdBy || "—"}</strong>
+        </div>
+
+       
+      </div>
+
+      <div className="modal-actions-row">
+        <button
+          className="btn-modal-pro cancel"
+          onClick={closeViewModal}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

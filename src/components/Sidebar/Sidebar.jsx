@@ -239,7 +239,7 @@ export default function Sidebar() {
         </div>
 
         {/* Consultation */}
-        <NavLink
+        {/* <NavLink
           to="/consultation"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -247,7 +247,7 @@ export default function Sidebar() {
         >
           <IconConsultation />
           <span className="an-nav-text">Consultation</span>
-        </NavLink>
+        </NavLink> */}
 
         {/* Product */}
         <NavLink
@@ -282,7 +282,7 @@ export default function Sidebar() {
         </NavLink>
 
         {/* Wallet */}
-        <NavLink
+        {/* <NavLink
           to="/wallet"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -290,7 +290,7 @@ export default function Sidebar() {
         >
           <IconWallet />
           <span className="an-nav-text">Wallet</span>
-        </NavLink>
+        </NavLink> */}
 
         {/* Shop */}
         <NavLink

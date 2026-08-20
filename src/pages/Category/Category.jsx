@@ -26,7 +26,7 @@ export default function Category() {
   const [originalPrice, setOriginalPrice] = useState("999");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryName, setCategoryName] = useState("Healing Crystal");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ const [selectedCategory, setSelectedCategory] = useState(null);
     try {
       const data = new FormData();
       data.append("name", formData.name);
-      
+
       data.append("description", formData.description);
       data.append("image", formData.image);
 
@@ -71,54 +71,54 @@ const [selectedCategory, setSelectedCategory] = useState(null);
       toast.error(error.message || "Failed to add category");
     }
   };
-const handleSaveSpecs = async () => {
-  if (!formData) return;
+  const handleSaveSpecs = async () => {
+    if (!formData) return;
 
-  try {
-    const data = new FormData();
+    try {
+      const data = new FormData();
 
-    data.append("name", formData.name);
-    data.append("description", formData.description);
-    data.append("isActive", formData.isActive);
+      data.append("name", formData.name);
+      data.append("description", formData.description);
+      data.append("isActive", formData.isActive);
 
-    if (formData.image instanceof File) {
-      data.append("image", formData.image);
+      if (formData.image instanceof File) {
+        data.append("image", formData.image);
+      }
+
+      const response = await updateProductCategory(formData._id, data);
+
+      setCategories((prev) =>
+        prev.map((item) =>
+          item._id === formData._id ? response.data : item
+        )
+      );
+
+      setShowEditModal(false);
+      toast.success("Category updated successfully!");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Failed to update category");
     }
+  };
+  const handleDeleteCategory = async () => {
+    if (!selectedCategory) return;
 
-    const response = await updateProductCategory(formData._id, data);
+    try {
+      await deleteProductCategory(selectedCategory._id);
 
-    setCategories((prev) =>
-      prev.map((item) =>
-        item._id === formData._id ? response.data : item
-      )
-    );
+      setCategories((prev) =>
+        prev.filter((item) => item._id !== selectedCategory._id)
+      );
 
-    setShowEditModal(false);
-    toast.success("Category updated successfully!");
-  } catch (error) {
-    console.log(error);
-    toast.error(error.message || "Failed to update category");
-  }
-};
-const handleDeleteCategory = async () => {
-  if (!selectedCategory) return;
+      setShowDeleteModal(false);
+      setSelectedCategory(null);
 
-  try {
-    await deleteProductCategory(selectedCategory._id);
-
-    setCategories((prev) =>
-      prev.filter((item) => item._id !== selectedCategory._id)
-    );
-
-    setShowDeleteModal(false);
-    setSelectedCategory(null);
-
-    toast.success("Category deleted successfully!");
-  } catch (error) {
-    console.log(error);
-    toast.error(error.message || "Failed to delete category");
-  }
-};
+      toast.success("Category deleted successfully!");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Failed to delete category");
+    }
+  };
   const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -215,9 +215,8 @@ const handleDeleteCategory = async () => {
 
                     <td>
                       <span
-                        className={`status-pill ${
-                          item.isActive ? "active" : "inactive"
-                        }`}
+                        className={`status-pill ${item.isActive ? "active" : "inactive"
+                          }`}
                       >
                         {item.isActive ? (
                           <>
@@ -235,27 +234,36 @@ const handleDeleteCategory = async () => {
                       <button
                         className="btn-pro btn-pro-edit"
                         onClick={() => {
-                        setFormData({
-  _id: item._id,
-  name: item.name,
-  description: item.description,
-  isActive: item.isActive,
-  image: item.image,
-});
+                          setFormData({
+                            _id: item._id,
+                            name: item.name,
+                            description: item.description,
+                            isActive: item.isActive,
+                            image: item.image,
+                          });
                           setShowEditModal(true);
                         }}
                       >
                         <FaEdit /> Edit
                       </button>
                       <button
-  className="btn-pro btn-pro-delete"
-  onClick={() => {
-    setSelectedCategory(item);
-    setShowDeleteModal(true);
-  }}
->
-  <FaTrash /> 
-</button>
+                        className="btn-pro btn-pro-view"
+                        onClick={() => setSelectedCategory(item)}
+                      >
+                        View
+                      </button>
+
+                      <button
+                        className="btn-pro btn-pro-delete"
+                       onClick={() => {
+  setShowEditModal(false);
+  setFormData(null);
+  setSelectedCategory(item);
+  setShowDeleteModal(true);
+}}
+                      >
+                        <FaTrash />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -278,9 +286,8 @@ const handleDeleteCategory = async () => {
               (page) => (
                 <button
                   key={page}
-                  className={`pagination-btn number-btn ${
-                    currentPage === page ? "active" : ""
-                  }`}
+                  className={`pagination-btn number-btn ${currentPage === page ? "active" : ""
+                    }`}
                   onClick={() => handlePageChange(page)}
                 >
                   {page}
@@ -318,59 +325,59 @@ const handleDeleteCategory = async () => {
               </button>
             </div>
 
-       <div className="edit-form-body">
+            <div className="edit-form-body">
 
-  <div className="form-group">
-    <label>Name</label>
-    <input
-      type="text"
-      value={formData.name}
-      onChange={(e) =>
-        setFormData({ ...formData, name: e.target.value })
-      }
-    />
-  </div>
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+              </div>
 
-  <div className="form-group">
-    <label>Description</label>
-    <textarea
-      value={formData.description}
-      onChange={(e) =>
-        setFormData({ ...formData, description: e.target.value })
-      }
-    />
-  </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
 
-  <div className="form-group">
-    <label>Status</label>
-    <select
-      value={formData.isActive}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          isActive: e.target.value === "true",
-        })
-      }
-    >
-      <option value={true}>Active</option>
-      <option value={false}>Inactive</option>
-    </select>
-  </div>
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      isActive: e.target.value === "true",
+                    })
+                  }
+                >
+                  <option value={true}>Active</option>
+                  <option value={false}>Inactive</option>
+                </select>
+              </div>
 
-  <div className="form-group">
-    <label>Image</label>
-    <input
-      type="file"
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          image: e.target.files[0],
-        })
-      }
-    />
-  </div>
+              <div className="form-group">
+                <label>Image</label>
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      image: e.target.files[0],
+                    })
+                  }
+                />
+              </div>
 
-</div>
+            </div>
             <div className="modal-actions-row">
               <button
                 className="btn-modal-pro cancel"
@@ -388,53 +395,121 @@ const handleDeleteCategory = async () => {
           </div>
         </div>
       )}
-{showDeleteModal && (
-  <div
-    className="ultra-modal-backdrop"
-    onClick={() => setShowDeleteModal(false)}
-  >
-    <div
-      className="ultra-modal-box"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="ultra-modal-header">
-        <h3>Delete Category</h3>
-        <button
-          className="modal-close-btn"
-          onClick={() => setShowDeleteModal(false)}
+      {showDeleteModal && (
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => {
+            setShowDeleteModal(false);
+            setShowEditModal(false);
+            setFormData(null);
+            setSelectedCategory(null);
+          }}
         >
-          <FaTimes />
-        </button>
-      </div>
+          <div
+            className="ultra-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <h3>Delete Category</h3>
 
-      <p style={{ margin: "20px 0" }}>
-        Are you sure you want to delete
-        <strong> {selectedCategory?.name}</strong>?
-      </p>
+            </div>
 
-      <div className="modal-actions-row">
-        <button
-          className="btn-modal-pro cancel"
-          onClick={() => setShowDeleteModal(false)}
-        >
-          Cancel
-        </button>
+            <p style={{ margin: "20px 0" }}>
+              Are you sure you want to delete
+              <strong> {selectedCategory?.name}</strong>?
+            </p>
 
-      <button
-  className="btn-modal-pro delete"
-  onClick={handleDeleteCategory}
+            <div className="modal-actions-row">
+             <button
+  className="btn-modal-pro cancel"
+  onClick={() => {
+    setShowDeleteModal(false);
+    setSelectedCategory(null);
+  }}
 >
-  Delete
+  Cancel
 </button>
-      </div>
-    </div>
-  </div>
-)}
+
+              <button
+                className="btn-modal-pro delete"
+                onClick={handleDeleteCategory}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <AddCategoryModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddCategory}
       />
+      {selectedCategory && !showDeleteModal && (
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setSelectedCategory(null)}
+        >
+          <div
+            className="ultra-modal-box view-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <h3>Category Details</h3>
+
+              <button
+                className="modal-close-btn"
+                onClick={() => setSelectedCategory(null)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="view-category-content">
+              <img
+                src={selectedCategory.image}
+                alt={selectedCategory.name}
+                className="view-category-image"
+              />
+
+              <div className="view-category-info">
+                <div>
+                  <label>Category Name</label>
+                  <p>{selectedCategory.name}</p>
+                </div>
+
+                <div>
+                  <label>Description</label>
+                  <p>{selectedCategory.description || "—"}</p>
+                </div>
+
+                <div>
+                  <label>Status</label>
+                  <p>
+                    {selectedCategory.isActive ? "Active" : "Inactive"}
+                  </p>
+                </div>
+
+                <div>
+                  <label>Created At</label>
+                  <p>
+                    {new Date(selectedCategory.createdAt).toLocaleString()}
+                  </p>
+                </div>
+
+                <div>
+                  <label>Updated At</label>
+                  <p>
+                    {new Date(selectedCategory.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

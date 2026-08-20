@@ -28,7 +28,9 @@
 }
 
 /* ================= HEADER ================= */
-
+.view-blog-link {
+  color: #2563eb;
+}
 .view-blog-header {
   position: sticky;
   top: 0;
@@ -544,4 +546,21 @@
   .view-blog-meta {
     gap: 10px;
   }
+}
+
+.view-blog-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.view-blog-modal::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+.view-blog-modal::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.view-blog-modal::-webkit-scrollbar-thumb:hover {
+  background: #c4c8ce;
 }

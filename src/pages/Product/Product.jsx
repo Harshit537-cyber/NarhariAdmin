@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { getProductList, addProduct, updateProduct,deleteProduct,getProductCategories  } from "../../api/Controller/product";
+import { getProductList, addProduct, updateProduct, deleteProduct, getProductCategories } from "../../api/Controller/product";
 import "./Product.css";
 import AddProductModal from "./AddProductModal";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,9 +9,10 @@ import {
   FaCrown,
   FaPlus,
   FaEdit,
+  FaEye,
   FaChevronLeft,
   FaChevronRight,
-  FaTimes,FaTrash,
+  FaTimes, FaTrash,
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
@@ -22,25 +23,27 @@ export default function Product() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState(null);
-const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [productCategories, setProductCategories] = useState([]);
-const [deleteId, setDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewProduct, setViewProduct] = useState(null);
+  const [productCategories, setProductCategories] = useState([]);
+  const [deleteId, setDeleteId] = useState(null);
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-useEffect(() => {
-  fetchCategories();
-  fetchProductCategories();
-}, []);
+  useEffect(() => {
+    fetchCategories();
+    fetchProductCategories();
+  }, []);
 
-const fetchProductCategories = async () => {
-  try {
-    const response = await getProductCategories();
-    setProductCategories(response.data || []);
-  } catch (error) {
-    console.log(error);
-  }
-};
+  const fetchProductCategories = async () => {
+    try {
+      const response = await getProductCategories();
+      setProductCategories(response.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -139,26 +142,26 @@ const fetchProductCategories = async () => {
     }
   };
 
- // opens confirm popup
-const handleDeleteClick = (id) => {
-  setDeleteId(id);
-  setShowDeleteModal(true);
-};
+  // opens confirm popup
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
 
-// actual delete call
-const confirmDeleteProduct = async () => {
-  if (!deleteId) return;
-  try {
-    const response = await deleteProduct(deleteId);
-    toast.success(response?.message || "Product deleted successfully!");
-    fetchCategories();
-  } catch (err) {
-    toast.error(err.message);
-  } finally {
-    setShowDeleteModal(false);
-    setDeleteId(null);
-  }
-};
+  // actual delete call
+  const confirmDeleteProduct = async () => {
+    if (!deleteId) return;
+    try {
+      const response = await deleteProduct(deleteId);
+      toast.success(response?.message || "Product deleted successfully!");
+      fetchCategories();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteId(null);
+    }
+  };
   // Pagination Logic
   const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -170,7 +173,10 @@ const confirmDeleteProduct = async () => {
       setCurrentPage(pageNumber);
     }
   };
-
+  const openViewModal = (item) => {
+    setViewProduct(item);
+    setShowViewModal(true);
+  };
   // Opens the edit modal, pre-filled from the actual product record
   const openEditModal = (item) => {
     setFormData({
@@ -243,7 +249,7 @@ const confirmDeleteProduct = async () => {
               <tr>
                 <th>IMAGE</th>
                 <th>PRODUCT NAME</th>
-                
+
                 <th>DESCRIPTION</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
@@ -293,13 +299,21 @@ const confirmDeleteProduct = async () => {
                       </span>
                     </td>
 
-                    <td style={{ textAlign: "right" }}>
+                    <td className="action-cell">
+                      <button
+                        className="btn-pro btn-pro-view"
+                        onClick={() => openViewModal(item)}
+                      >
+                        <FaEye />View
+                      </button>
+
+
                       <button className="btn-pro btn-pro-edit" onClick={() => openEditModal(item)}>
                         <FaEdit /> Edit
                       </button>
-                     <button className="btn-pro btn-pro-delete" onClick={() => handleDeleteClick(item._id)}>
-  <FaTrash /> Delete
-</button>
+                      <button className="btn-pro btn-pro-delete" onClick={() => handleDeleteClick(item._id)}>
+                        <FaTrash /> Delete
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -344,16 +358,16 @@ const confirmDeleteProduct = async () => {
       {showEditModal && formData && (
         <div className="ultra-modal-backdrop" onClick={() => setShowEditModal(false)}>
           <div className="ultra-modal-box edit-modal-box" onClick={(e) => e.stopPropagation()}>
-        
-             
-              <div className="ultra-modal-header">
-  <div className="modal-title">
-    <h3>Edit Product Specifications</h3>
-  </div>
 
- 
-</div>
-    
+
+            <div className="ultra-modal-header">
+              <div className="modal-title">
+                <h3>Edit Product Specifications</h3>
+              </div>
+
+
+            </div>
+
 
             <div className="edit-form-body">
               <div className="form-group">
@@ -364,14 +378,14 @@ const confirmDeleteProduct = async () => {
                   onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
                 />
               </div>
-<div className="form-group">
-  <label>Slug</label>
-  <input
-    type="text"
-    value={formData.slug}
-    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-  />
-</div>
+              <div className="form-group">
+                <label>Slug</label>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                />
+              </div>
               <div className="form-group">
                 <label>Short Description</label>
                 <input
@@ -391,24 +405,24 @@ const confirmDeleteProduct = async () => {
 
               <div className="form-group">
                 <label>Category</label>
-               <select
-  value={formData.category}
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      category: e.target.value
-    })
-  }
->
-  <option value="">Select Category</option>
+                <select
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      category: e.target.value
+                    })
+                  }
+                >
+                  <option value="">Select Category</option>
 
-  {productCategories.map((cat) => (
-    <option key={cat._id} value={cat._id}>
-      {cat.name}
-    </option>
-  ))}
+                  {productCategories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
 
-</select>
+                </select>
               </div>
 
               <div className="form-group">
@@ -527,31 +541,167 @@ const confirmDeleteProduct = async () => {
           </div>
         </div>
       )}
-{showDeleteModal && (
-  <div className="ultra-modal-backdrop" onClick={() => setShowDeleteModal(false)}>
-    <div className="ultra-modal-box delete-modal-box" onClick={(e) => e.stopPropagation()}>
-      <div className="ultra-modal-header">
-        <h3>Delete Product</h3>
-        <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>
-          <FaTimes />
-        </button>
-      </div>
 
-      <p className="delete-confirm-text">
-        Are you sure you want to delete this product? This action cannot be undone.
-      </p>
+      {showViewModal && viewProduct && (
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setShowViewModal(false)}
+        >
+          <div
+            className="ultra-modal-box view-product-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <div className="modal-title">
+                <h3>Product Details</h3>
+              </div>
 
-      <div className="modal-actions-row">
-        <button className="btn-modal-pro cancel" onClick={() => setShowDeleteModal(false)}>
-          Cancel
-        </button>
-        <button className="btn-modal-pro delete-confirm" onClick={confirmDeleteProduct}>
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowViewModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="view-product-body">
+
+              {viewProduct.images?.length > 0 && (
+                <div className="view-product-image">
+                  <img
+                    src={viewProduct.images[0]}
+                    alt={viewProduct.name}
+                  />
+                </div>
+              )}
+
+              <div className="view-product-info">
+
+                <div className="view-info-item">
+                  <span>Product Name</span>
+                  <strong>{viewProduct.name || "—"}</strong>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Slug</span>
+                  <strong>{viewProduct.slug || "—"}</strong>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Category</span>
+                  <strong>
+                    {viewProduct.category?.name || "—"}
+                  </strong>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Short Description</span>
+                  <p>{viewProduct.shortDescription || "—"}</p>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Description</span>
+                  <p>{viewProduct.description || "—"}</p>
+                </div>
+
+                <div className="view-info-grid">
+                  <div className="view-info-item">
+                    <span>Price</span>
+                    <strong>₹{viewProduct.price ?? "—"}</strong>
+                  </div>
+
+                  <div className="view-info-item">
+                    <span>Sale Price</span>
+                    <strong>₹{viewProduct.salePrice ?? "—"}</strong>
+                  </div>
+
+                  <div className="view-info-item">
+                    <span>Stock</span>
+                    <strong>{viewProduct.stock ?? "—"}</strong>
+                  </div>
+
+                  <div className="view-info-item">
+                    <span>Status</span>
+                    <strong className={viewProduct.isActive ? "active-text" : "inactive-text"}>
+                      {viewProduct.isActive ? "Active" : "Inactive"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Benefits</span>
+                  <p>
+                    {Array.isArray(viewProduct.benefits)
+                      ? viewProduct.benefits.join(", ")
+                      : viewProduct.benefits || "—"}
+                  </p>
+                </div>
+
+                <div className="view-info-item">
+                  <span>How To Use</span>
+                  <p>{viewProduct.howToUse || "—"}</p>
+                </div>
+
+                <div className="view-info-item">
+                  <span>Care Instructions</span>
+                  <p>{viewProduct.careInstructions || "—"}</p>
+                </div>
+
+                <div className="view-info-grid">
+                  <div className="view-info-item">
+                    <span>Featured</span>
+                    <strong>{viewProduct.isFeatured ? "Yes" : "No"}</strong>
+                  </div>
+
+                  <div className="view-info-item">
+                    <span>Created At</span>
+                    <strong>
+                      {viewProduct.createdAt
+                        ? new Date(viewProduct.createdAt).toLocaleDateString()
+                        : "—"}
+                    </strong>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="modal-actions-row">
+              <button
+                className="btn-modal-pro cancel"
+                onClick={() => setShowViewModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className="ultra-modal-backdrop" onClick={() => setShowDeleteModal(false)}>
+          <div className="ultra-modal-box delete-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="ultra-modal-header">
+              <h3>Delete Product</h3>
+              <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <p className="delete-confirm-text">
+              Are you sure you want to delete this product? This action cannot be undone.
+            </p>
+
+            <div className="modal-actions-row">
+              <button className="btn-modal-pro cancel" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button className="btn-modal-pro delete-confirm" onClick={confirmDeleteProduct}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <AddProductModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}

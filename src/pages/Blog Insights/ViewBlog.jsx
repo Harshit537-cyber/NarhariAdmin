@@ -139,7 +139,22 @@ const ViewBlogModal = ({ blogId, onClose }) => {
 
               </div>
             </div>
+            {/* ================= BLOG LINK ================= */}
 
+            {blog.blogLink && (
+              <div className="view-blog-section">
+                <h3>Blog Link</h3>
+
+                <a
+                  href={blog.blogLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-blog-link"
+                >
+                  {blog.blogLink}
+                </a>
+              </div>
+            )}
             {/* ================= SUMMARY ================= */}
 
             {blog.summary && (
@@ -249,9 +264,9 @@ const ViewBlogModal = ({ blogId, onClose }) => {
                         >
                           {typeof item === "object"
                             ? item?.point ||
-                              item?.title ||
-                              item?.description ||
-                              ""
+                            item?.title ||
+                            item?.description ||
+                            ""
                             : item}
                         </div>
                       )
@@ -299,8 +314,8 @@ const ViewBlogModal = ({ blogId, onClose }) => {
                         <span key={index}>
                           {typeof tag === "object"
                             ? tag?.name ||
-                              tag?.tag ||
-                              ""
+                            tag?.tag ||
+                            ""
                             : tag}
                         </span>
                       )

@@ -253,7 +253,7 @@ export default function Shop() {
                         <FaEdit /> Edit
                       </button>
                       <button className="btn-pro btn-pro-delete" style={{marginLeft: '8px', color: '#ef4444'}} onClick={() => handleDeleteClick(item._id)}>
-                        <FaTrash /> Delete
+                        Delete
                       </button>
                     </td>
                   </tr>
