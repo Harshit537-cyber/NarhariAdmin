@@ -9,7 +9,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
-
+const [sidebarOpen, setSidebarOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(
     location.pathname.startsWith("/partner")
   );
@@ -32,8 +32,16 @@ export default function Sidebar() {
     navigate("/login", { replace: true });
   };
 
-  return (
-    <aside className="an-sidebar">
+ return (
+  <>
+    <button
+      className="sidebar-toggle"
+      onClick={() => setSidebarOpen(prev => !prev)}
+    >
+      ☰
+    </button>
+
+    <aside className={`an-sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
       {/* Brand Header */}
       <div className="an-sidebar-brand">
         <div className="an-brand-icon-wrapper">
@@ -59,8 +67,14 @@ export default function Sidebar() {
         <span className="an-sidebar-brand-text">NAMAH ASTRO</span>
       </div>
 
-      {/* Navigation List */}
-      <nav className="an-sidebar-nav">
+    <nav
+  className="an-sidebar-nav"
+  onClick={(e) => {
+    if (window.innerWidth <= 860 && e.target.closest("a")) {
+      setSidebarOpen(false);
+    }
+  }}
+>
         {/* Dashboard */}
         <NavLink
           to="/dashboard"
@@ -267,7 +281,7 @@ export default function Sidebar() {
           }
         >
           <IconCategory />
-          <span className="an-nav-text">Category</span>
+          <span className="an-nav-text"> Product Category</span>
         </NavLink>
 
         {/* Gifts */}
@@ -388,7 +402,7 @@ export default function Sidebar() {
         onClose={() => setShowModal(false)}
         onConfirm={handleLogoutConfirm}
       />
-    </aside>
+    </aside></>
   );
 }
 

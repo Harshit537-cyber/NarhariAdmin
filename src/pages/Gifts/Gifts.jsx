@@ -285,7 +285,7 @@ useEffect(() => {
 
                     <td style={{ textAlign: "right" }}>
 
-                        <button className="btn-pro btn-pro-view" onClick={() => openViewModal(item)}>
+                        <button className="btn-pro btn-pro-view" style={{ color: "neon cyan", paddingLeft:"10px" }} onClick={() => openViewModal(item)}>
                         <FaEye /> View
                       </button>
                       <button className="btn-pro btn-pro-edit" onClick={() => openEditModal(item)}>

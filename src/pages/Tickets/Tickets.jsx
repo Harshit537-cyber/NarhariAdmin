@@ -24,7 +24,7 @@ import {
   FaPaperclip,
   FaPhoneAlt,
 } from "react-icons/fa";
-import { getAllTickets , updateTicket } from "../../api/Controller/ticket";
+import { getAllTickets, updateTicket } from "../../api/Controller/ticket";
 
 let DUMMY_TICKETS = [
   {
@@ -185,7 +185,7 @@ export default function Tickets() {
   const handleEditInit = (ticket) => {
     setSelectedTicket(ticket);
     setEditForm({
-      
+
       status: ticket.status || "Pending",
       adminResponse: ticket.adminResponse || ticket.adminReply || "",
     });
@@ -196,24 +196,24 @@ export default function Tickets() {
     e.preventDefault();
     try {
       const payload = {
-       
+
         status: editForm.status,
         adminResponse: editForm.adminResponse,
       };
 
-    const response = await updateTicket(selectedTicket._id, payload);
+      const response = await updateTicket(selectedTicket._id, payload);
 
-if (response.success) {
-  setTickets((prev) =>
-    prev.map((t) =>
-      t._id === selectedTicket._id ? response.ticket : t
-    )
-  );
+      if (response.success) {
+        setTickets((prev) =>
+          prev.map((t) =>
+            t._id === selectedTicket._id ? response.ticket : t
+          )
+        );
 
-  setEditOpen(false);
-  setSelectedTicket(null);
-  showToast("success", response.message);
-}
+        setEditOpen(false);
+        setSelectedTicket(null);
+        showToast("success", response.message);
+      }
       setEditOpen(false);
       setSelectedTicket(null);
       showToast("success", "Ticket updated successfully!");
@@ -245,8 +245,8 @@ if (response.success) {
     return tickets.filter((ticket) => {
       const subject = (ticket.subject || "").toLowerCase();
       const userObj = ticket.raisedBy || ticket.user || {};
-    const userName = (ticket.raisedBy?.fullName || ticket.raisedBy?.name || "").toLowerCase();
-const email = (ticket.raisedBy?.email || ticket.raisedBy?.mobile || "").toLowerCase();
+      const userName = (ticket.raisedBy?.fullName || ticket.raisedBy?.name || "").toLowerCase();
+      const email = (ticket.raisedBy?.email || ticket.raisedBy?.mobile || "").toLowerCase();
       const mobile = (userObj.mobile || "").toLowerCase();
       const category = (ticket.category || "").toLowerCase();
       const ticketId = (ticket._id || "").toLowerCase();
@@ -508,6 +508,7 @@ const email = (ticket.raisedBy?.email || ticket.raisedBy?.mobile || "").toLowerC
               <table className="cosmic-table">
                 <thead>
                   <tr>
+                    <th>S.No</th>
                     <th>Ticket ID & Subject</th>
                     <th>Raised By</th>
                     <th>Category</th>
@@ -518,16 +519,18 @@ const email = (ticket.raisedBy?.email || ticket.raisedBy?.mobile || "").toLowerC
                   </tr>
                 </thead>
                 <tbody>
-                  {currentTickets.map((ticket) => {
+                  {currentTickets.map((ticket, index) => {
                     const userObj = ticket.raisedBy || ticket.user || {};
-const userName = ticket.raisedBy?.fullName || ticket.raisedBy?.name || "Unknown User";
-const userContact = ticket.raisedBy?.mobile || ticket.raisedBy?.email || "N/A";
-const profilePic = ticket.raisedBy?.profilePic || null;                  
+                    const userName = ticket.raisedBy?.fullName || ticket.raisedBy?.name || "Unknown User";
+                    const userContact = ticket.raisedBy?.mobile || ticket.raisedBy?.email || "N/A";
+                    const profilePic = ticket.raisedBy?.profilePic || null;
                     const hasAttachments = Array.isArray(ticket.attachments) && ticket.attachments.length > 0;
 
                     return (
-                      <tr key={ticket._id}>
+                      <tr key={ticket._id}>   
+                        <td>{indexOfFirstItem + index + 1}</td>
                         <td>
+
                           <div className="cell-ticket-info">
                             <span className="ticket-id-badge">#{ticket._id?.slice(-6).toUpperCase()}</span>
                             <div className="ticket-subject-title">
@@ -685,10 +688,10 @@ const profilePic = ticket.raisedBy?.profilePic || null;
                     <p><FaPhoneAlt /> {selectedTicket.raisedBy.mobile}</p>
                   )}
                   {selectedTicket.raisedBy?.email && (
-               
-<p>
-  <FaEnvelope /> {selectedTicket.raisedBy?.email || selectedTicket.raisedBy?.mobile || "N/A"}
-</p>
+
+                    <p>
+                      <FaEnvelope /> {selectedTicket.raisedBy?.email || selectedTicket.raisedBy?.mobile || "N/A"}
+                    </p>
                   )}
                 </div>
 
@@ -720,12 +723,12 @@ const profilePic = ticket.raisedBy?.profilePic || null;
                   </div>
                 )}
 
-               {(selectedTicket.adminResponse || selectedTicket.adminReply) && (
-  <div className="admin-reply-box">
-    <strong>Admin Response:</strong>
-    <p>{selectedTicket.adminResponse || selectedTicket.adminReply}</p>
-  </div>
-)}
+                {(selectedTicket.adminResponse || selectedTicket.adminReply) && (
+                  <div className="admin-reply-box">
+                    <strong>Admin Response:</strong>
+                    <p>{selectedTicket.adminResponse || selectedTicket.adminReply}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -750,11 +753,11 @@ const profilePic = ticket.raisedBy?.profilePic || null;
                   gap: "16px",
                 }}
               >
-               
 
-             
 
-               
+
+
+
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
                   <label>Status</label>

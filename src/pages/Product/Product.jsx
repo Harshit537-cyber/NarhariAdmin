@@ -312,7 +312,7 @@ export default function Product() {
                         <FaEdit /> Edit
                       </button>
                       <button className="btn-pro btn-pro-delete" onClick={() => handleDeleteClick(item._id)}>
-                        <FaTrash /> Delete
+                       Delete
                       </button>
                     </td>
                   </tr>

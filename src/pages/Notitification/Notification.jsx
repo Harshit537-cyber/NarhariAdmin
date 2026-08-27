@@ -201,6 +201,7 @@ const PushNotification = () => {
           <table className="khatarnak-table">
             <thead>
               <tr>
+                <th>SNo.</th>
                 <th>NOTIFICATION</th>
                 <th>TARGET TYPE</th>
                 <th>DELIVERY</th>
@@ -229,8 +230,9 @@ const PushNotification = () => {
                   </td>
                 </tr>
               ) : (
-                notifications.map((item) => (
+            notifications.map((item, index) => (
                   <tr key={item._id}>
+                    <td>{index + 1}</td>
                     <td>
                       <span className="main-name">
                         {item.imageUrl && (

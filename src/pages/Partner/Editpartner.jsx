@@ -274,7 +274,7 @@ const payload = new FormData();
               <input
                 type="file"
                 name="profilePic"
-                accept="image/*"
+               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 onChange={handleFileChange}
               />
             </div>

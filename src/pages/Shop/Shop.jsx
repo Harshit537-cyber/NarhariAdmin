@@ -12,7 +12,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaTimes,
-  FaTrash, // Added Trash icon
+  FaTrash, FaEye,
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
@@ -24,11 +24,12 @@ export default function Shop() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState(null);
-  
+
   // Delete states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
+const [showViewModal, setShowViewModal] = useState(false);
+const [viewData, setViewData] = useState(null);
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -166,7 +167,10 @@ export default function Shop() {
     });
     setShowEditModal(true);
   };
-
+const handleViewClick = (item) => {
+  setViewData(item);
+  setShowViewModal(true);
+};
   return (
     <div className="an-dashboard-container shop-page">
       <ToastContainer />
@@ -249,11 +253,18 @@ export default function Shop() {
                       </span>
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <button className="btn-pro btn-pro-edit" onClick={() => openEditModal(item)}>
+                      <button className="btn-pro btn-pro-edit"   style={{ paddingLeft: "10px" }} onClick={() => openEditModal(item)}>
                         <FaEdit /> Edit
                       </button>
-                      <button className="btn-pro btn-pro-delete" style={{marginLeft: '8px', color: '#ef4444'}} onClick={() => handleDeleteClick(item._id)}>
-                        Delete
+                      <button
+                        className="btn-pro btn-pro-view"
+                        style={{ color: "neon cyan", paddingLeft: "10px" }}
+                        onClick={() => handleViewClick(item)}
+                      >
+                        <FaEye /> View
+                      </button>
+                      <button className="btn-pro btn-pro-delete" style={{ marginLeft: '8px', color: 'red',backgroundColor: "#fee2e2" }} onClick={() => handleDeleteClick(item._id)}>
+                     Delete
                       </button>
                     </td>
                   </tr>
@@ -324,12 +335,214 @@ export default function Shop() {
             <p className="delete-confirm-text">Are you sure? This action cannot be undone.</p>
             <div className="modal-actions-row">
               <button className="btn-modal-pro cancel" onClick={() => setShowDeleteModal(false)}>Cancel</button>
-              <button className="btn-modal-pro delete-confirm" style={{backgroundColor: '#ef4444', color: '#fff'}} onClick={confirmDeleteProduct}>Delete</button>
+              <button className="btn-modal-pro delete-confirm" style={{ backgroundColor: '#ef4444', color: '#fff' }} onClick={confirmDeleteProduct}>Delete</button>
             </div>
           </div>
         </div>
       )}
+{showViewModal && viewData && (
+  <div
+    className="ultra-modal-backdrop"
+    onClick={() => setShowViewModal(false)}
+  >
+    <div
+      className="view-product-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="view-modal-header">
+        <div>
+          <span className="view-modal-label">PRODUCT DETAILS</span>
+          <h3>{viewData.name}</h3>
+        </div>
 
+        <button
+          className="modal-close-btn"
+          onClick={() => setShowViewModal(false)}
+        >
+          <FaTimes />
+        </button>
+      </div>
+
+      {/* Main Content */}
+      <div className="view-modal-content">
+
+        {/* Image + Basic Info */}
+        <div className="view-top-section">
+
+          <div className="view-image-box">
+            <img
+              src={viewData.images?.[0]}
+              alt={viewData.name}
+            />
+          </div>
+
+          <div className="view-basic-info">
+
+            <div className="view-field">
+              <span>Product Name</span>
+              <strong>{viewData.name || "—"}</strong>
+            </div>
+
+            <div className="view-field">
+              <span>Category</span>
+              <strong>{viewData.category?.name || "—"}</strong>
+            </div>
+
+            <div className="view-field">
+              <span>Status</span>
+              <strong>
+                <span
+                  className={`view-status ${
+                    viewData.isActive ? "active" : "inactive"
+                  }`}
+                >
+                  {viewData.isActive ? "Active" : "Inactive"}
+                </span>
+              </strong>
+            </div>
+
+            <div className="view-field">
+              <span>Featured</span>
+              <strong>
+                <span
+                  className={`view-status ${
+                    viewData.isFeatured ? "featured" : "normal"
+                  }`}
+                >
+                  {viewData.isFeatured ? "Featured" : "Normal"}
+                </span>
+              </strong>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="view-section">
+          <h4>Pricing & Inventory</h4>
+
+          <div className="view-grid three-column">
+
+            <div className="view-field">
+              <span>Selling Price</span>
+              <strong className="price-text">
+                ₹{viewData.price ?? "—"}
+              </strong>
+            </div>
+
+            <div className="view-field">
+              <span>Sale Price</span>
+              <strong className="sale-price-text">
+                ₹{viewData.salePrice ?? "—"}
+              </strong>
+            </div>
+
+            <div className="view-field">
+              <span>Stock</span>
+              <strong>{viewData.stock ?? "—"}</strong>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="view-section">
+          <h4>Product Information</h4>
+
+          <div className="view-field full-width">
+            <span>Short Description</span>
+            <p>{viewData.shortDescription || "—"}</p>
+          </div>
+
+          <div className="view-field full-width">
+            <span>Description</span>
+            <p>{viewData.description || "—"}</p>
+          </div>
+        </div>
+
+        {/* Benefits */}
+        <div className="view-section">
+          <h4>Benefits</h4>
+
+          <div className="benefits-list">
+            {viewData.benefits?.length > 0 ? (
+              viewData.benefits.map((benefit, index) => (
+                <div className="benefit-item" key={index}>
+                  <FaCheckCircle />
+                  <span>{benefit}</span>
+                </div>
+              ))
+            ) : (
+              <span>—</span>
+            )}
+          </div>
+        </div>
+
+        {/* Usage & Care */}
+        <div className="view-section">
+          <div className="view-grid">
+
+            <div className="view-field description-box">
+              <span>How To Use</span>
+              <p>{viewData.howToUse || "—"}</p>
+            </div>
+
+            <div className="view-field description-box">
+              <span>Care Instructions</span>
+              <p>{viewData.careInstructions || "—"}</p>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="view-section">
+          <h4>Additional Information</h4>
+
+          <div className="view-grid three-column">
+
+            <div className="view-field">
+              <span>Slug</span>
+              <strong>{viewData.slug || "—"}</strong>
+            </div>
+
+            <div className="view-field">
+              <span>Created At</span>
+              <strong>
+                {viewData.createdAt
+                  ? new Date(viewData.createdAt).toLocaleDateString()
+                  : "—"}
+              </strong>
+            </div>
+
+            <div className="view-field">
+              <span>Updated At</span>
+              <strong>
+                {viewData.updatedAt
+                  ? new Date(viewData.updatedAt).toLocaleDateString()
+                  : "—"}
+              </strong>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      <div className="view-modal-footer">
+        <button
+          className="btn-modal-pro cancel"
+          onClick={() => setShowViewModal(false)}
+        >
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
       <AddProductModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}

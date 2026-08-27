@@ -1067,7 +1067,7 @@ export default function AstrologyChatAdmin() {
               <div className="inspector-header">
                 <div className="inspector-title-area">
                   <div className="chat-main-badges">
-                    <span className="session-id-tag lg">{activeChat.id}</span>
+                    {/* <span className="session-id-tag lg">{activeChat.id}</span> */}
                     <span className={`status-pill status-${activeChat.status.toLowerCase()}`}>
                       <span className="status-dot"></span> {activeChat.status}
                     </span>

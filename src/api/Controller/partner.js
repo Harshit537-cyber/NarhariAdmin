@@ -34,17 +34,12 @@ export const getApprovedPartners = async () => {
   }
 };
 
-// 4. Update Partner Data
 export const updatePartner = async (partnerId, data) => {
   try {
     const response = await apiClient.put(
       `/admin/dashboard/partners/${partnerId}`,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      data
+      // 👈 headers config hata diya
     );
     return response.data;
   } catch (error) {
