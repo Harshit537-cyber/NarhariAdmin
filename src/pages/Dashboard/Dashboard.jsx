@@ -7,6 +7,7 @@ import {
   getRecentUsers,
   deleteUser,
 } from "../../api/Controller/authController";
+import { getPendingPartners ,updatePartnerStatus }  from "../../api/Controller/pendingPartnerService";
 import { toast } from "react-toastify";
 import UserViewModal from "../../components/UserModule/UserViewModal";
 import {
@@ -22,7 +23,7 @@ import {
   FaCheckCircle,
   FaUserCheck,
   FaUserTimes,
-  FaClock,
+  FaClock,FaPhone,
 } from "react-icons/fa";
 
 export default function Dashboard() {
@@ -34,14 +35,10 @@ export default function Dashboard() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewUser, setViewUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+   const [pendingApprovals, setPendingApprovals] = useState([]);
 const itemsPerPage = 5;
   const [modalTitle, setModalTitle] = useState("");
-  const [pendingApprovals, setPendingApprovals] = useState([
-  { _id: "1", name: "Rahul Sharma", email: "rahul.sharma@gmail.com", role: "partner" },
-  { _id: "2", name: "Priya Verma", email: "priya.verma@gmail.com", role: "user" },
-  { _id: "3", name: "Amit Singh", email: "amit.singh@gmail.com", role: "partner" },
-  { _id: "4", name: "Neha Gupta", email: "neha.gupta@gmail.com", role: "admin" },
-]);
+ 
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalPartners: 0,
@@ -56,8 +53,17 @@ useEffect(() => {
   fetchUsers();
   fetchStats();
   fetchRecentUsers();
+   fetchPendingApprovals();
 }, []);
 
+const fetchPendingApprovals = async () => {
+  try {
+    const res = await getPendingPartners();
+    setPendingApprovals(res.data || res.partners || []);
+  } catch (err) {
+    console.error("Failed to load pending approvals:", err.message || err);
+  }
+};
   const fetchStats = async () => {
     try {
       const res = await getDashboardStats();
@@ -89,14 +95,24 @@ useEffect(() => {
   };
 
 
-const handleApprove = (userId) => {
-  toast.success("Profile approved successfully");
-  setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+const handleApprove = async (userId) => {
+  try {
+    const res = await updatePartnerStatus(userId, { status: "Approved" });
+    toast.success(res.message || "Profile approved successfully");
+    setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+  } catch (err) {
+    toast.error(err.message || "Approval failed");
+  }
 };
 
-const handleReject = (userId) => {
-  toast.error("Profile rejected");
-  setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+const handleReject = async (userId) => {
+  try {
+    const res = await updatePartnerStatus(userId, { status: "Rejected" });
+    toast.error(res.message || "Profile rejected");
+    setPendingApprovals((prev) => prev.filter((u) => u._id !== userId));
+  } catch (err) {
+    toast.error(err.message || "Rejection failed");
+  }
 };
   const confirmDelete = (user) => {
     setSelectedUser(user);
@@ -421,6 +437,7 @@ const handlePageChange = (pageNumber) => {
           </div>
         </div>
       </div>
+
  <div className="super-card approval-card animate-fade-in-delayed">
         <div className="super-card-header">
           <div className="header-accent-title">
@@ -443,8 +460,7 @@ const handlePageChange = (pageNumber) => {
             <table className="khatarnak-table">
               <thead>
                 <tr>
-                  <th>USER PROFILE</th>
-                  <th>EMAIL ADDRESS</th>
+             <th>MOBILE NUMBER</th>
                   <th>REQUESTED ROLE</th>
                   <th>STATUS</th>
                   <th style={{ textAlign: "right" }}>ACTIONS</th>
@@ -457,17 +473,18 @@ const handlePageChange = (pageNumber) => {
                     className="approval-row animate-slide-up"
                     style={{ animationDelay: `${idx * 0.08}s` }}
                   >
-                    <td>
-                      <div className="large-user-profile">
-                        <div className="giant-avatar purple-avatar">
-                          {getInitial(user.name)}
-                        </div>
-                        <div className="profile-names">
-                          <span className="main-name">{user.name || "N/A"}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="bold-email">{user.email || "—"}</td>
+                   <td>
+  <div className="large-user-profile">
+    <div className="giant-avatar purple-avatar" style={{ width: "20px", height: "18px" }}>
+  <div className="giant-avatar purple-avatar" style={{ width: "24px", height: "22px" }}>
+  <FaPhone style={{ fontSize: "14px" }} />
+</div>
+    </div>
+    <div className="profile-names">
+      <span className="main-name">{user.mobile || "N/A"}</span>
+    </div>
+  </div>
+</td>
                     <td>
                       <span className={`bold-role-tag role-${user.role}`}>
                         {user.role}
@@ -500,36 +517,11 @@ const handlePageChange = (pageNumber) => {
             </table>
           )}
         </div>
-        <div className="table-pagination-footer">
-  <div className="pagination-container">
-    <button
-      className="pagination-btn arrow-btn"
-      onClick={() => handlePageChange(currentPage - 1)}
-      disabled={currentPage === 1}
-    >
-      <FaChevronLeft />
-    </button>
-
-    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-      <button
-        key={page}
-        className={`pagination-btn ${currentPage === page ? "active" : ""}`}
-        onClick={() => handlePageChange(page)}
-      >
-        {page}
-      </button>
-    ))}
-
-    <button
-      className="pagination-btn arrow-btn"
-      onClick={() => handlePageChange(currentPage + 1)}
-      disabled={currentPage === totalPages}
-    >
-      <FaChevronRight />
-    </button>
-  </div>
-</div>
+     
       </div>
+
+
+
       {/* Khatarnak Delete Modal */}
       {showDeleteModal && (
         <div className="ultra-modal-backdrop">

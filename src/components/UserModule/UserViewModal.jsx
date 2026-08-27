@@ -63,10 +63,7 @@ export default function UserViewModal({ user, onClose, title  }) {
   <span className="view-value">₹ {user.walletBalance ?? 0}</span>
 </div>
 
-<div className="view-row">
-  <span className="view-label">FCM Token</span>
-  <span className="view-value">{user.fcmToken || "-"}</span>
-</div>
+
           <div className="view-row">
             <span className="view-label">Role</span>
             <span className={`role-badge role-${user.role}`}>{user.role}</span>
