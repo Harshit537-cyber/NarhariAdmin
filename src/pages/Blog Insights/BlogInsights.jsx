@@ -35,7 +35,7 @@ const BlogInsights = () => {
     publishedDate: "",
     isPublished: true,
     isFeatured: false,
-
+ videoBlog: "",
     authorName: "",
     authorDesignation: "",
 
@@ -270,7 +270,7 @@ const truncateWords = (text, maxWords = 7) => {
       isPublished: blog.isPublished ?? true,
       isFeatured: blog.isFeatured ?? false,
       slug: blog.slug || "",
-
+videoBlog: blog.videoBlog || "", 
       authorName: blog.author?.name || "",
       authorDesignation: blog.author?.designation || "",
 
@@ -336,7 +336,7 @@ const truncateWords = (text, maxWords = 7) => {
     data.append("readTime", formData.readTime);
     data.append("publishedDate", formData.publishedDate);
     data.append("slug", formData.slug);
-
+data.append("videoBlog", formData.videoBlog); 
     data.append("isPublished", formData.isPublished);
     data.append("isFeatured", formData.isFeatured);
 
@@ -736,6 +736,17 @@ const truncateWords = (text, maxWords = 7) => {
                     />
                   </div>
 
+<div className="blog-form-group">
+  <label>Video Blog (URL)</label>
+
+  <input
+    type="text"
+    name="videoBlog"
+    value={formData.videoBlog}
+    onChange={handleChange}
+    placeholder="Enter video URL (YouTube/Vimeo etc.)"
+  />
+</div> 
                   <div className="blog-form-group full-width">
                     <label>Description</label>
 

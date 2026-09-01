@@ -142,7 +142,7 @@ export default function Category() {
             <span className="enterprise-badge">
               <FaCrown className="crown-icon" /> COSMIC INVENTORY HUB
             </span>
-            <h1 className="wrapped-header-title">Category Management</h1>
+            <h1 className="wrapped-header-title">Product & Category Managert</h1>
           </div>
           <p className="header-subtitle">
             Monitor sales velocity, manage specs, and review product categories.
@@ -163,7 +163,7 @@ export default function Category() {
         <div className="super-card-header">
           <div className="header-accent-title">
             <div className="title-vertical-bar gold"></div>
-            <h2>Category Management</h2>
+            <h2>Product & Category Manager</h2>
           </div>
           <span className="giant-badge gold">{categories.length} Categories</span>
         </div>

@@ -219,7 +219,7 @@ export default function Product() {
             <span className="enterprise-badge">
               <FaCrown className="crown-icon" /> COSMIC INVENTORY HUB
             </span>
-            <h1 className="wrapped-header-title">Product & Category Manager</h1>
+            <h1 className="wrapped-header-title">Product Management</h1>
           </div>
           <p className="header-subtitle">
             Monitor sales velocity, manage specs, and review product categories.

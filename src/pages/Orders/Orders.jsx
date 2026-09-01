@@ -15,7 +15,7 @@ export default function Orders() {
   // Live orders state with customer and referral details
   const [orders, setOrders] = useState([
     {
-      id: "AST1025",
+    
       customer: "Aman Sharma",
       refPandit: "Acharya Rahul",
       productName: "Healing Crystal",
@@ -26,7 +26,7 @@ export default function Orders() {
       status: "Delivered",
     },
     {
-      id: "AST1026",
+     
       customer: "Priya Patel",
       refPandit: "Pandit Sharma",
       productName: "Rudraksha Mala",
@@ -37,7 +37,7 @@ export default function Orders() {
       status: "Shipping",
     },
     {
-      id: "AST1027",
+     
       customer: "Rohan Verma",
       refPandit: "Acharya Rahul",
       productName: "Kuber Yantra",
@@ -48,7 +48,7 @@ export default function Orders() {
       status: "Shipping",
     },
     {
-      id: "AST1028",
+    
       customer: "Sneha Rao",
       refPandit: "Pandit Sharma",
       productName: "Tulsi Mala",
@@ -223,7 +223,7 @@ export default function Orders() {
             {/* Top section with ID, Customer metadata, and Status */}
             <div className="order-top">
               <div className="order-title-meta">
-                <h3>Order #{order.id}</h3>
+                <h3>Order</h3>
                 <p className="customer-name">
                   Customer: <strong>{order.customer}</strong>
                 </p>
