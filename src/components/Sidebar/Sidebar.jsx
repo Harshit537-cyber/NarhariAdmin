@@ -3,13 +3,13 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
 import { AlertCircle, Ticket, Bell, Gift } from "lucide-react";
-import { FaBan, FaBlog } from "react-icons/fa";
+import { FaBan, FaBlog, FaVideo } from "react-icons/fa";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
-const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(
     location.pathname.startsWith("/partner")
   );
@@ -32,228 +32,228 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
     navigate("/login", { replace: true });
   };
 
- return (
-  <>
-    <button
-      className="sidebar-toggle"
-      onClick={() => setSidebarOpen(prev => !prev)}
-    >
-      ☰
-    </button>
+  return (
+    <>
+      <button
+        className="sidebar-toggle"
+        onClick={() => setSidebarOpen(prev => !prev)}
+      >
+        ☰
+      </button>
 
-    <aside className={`an-sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
-      {/* Brand Header */}
-      <div className="an-sidebar-brand">
-        <div className="an-brand-icon-wrapper">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M62 20C44 20 30 34 30 52C30 70 44 84 62 84C68 84 73.5 82.5 78 79.8C68.4 76.7 61.5 67.8 61.5 57.2C61.5 43.6 71 32.4 84 29.6C78.2 23.6 70.5 20 62 20Z"
-              fill="url(#brandGradient)"
-            />
-            <defs>
-              <linearGradient
-                id="brandGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#f0abfc" />
-                <stop offset="100%" stopColor="#c084fc" />
-              </linearGradient>
-            </defs>
-          </svg>
+      <aside className={`an-sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+        {/* Brand Header */}
+        <div className="an-sidebar-brand">
+          <div className="an-brand-icon-wrapper">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M62 20C44 20 30 34 30 52C30 70 44 84 62 84C68 84 73.5 82.5 78 79.8C68.4 76.7 61.5 67.8 61.5 57.2C61.5 43.6 71 32.4 84 29.6C78.2 23.6 70.5 20 62 20Z"
+                fill="url(#brandGradient)"
+              />
+              <defs>
+                <linearGradient
+                  id="brandGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor="#f0abfc" />
+                  <stop offset="100%" stopColor="#c084fc" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span className="an-sidebar-brand-text">NAMAH ASTRO</span>
         </div>
-        <span className="an-sidebar-brand-text">NAMAH ASTRO</span>
-      </div>
 
-    <nav
-  className="an-sidebar-nav"
-  onClick={(e) => {
-    if (window.innerWidth <= 860 && e.target.closest("a")) {
-      setSidebarOpen(false);
-    }
-  }}
->
-        {/* Dashboard */}
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
+        <nav
+          className="an-sidebar-nav"
+          onClick={(e) => {
+            if (window.innerWidth <= 860 && e.target.closest("a")) {
+              setSidebarOpen(false);
+            }
+          }}
         >
-          <IconGrid />
-          <span className="an-nav-text">Dashboard</span>
-        </NavLink>
+          {/* Dashboard */}
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <IconGrid />
+            <span className="an-nav-text">Dashboard</span>
+          </NavLink>
 
-        {/* Collapsible Partner Menu */}
-        <div className="an-nav-group">
-          <button
-            className={`an-nav-item an-nav-parent ${partnerOpen ? "is-open" : ""
-              }`}
-            onClick={() => setPartnerOpen((prev) => !prev)}
+          {/* Collapsible Partner Menu */}
+          <div className="an-nav-group">
+            <button
+              className={`an-nav-item an-nav-parent ${partnerOpen ? "is-open" : ""
+                }`}
+              onClick={() => setPartnerOpen((prev) => !prev)}
+            >
+              <IconPartner />
+              <span className="an-nav-text">Partner</span>
+              <IconChevron className="an-nav-chevron" />
+            </button>
+
+            {partnerOpen && (
+              <div className="an-nav-submenu">
+                <NavLink
+                  to="/partner"
+                  end
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>All Partners</span>
+                </NavLink>
+                <NavLink
+                  to="/partner/profile-approval"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Profile Approval</span>
+                </NavLink>
+                <NavLink
+                  to="/partner/kyc-verification"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>KYC Document Verify</span>
+                </NavLink>
+
+                <NavLink
+                  to="/partner/min-rate-astrologer"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Min Rate Astrologer</span>
+                </NavLink>
+
+
+                <NavLink
+                  to="/partner/commission"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Commission</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible User Menu */}
+          <div className="an-nav-group">
+            <button
+              className={`an-nav-item an-nav-parent ${userOpen ? "is-open" : ""
+                }`}
+              onClick={() => setUserOpen((prev) => !prev)}
+            >
+              <IconUser />
+              <span className="an-nav-text">User</span>
+              <IconChevron className="an-nav-chevron" />
+            </button>
+
+            {userOpen && (
+              <div className="an-nav-submenu">
+                <NavLink
+                  to="/user"
+                  end
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>All Users</span>
+                </NavLink>
+              </div>
+            )}
+
+          </div>
+
+          <NavLink
+            to="/pandit"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
           >
             <IconPartner />
-            <span className="an-nav-text">Partner</span>
-            <IconChevron className="an-nav-chevron" />
-          </button>
-
-          {partnerOpen && (
-            <div className="an-nav-submenu">
-              <NavLink
-                to="/partner"
-                end
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>All Partners</span>
-              </NavLink>
-              <NavLink
-                to="/partner/profile-approval"
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>Profile Approval</span>
-              </NavLink>
-              <NavLink
-                to="/partner/kyc-verification"
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>KYC Document Verify</span>
-              </NavLink>
-
-              <NavLink
-                to="/partner/min-rate-astrologer"
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>Min Rate Astrologer</span>
-              </NavLink>
+            <span className="an-nav-text">Pandit Ji</span>
+          </NavLink>
 
 
-              <NavLink
-                to="/partner/commission"
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>Commission</span>
-              </NavLink>
-            </div>
-          )}
-        </div>
-
-        {/* Collapsible User Menu */}
-        <div className="an-nav-group">
-          <button
-            className={`an-nav-item an-nav-parent ${userOpen ? "is-open" : ""
-              }`}
-            onClick={() => setUserOpen((prev) => !prev)}
+          {/* Rituals */}
+          <NavLink
+            to="/rituals"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
           >
-            <IconUser />
-            <span className="an-nav-text">User</span>
-            <IconChevron className="an-nav-chevron" />
-          </button>
-
-          {userOpen && (
-            <div className="an-nav-submenu">
-              <NavLink
-                to="/user"
-                end
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>All Users</span>
-              </NavLink>
-            </div>
-          )}
-
-        </div>
-
-        <NavLink
-          to="/pandit"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconPartner />
-          <span className="an-nav-text">Pandit Ji</span>
-        </NavLink>
-
-
-        {/* Rituals */}
-        <NavLink
-          to="/rituals"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconRituals />
-          <span className="an-nav-text">Rituals</span>
-        </NavLink>
+            <IconRituals />
+            <span className="an-nav-text">Rituals</span>
+          </NavLink>
 
 
 
-        {/* Banner Management */}
-        <NavLink
-          to="/banners"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconBanner />
-          <span className="an-nav-text">Banner Management</span>
-        </NavLink>
-
-
-
-        <NavLink
-          to="/keywords"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <FaBan />
-          <span className="an-nav-text">Restriction Keywords</span>
-        </NavLink>
-
-
-
-
-        {/* Collapsible Chats Menu */}
-        <div className="an-nav-group">
-          <button
-            className={`an-nav-item an-nav-parent ${chatsOpen ? "is-open" : ""
-              }`}
-            onClick={() => setChatsOpen((prev) => !prev)}
+          {/* Banner Management */}
+          <NavLink
+            to="/banners"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
           >
-            <IconChat />
-            <span className="an-nav-text">Chats</span>
-            <IconChevron className="an-nav-chevron" />
-          </button>
+            <IconBanner />
+            <span className="an-nav-text">Banner Management</span>
+          </NavLink>
 
-          {chatsOpen && (
-            <div className="an-nav-submenu">
-              <NavLink
-                to="/chats/user-astro-chats"
-                className={({ isActive }) =>
-                  `an-nav-subitem ${isActive ? "is-active" : ""}`
-                }
-              >
-                <span>User Astro Chats</span>
-              </NavLink>
-            </div>
-          )}
-        </div>
 
-        {/* Consultation */}
-        {/* <NavLink
+
+          <NavLink
+            to="/keywords"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <FaBan />
+            <span className="an-nav-text">Restriction Keywords</span>
+          </NavLink>
+
+
+
+
+          {/* Collapsible Chats Menu */}
+          <div className="an-nav-group">
+            <button
+              className={`an-nav-item an-nav-parent ${chatsOpen ? "is-open" : ""
+                }`}
+              onClick={() => setChatsOpen((prev) => !prev)}
+            >
+              <IconChat />
+              <span className="an-nav-text">Chats</span>
+              <IconChevron className="an-nav-chevron" />
+            </button>
+
+            {chatsOpen && (
+              <div className="an-nav-submenu">
+                <NavLink
+                  to="/chats/user-astro-chats"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>User Astro Chats</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
+
+          {/* Consultation */}
+          {/* <NavLink
           to="/consultation"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -263,40 +263,40 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
           <span className="an-nav-text">Consultation</span>
         </NavLink> */}
 
-        {/* Product */}
-        <NavLink
-          to="/product"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconBox />
-          <span className="an-nav-text">Product</span>
-        </NavLink>
-        {/* Category */}
-        <NavLink
-          to="/category"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconCategory />
-          <span className="an-nav-text"> Product Category</span>
-        </NavLink>
+          {/* Product */}
+          <NavLink
+            to="/product"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <IconBox />
+            <span className="an-nav-text">Product</span>
+          </NavLink>
+          {/* Category */}
+          <NavLink
+            to="/category"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <IconCategory />
+            <span className="an-nav-text"> Product Category</span>
+          </NavLink>
 
-        {/* Gifts */}
-        <NavLink
-          to="/gifts"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <Gift />
-          <span className="an-nav-text">Gifts</span>
-        </NavLink>
+          {/* Gifts */}
+          <NavLink
+            to="/gifts"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <Gift />
+            <span className="an-nav-text">Gifts</span>
+          </NavLink>
 
-        {/* Wallet */}
-        {/* <NavLink
+          {/* Wallet */}
+          {/* <NavLink
           to="/wallet"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -306,31 +306,41 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
           <span className="an-nav-text">Wallet</span>
         </NavLink> */}
 
-        {/* Shop */}
-        <NavLink
-          to="/shop"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <IconStore />
-          <span className="an-nav-text">Shop</span>
-        </NavLink>
+          {/* Shop */}
+          <NavLink
+            to="/shop"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <IconStore />
+            <span className="an-nav-text">Shop</span>
+          </NavLink>
 
 
 
-        <NavLink
-          to="/blog"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <FaBlog/>
-          <span className="an-nav-text">Blog Insights</span>
-        </NavLink>
+          <NavLink
+            to="/blog"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <FaBlog />
+            <span className="an-nav-text">Blog Insights</span>
+          </NavLink>
 
-        {/* Shopping */}
-        {/* <NavLink
+          {/* Video Blog */}
+          <NavLink
+            to="/video-blog"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <FaVideo />
+            <span className="an-nav-text">Video Blog</span>
+          </NavLink>
+          {/* Shopping */}
+          {/* <NavLink
           to="/shopping"
           className={({ isActive }) =>
             `an-nav-item ${isActive ? "is-active" : ""}`
@@ -340,69 +350,69 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
           <span className="an-nav-text">Shopping</span>
         </NavLink> */}
 
-        {/* Orders */}
-        <NavLink
-          to="/orders"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
+          {/* Orders */}
+          <NavLink
+            to="/orders"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <IconList />
+            <span className="an-nav-text">Orders</span>
+          </NavLink>
+
+
+
+          <NavLink
+            to="/push-notification"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <Bell />
+            <span className="an-nav-text">Push Notification</span>
+          </NavLink>
+
+
+          {/* Complaints */}
+          <NavLink
+            to="/complaints"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <AlertCircle />
+            <span className="an-nav-text">Complaints</span>
+          </NavLink>
+
+          {/* Tickets */}
+          <NavLink
+            to="/tickets"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+            <Ticket />
+            <span className="an-nav-text">Tickets</span>
+          </NavLink>
+        </nav>
+
+        {/* Logout Button */}
+        <button
+          className="an-nav-item logout-btn"
+          onClick={() => setShowModal(true)}
         >
-          <IconList />
-          <span className="an-nav-text">Orders</span>
-        </NavLink>
+          <IconLogout />
+          <span className="an-nav-text">Logout</span>
+        </button>
 
-
-
-        <NavLink
-          to="/push-notification"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <Bell />
-          <span className="an-nav-text">Push Notification</span>
-        </NavLink>
-
-
-        {/* Complaints */}
-        <NavLink
-          to="/complaints"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <AlertCircle />
-          <span className="an-nav-text">Complaints</span>
-        </NavLink>
-
-        {/* Tickets */}
-        <NavLink
-          to="/tickets"
-          className={({ isActive }) =>
-            `an-nav-item ${isActive ? "is-active" : ""}`
-          }
-        >
-          <Ticket />
-          <span className="an-nav-text">Tickets</span>
-        </NavLink>
-      </nav>
-
-      {/* Logout Button */}
-      <button
-        className="an-nav-item logout-btn"
-        onClick={() => setShowModal(true)}
-      >
-        <IconLogout />
-        <span className="an-nav-text">Logout</span>
-      </button>
-
-      {/* Logout Confirmation Modal */}
-      <LogoutModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onConfirm={handleLogoutConfirm}
-      />
-    </aside></>
+        {/* Logout Confirmation Modal */}
+        <LogoutModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onConfirm={handleLogoutConfirm}
+        />
+      </aside></>
   );
 }
 

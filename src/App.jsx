@@ -35,6 +35,7 @@ import PushNotification from "./pages/Notitification/Notification.jsx";
 import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
 import Gifts from "./pages/Gifts/Gifts.jsx"
 import BlogInsights from "./pages/Blog Insights/BlogInsights.jsx";
+import VideoBlog from "./pages/VideoBlogs/videoblog.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -76,7 +77,7 @@ const AppRoutes = () => {
               <Route path="push-notification" element={<PushNotification />} />
               <Route path="/gifts" element={<Gifts />} />
               <Route path="/blog" element={<BlogInsights />} />
-
+<Route path="/video-blog" element={<VideoBlog />} />
               <Route
                 path="/partner/kyc-verification"
                 element={<KycVerification />}
