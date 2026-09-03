@@ -35,7 +35,7 @@ import PushNotification from "./pages/Notitification/Notification.jsx";
 import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
 import Gifts from "./pages/Gifts/Gifts.jsx"
 import BlogInsights from "./pages/Blog Insights/BlogInsights.jsx";
-import VideoBlog from "./pages/VideoBlogs/videoblog.jsx";
+import VideoBlog from "./pages/VideoBlogs/VideoBlog.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
