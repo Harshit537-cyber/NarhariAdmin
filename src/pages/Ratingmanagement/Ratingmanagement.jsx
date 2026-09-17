@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAllConsultationRatings } from "../../api/Controller/rating";
-import "./RatingManagement.css";
+import "./Ratingmanagement.css";
 import { toast } from "react-toastify";
 import { FaStar, FaCrown, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
