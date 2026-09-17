@@ -551,6 +551,28 @@
   width: 0;
   height: 0;
 }
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: default; /* not clickable */
+}
+
+.status-badge-green {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.status-badge-red {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
 
 .toggle-slider {
   position: absolute;
@@ -653,4 +675,271 @@
   .db-header { flex-direction: column; align-items: flex-start; gap: 20px; }
   .pt-controls-bar { flex-direction: column; align-items: stretch; }
   .filter-tabs { overflow-x: auto; }
+}
+
+/* ================================
+   STATUS CONFIRMATION MODAL
+================================ */
+
+.status-modal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+  padding: 20px;
+
+  animation: statusOverlayFade 0.2s ease-out;
+}
+
+.status-modal {
+  position: relative;
+  width: 400px;
+  max-width: 100%;
+
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+
+  padding: 28px;
+
+  box-shadow:
+    0 25px 60px rgba(15, 23, 42, 0.18),
+    0 8px 25px rgba(179, 140, 27, 0.08);
+
+  animation: statusModalSlide 0.25s ease-out;
+}
+
+/* Small top accent */
+.status-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 70px;
+  height: 4px;
+
+  background: linear-gradient(
+    90deg,
+    var(--neon-gold),
+    #d97706
+  );
+
+  border-radius: 0 0 10px 10px;
+}
+
+/* Heading */
+.status-modal h3 {
+  margin: 4px 0 10px;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  color: var(--black-title);
+  letter-spacing: -0.4px;
+}
+
+/* Description */
+.status-modal p {
+  margin: 0;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.status-modal p strong {
+  color: var(--black-title);
+  font-weight: 800;
+}
+
+/* Buttons container */
+.status-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 10px;
+  margin-top: 26px;
+}
+
+/* Cancel */
+.status-cancel-btn {
+  min-width: 90px;
+
+  padding: 10px 18px;
+
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+
+  background: #f8fafc;
+  color: #475569;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.status-cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+/* Confirm */
+.status-confirm-btn {
+  min-width: 105px;
+
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    var(--neon-gold),
+    #d97706
+  );
+
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 15px rgba(179, 140, 27, 0.25);
+
+  transition: all 0.2s ease;
+}
+
+.status-confirm-btn:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 9px 20px rgba(179, 140, 27, 0.35);
+}
+
+.status-cancel-btn:disabled,
+.status-confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ================================
+   MODAL ANIMATIONS
+================================ */
+
+@keyframes statusOverlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes statusModalSlide {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 480px) {
+  .status-modal {
+    padding: 24px;
+    border-radius: 18px;
+  }
+
+  .status-modal h3 {
+    font-size: 18px;
+  }
+
+  .status-modal-actions {
+    margin-top: 22px;
+  }
+
+  .status-cancel-btn,
+  .status-confirm-btn {
+    flex: 1;
+  }
+}.status-input-group {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.status-input-group label {
+  display: block;
+  font-size: 13px;
+   color: #000107;
+  font-weight: 500;
+  margin-bottom: 6px;
+
+  letter-spacing: 0.3px;
+}
+
+.status-input-group input,
+.status-input-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f7f5f3;
+ background: #f0eeeb;
+  color: #000107;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-input-group input::placeholder,
+.status-input-group textarea::placeholder {
+  color: #6b7280; /* dim placeholder text */
+  font-size: 13px;
+}
+
+.status-input-group input:focus,
+.status-input-group textarea:focus {
+  border-color: #d97706; /* orange highlight on focus, matches Activate btn */
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.status-input-group textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.status-input-group input:disabled,
+.status-input-group textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

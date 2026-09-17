@@ -27,10 +27,11 @@ export default function Commission() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-const [showViewModal, setShowViewModal] = useState(false);
-const [selectedCommission, setSelectedCommission] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCommission, setSelectedCommission] = useState(null);
   const [formData, setFormData] = useState(null);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [addFormData, setAddFormData] = useState({
     partnerId: "",
     commissionPercentage: "",
@@ -128,44 +129,40 @@ const [selectedCommission, setSelectedCommission] = useState(null);
     }
   };
 
-  const handleDelete = async (commissionId) => {
+  const handleDelete = (commissionId) => {
     if (!commissionId) {
       toast.error("Commission ID is missing");
       return;
     }
+    setDeleteId(commissionId);
+    setShowDeleteModal(true);
+  };
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this commission?",
-    );
-
-    if (!confirmed) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      const res = await deleteCommission(commissionId);
+      const res = await deleteCommission(deleteId);
 
       if (res.data?.success) {
         toast.success(res.data?.message || "Commission deleted successfully");
 
-        // Remove deleted commission immediately from UI
         setCommissions((prev) =>
-          prev.filter((item) => item._id !== commissionId),
+          prev.filter((item) => item._id !== deleteId),
         );
-
-        // Optional: refresh from backend
-        // await fetchCommissions();
       } else {
         toast.error(res.data?.message || "Failed to delete commission");
       }
     } catch (error) {
       console.error("Delete commission error:", error);
-
       toast.error(
         error.response?.data?.message || "Failed to delete commission",
       );
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteId(null);
     }
   };
-
-  // ---- UPDATE COMMISSION (dummy) ----
   const handleSaveCommission = async () => {
     if (!formData) return;
 
@@ -235,9 +232,9 @@ const [selectedCommission, setSelectedCommission] = useState(null);
   };
 
   const openViewModal = (item) => {
-  setSelectedCommission(item);
-  setShowViewModal(true);
-};
+    setSelectedCommission(item);
+    setShowViewModal(true);
+  };
   // Totals for the summary strip
   const totalPaid = commissions
     .filter((c) => c.status === "paid")
@@ -474,7 +471,7 @@ const [selectedCommission, setSelectedCommission] = useState(null);
                             <FaTrash size={18} />
                           </button>
                           <button
-                         onClick={() => openViewModal(item)}
+                            onClick={() => openViewModal(item)}
                             title="View Commission"
                             style={{
                               display: "flex",
@@ -559,7 +556,7 @@ const [selectedCommission, setSelectedCommission] = useState(null);
                   <FaTimes />
                 </button>
               </div>
-           
+
             </div>
 
             <div className="edit-form-body">
@@ -716,124 +713,172 @@ const [selectedCommission, setSelectedCommission] = useState(null);
           </div>
         </div>
       )}
-{/* View Commission Modal */}
-{showViewModal && selectedCommission && (
-  <div
-    className="ultra-modal-backdrop"
-    onClick={() => setShowViewModal(false)}
-  >
-    <div
-      className="ultra-modal-box edit-modal-box"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="ultra-modal-header">
-        <div className="modal-header-top">
-          <div>
-            <h3>Commission Details</h3>
-            <p className="modal-subtitle">
-              Complete commission information
-            </p>
-          </div>
 
-          <button
-            className="modal-close-btn"
-            onClick={() => setShowViewModal(false)}
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="ultra-modal-backdrop"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="ultra-modal-box edit-modal-box"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "400px" }}
           >
-            <FaTimes />
-          </button>
-        </div>
+            <div className="ultra-modal-header">
+              <div className="modal-header-top">
+                <h3>Delete Commission</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            </div>
 
-       
-      </div>
+            <div className="edit-form-body">
+              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "14px" }}>
+                Are you sure you want to delete this commission? This action cannot be undone.
+              </p>
+            </div>
 
-      <div className="edit-form-body">
-
-        <div className="partner-preview-card">
-          <div className="partner-preview-avatar">
-            <span>
-              {selectedCommission.partnerId?.fullName
-                ?.charAt(0)
-                ?.toUpperCase() || "P"}
-            </span>
+            <div className="modal-actions-row">
+              <button
+                className="btn-modal-pro cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-modal-pro save"
+                style={{ background: "var(--danger-red)" }}
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
           </div>
-
-          <div>
-            <span className="partner-preview-name">
-              {selectedCommission.partnerId?.fullName || "Unnamed Partner"}
-            </span>
-
-            <span className="partner-preview-mobile">
-              {selectedCommission.partnerId?.mobile || "No mobile"}
-            </span>
-          </div>
         </div>
-
-      
-
-        
-
-        <div className="form-group">
-          <label>Commission Percentage</label>
-          <input
-            type="text"
-            value={`${selectedCommission.commissionPercentage ?? 0}%`}
-            disabled
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Created Date</label>
-          <input
-            type="text"
-            value={
-              selectedCommission.createdAt
-                ? new Date(
-                    selectedCommission.createdAt
-                  ).toLocaleString("en-IN")
-                : "—"
-            }
-            disabled
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Last Updated</label>
-          <input
-            type="text"
-            value={
-              selectedCommission.updatedAt
-                ? new Date(
-                    selectedCommission.updatedAt
-                  ).toLocaleString("en-IN")
-                : "—"
-            }
-            disabled
-          />
-        </div>
-
-        
-
-        <div className="form-group">
-          <label>Version</label>
-          <input
-            type="text"
-            value={selectedCommission.__v ?? "0"}
-            disabled
-          />
-        </div>
-      </div>
-
-      <div className="modal-actions-row">
-        <button
-          className="btn-modal-pro cancel"
+      )}
+      {/* View Commission Modal */}
+      {showViewModal && selectedCommission && (
+        <div
+          className="ultra-modal-backdrop"
           onClick={() => setShowViewModal(false)}
         >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div
+            className="ultra-modal-box edit-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <div className="modal-header-top">
+                <div>
+                  <h3>Commission Details</h3>
+                  <p className="modal-subtitle">
+                    Complete commission information
+                  </p>
+                </div>
+
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+
+            </div>
+
+            <div className="edit-form-body">
+
+              <div className="partner-preview-card">
+                <div className="partner-preview-avatar">
+                  <span>
+                    {selectedCommission.partnerId?.fullName
+                      ?.charAt(0)
+                      ?.toUpperCase() || "P"}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="partner-preview-name">
+                    {selectedCommission.partnerId?.fullName || "Unnamed Partner"}
+                  </span>
+
+                  <span className="partner-preview-mobile">
+                    {selectedCommission.partnerId?.mobile || "No mobile"}
+                  </span>
+                </div>
+              </div>
+
+
+
+
+
+              <div className="form-group">
+                <label>Commission Percentage</label>
+                <input
+                  type="text"
+                  value={`${selectedCommission.commissionPercentage ?? 0}%`}
+                  disabled
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Created Date</label>
+                <input
+                  type="text"
+                  value={
+                    selectedCommission.createdAt
+                      ? new Date(
+                        selectedCommission.createdAt
+                      ).toLocaleString("en-IN")
+                      : "—"
+                  }
+                  disabled
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Last Updated</label>
+                <input
+                  type="text"
+                  value={
+                    selectedCommission.updatedAt
+                      ? new Date(
+                        selectedCommission.updatedAt
+                      ).toLocaleString("en-IN")
+                      : "—"
+                  }
+                  disabled
+                />
+              </div>
+
+
+
+              <div className="form-group">
+                <label>Version</label>
+                <input
+                  type="text"
+                  value={selectedCommission.__v ?? "0"}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="modal-actions-row">
+              <button
+                className="btn-modal-pro cancel"
+                onClick={() => setShowViewModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

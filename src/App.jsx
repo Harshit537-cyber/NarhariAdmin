@@ -35,7 +35,10 @@ import PushNotification from "./pages/Notitification/Notification.jsx";
 import RestrictionKeywords from "./pages/RestrictionKeyword/RestrictionKeyword.jsx";
 import Gifts from "./pages/Gifts/Gifts.jsx"
 import BlogInsights from "./pages/Blog Insights/BlogInsights.jsx";
+import RatingManagement from "./pages/Ratingmanagement/Ratingmanagement.jsx";
 import VideoBlog from "./pages/VideoBlogs/VideoBlogs.jsx";
+import PartnerStatus from "./pages/Partner/PartnerStatus/Status.jsx";
+import PanditJiApproval from "./pages/Pandit/PanditJiApproval.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -71,13 +74,15 @@ const AppRoutes = () => {
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/partner" element={<Partner />} />
-              <Route path="/category" element={<Category  />}  />
+              <Route path="/partner/status" element={<PartnerStatus />} />
+              <Route path="/category" element={<Category />} />
               <Route path="/rituals" element={<Rituals />} />
               <Route path="/pandit" element={<Pandit />} />
+              <Route path="/ratings" element={<RatingManagement />} />
               <Route path="push-notification" element={<PushNotification />} />
               <Route path="/gifts" element={<Gifts />} />
               <Route path="/blog" element={<BlogInsights />} />
-<Route path="/video-blog" element={<VideoBlog />} />
+              <Route path="/video-blog" element={<VideoBlog />} />
               <Route
                 path="/partner/kyc-verification"
                 element={<KycVerification />}
@@ -85,6 +90,10 @@ const AppRoutes = () => {
               <Route
                 path="/partner/profile-approval"
                 element={<ProfileApproval />}
+              />
+              <Route
+                path="/pandit/approval"
+                element={<PanditJiApproval />}
               />
               <Route path="/partner/min-rate-astrologer" element={<MinRateAstrologer />} />
               <Route path="/partner/commission" element={<Commission />} />

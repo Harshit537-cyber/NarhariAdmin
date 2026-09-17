@@ -204,6 +204,7 @@
 
 .action-column {
   width: 140px;
+   min-width: 210px;
 }
 
 /* ================= IMAGE ================= */
@@ -444,28 +445,44 @@
 
 
 
-/* ================= MODAL ================= */
-
 .blog-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 20px;
+
   background: rgba(7, 15, 40, 0.55);
-  backdrop-filter: blur(4px);
+
+  /* IMPORTANT */
+  overflow: hidden;
 }
 
+
 .blog-modal {
+  position: relative;
+
   width: 100%;
   max-width: 850px;
+
+  /* IMPORTANT */
+  height: 92vh;
   max-height: 92vh;
-  overflow-y: auto;
+
+  background: #fff;
   border-radius: 22px;
-  background: #ffffff;
-  box-shadow: 0 25px 70px rgba(5, 15, 45, 0.25);
+
+  /* IMPORTANT */
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior: contain;
+
+  scrollbar-width: auto;
 }
 
 .blog-modal-header {
@@ -738,7 +755,7 @@
 
 .blog-table-wrapper::-webkit-scrollbar,
 .blog-modal::-webkit-scrollbar {
-  width: 8px;      /* vertical scrollbar (modal) */
+  width: 7px;      /* vertical scrollbar (modal) */
   height: 8px;      /* horizontal scrollbar (table) */
 }
 
@@ -749,13 +766,14 @@
 
 .blog-table-wrapper::-webkit-scrollbar-thumb,
 .blog-modal::-webkit-scrollbar-thumb {
-  background-color: #d7dbe3;
-  border-radius: 999px;
+  background: #c5cbd6;
+  border-radius: 10px;
+
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 .blog-table-wrapper::-webkit-scrollbar-thumb:hover,
 .blog-modal::-webkit-scrollbar-thumb:hover {
-  background-color: #b9c0cc;
+  background: #aeb6c4;
 }

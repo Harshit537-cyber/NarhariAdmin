@@ -1,14 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
-import "./Partner.css";
+import React, { useState, useMemo, useEffect } from "react";
+import "../../Partner/Partner.css";
 import {
-  getAllPartners,
-  deletePartner,
-  togglePartnerStatus
-} from "../../api/Controller/partner";
-import {
-  FaEye,
-  FaEdit,
-  FaTrashAlt,
   FaSearch,
   FaCheckCircle,
   FaStar,
@@ -23,123 +15,58 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-import DeleteModal from "./DeleteModal";
-import EditPartnerModal from "./Editpartner";
 import { toast } from "react-toastify";
-import ViewPartnerModal from "./ViewPartnerModal";
+import { getAllPartnersStatus } from "../../../api/Controller/partner";
 
-export default function Partner() {
+
+export default function PartnerStatus() {
+
   const [partners, setPartners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
-  const [selectedPartner, setSelectedPartner] = useState(null);
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(false);
+  const [partnerStats, setPartnerStats] = useState({
+    totalPartners: 0,
+    activePartners: 0,
+    inactivePartners: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+ 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 8;
-const [statusReason, setStatusReason] = useState("");
-const [statusReasonNote, setStatusReasonNote] = useState("");
+
   useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        setLoading(true);
+
+        const response = await getAllPartnersStatus();
+
+        console.log("Partners API Response:", response);
+
+        setPartners(response?.data || []);
+
+        setPartnerStats({
+          totalPartners: response?.totalPartners || 0,
+          activePartners: response?.activePartners || 0,
+          inactivePartners: response?.inactivePartners || 0,
+        });
+
+      } catch (error) {
+        console.error("Failed to fetch partners:", error);
+        toast.error(error?.message || "Failed to fetch partners");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPartners();
   }, []);
 
-  const fetchPartners = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllPartners();
-      setPartners(res.data || []);
-    } catch (err) {
-      setError(err.message || "Failed to load partners");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (partner) => {
-    setSelectedPartner(partner);
-    setEditOpen(true);
-  };
-
-  const handleView = (partner) => {
-    setSelectedPartner(partner);
-    setViewOpen(true);
-  };
-const handleToggleStatus = (partner) => {
-  setSelectedPartner(partner);
-  setStatusReason("");
-  setStatusReasonNote("");
-  setStatusModalOpen(true);
-};
-
-const confirmStatusChange = async () => {
-  if (!selectedPartner) return;
-
-  const isCurrentlyActive = !!selectedPartner.isActive;
-
-  const data = {
-    reason: statusReason.trim() || (isCurrentlyActive ? "Deactivated by admin" : "Activated by admin"),
-    reasonNote: statusReasonNote.trim() || (isCurrentlyActive ? "Partner deactivated by admin" : "Partner activated by admin"),
-  };
-
-  try {
-    setStatusLoading(true);
-    await togglePartnerStatus(selectedPartner._id, data);
-
-    setPartners((prev) =>
-      prev.map((p) =>
-        p._id === selectedPartner._id ? { ...p, isActive: !isCurrentlyActive } : p
-      )
-    );
-
-    toast.success(
-      isCurrentlyActive ? "Partner deactivated successfully" : "Partner activated successfully"
-    );
-
-    setStatusModalOpen(false);
-    setSelectedPartner(null);
-    setStatusReason("");
-    setStatusReasonNote("");
-  } catch (err) {
-    console.error("Toggle status error:", err);
-    toast.error(err.message || "Failed to update partner status");
-  } finally {
-    setStatusLoading(false);
-  }
-};
-  const confirmDelete = async () => {
-    try {
-      await deletePartner(selectedPartner._id);
-      setPartners((prev) =>
-        prev.filter((partner) => partner._id !== selectedPartner._id)
-      );
-      toast.success("Partner deleted successfully");
-      setDeleteOpen(false);
-      setSelectedPartner(null);
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Failed to delete partner");
-    }
-  };
-
-  const stats = useMemo(() => {
-    const today = new Date().toDateString();
-    const totalPartners = partners.length;
-    const verifiedCount = partners.filter((p) => p.isVerified).length;
-    const kycPendingCount = partners.filter(
-      (p) => (p.kycStatus || "").toLowerCase() === "pending"
-    ).length;
-    const newToday = partners.filter(
-      (p) => new Date(p.createdAt).toDateString() === today
-    ).length;
-    return { totalPartners, verifiedCount, kycPendingCount, newToday };
-  }, [partners]);
-
+ 
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
       const name = (partner.fullName || "").toLowerCase();
@@ -153,13 +80,12 @@ const confirmStatusChange = async () => {
       if (!matchesSearch) return false;
 
       if (filterType === "active") return partner.isActive;
-      if (filterType === "verified") return partner.isVerified;
-      if (filterType === "kycPending")
-        return (partner.kycStatus || "").toLowerCase() === "pending";
+      if (filterType === "inactive") return !partner.isActive;
 
       return true;
     });
   }, [partners, searchTerm, filterType]);
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredPartners.length / itemsPerPage)
@@ -178,6 +104,7 @@ const confirmStatusChange = async () => {
       setCurrentPage(pageNumber);
     }
   };
+
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
 
   return (
@@ -192,10 +119,10 @@ const confirmStatusChange = async () => {
             <span className="enterprise-badge">
               <FaCrown className="crown-icon" /> COSMIC PARTNER NETWORK
             </span>
-            <h1 className="wrapped-header-title">Partner Management</h1>
+            <h1 className="wrapped-header-title">Partner Status</h1>
           </div>
           <p className="header-subtitle">
-            Real-time telemetry, profiles, and status controls for celestial guides.
+            View and control the active/inactive status of celestial guides.
           </p>
         </div>
 
@@ -215,13 +142,13 @@ const confirmStatusChange = async () => {
               <FaUsers />
             </div>
             <span className="trend-badge cyan-pill">
-              <FaArrowUp /> +{stats.newToday} TODAY
+           <FaArrowUp /> TODAY
             </span>
           </div>
 
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.totalPartners.toLocaleString()}</h2>
-            <p className="giant-stat-label">Total Active Partners</p>
+            <h2 className="giant-stat-number">{partnerStats.totalPartners.toLocaleString()}</h2>
+            <p className="giant-stat-label">Total Partners</p>
           </div>
 
           <div className="card-bottom-accent">
@@ -236,13 +163,13 @@ const confirmStatusChange = async () => {
               <FaCheckCircle />
             </div>
             <span className="trend-badge emerald-pill">
-              <FaCheckCircle /> VERIFIED
+              <FaCheckCircle /> ACTIVE
             </span>
           </div>
 
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.verifiedCount.toLocaleString()}</h2>
-            <p className="giant-stat-label">Verified Profiles</p>
+            <h2 className="giant-stat-number">{partnerStats.activePartners.toLocaleString()}</h2>
+            <p className="giant-stat-label">Active Partners</p>
           </div>
 
           <div className="card-bottom-accent">
@@ -257,13 +184,13 @@ const confirmStatusChange = async () => {
               <FaClock />
             </div>
             <span className="trend-badge gold-pill">
-              <FaBolt /> ACTION NEEDED
+              <FaBolt /> INACTIVE
             </span>
           </div>
 
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.kycPendingCount.toLocaleString()}</h2>
-            <p className="giant-stat-label">KYC Verification Pending</p>
+            <h2 className="giant-stat-number">{partnerStats.inactivePartners.toLocaleString()}</h2>
+            <p className="giant-stat-label">Inactive Partners</p>
           </div>
 
           <div className="card-bottom-accent">
@@ -297,29 +224,16 @@ const confirmStatusChange = async () => {
             Active
           </button>
           <button
-            className={`filter-btn ${filterType === "verified" ? "active" : ""}`}
-            onClick={() => setFilterType("verified")}
+            className={`filter-btn ${filterType === "inactive" ? "active" : ""}`}
+            onClick={() => setFilterType("inactive")}
           >
-            Verified
-          </button>
-          <button
-            className={`filter-btn ${filterType === "kycPending" ? "active" : ""}`}
-            onClick={() => setFilterType("kycPending")}
-          >
-            KYC Pending
+            Inactive
           </button>
         </div>
       </div>
 
       <div className="pt-content-grid animate-fade-in-delayed">
-        {loading ? (
-          <div className="khatarnak-loader">
-            <div className="glowing-spinner"></div>
-            <p>Fetching Cosmic Partners Database...</p>
-          </div>
-        ) : error ? (
-          <div className="table-error-box">{error}</div>
-        ) : filteredPartners.length === 0 ? (
+        {filteredPartners.length === 0 ? (
           <div className="table-error-box">No partners found matching your search criteria.</div>
         ) : (
           <div className="partner-cards-grid">
@@ -409,65 +323,24 @@ const confirmStatusChange = async () => {
                     <span className="rate-unit">/min</span>
                   </div>
 
-                  <div className="card-right-controls">
-
-                    <label
-                      className="toggle-switch"
-                      title={
-                        partner.isActive
-                          ? "Deactivate Partner"
-                          : "Activate Partner"
-                      }
-                    >
-                      <input
-                        type="checkbox"
-                        checked={!!partner.isActive}
-                        onChange={() => handleToggleStatus(partner)}
-                      />
-
-                      <span className="toggle-slider"></span>
-                    </label>
-
-                    <div className="action-button-group">
-
-
-
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleView(partner)}
-                        title="View Full Profile"
-                      >
-                        <FaEye />
-                      </button>
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleEdit(partner)}
-                        title="Edit Partner"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="btn-square-icon btn-delete-accent"
-                        onClick={() => {
-                          setSelectedPartner(partner);
-                          setDeleteOpen(true);
-                        }}
-                        title="Delete Partner"
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </div>
-                  </div>
+                 <div className="card-right-controls">
+  <span
+    className={`status-badge ${
+      partner.status === "Active" ? "status-badge-green" : "status-badge-red"
+    }`}
+  >
+    {partner.status === "Active" ? "Active" : "Inactive"}
+  </span>
+</div>
                 </div>
               </div>
             ))}
           </div>
         )}
-
       </div>
+
       <div className="table-pagination-footer">
         <div className="pagination-container">
-
           <button
             className="pagination-btn arrow-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -476,20 +349,19 @@ const confirmStatusChange = async () => {
             <FaChevronLeft />
           </button>
 
-
           {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
             (page) => (
               <button
                 key={page}
-                className={`pagination-btn ${currentPage === page ? "active" : ""
-                  }`}
+                className={`pagination-btn ${
+                  currentPage === page ? "active" : ""
+                }`}
                 onClick={() => handlePageChange(page)}
               >
                 {page}
               </button>
             )
           )}
-
 
           <button
             className="pagination-btn arrow-btn"
@@ -498,97 +370,8 @@ const confirmStatusChange = async () => {
           >
             <FaChevronRight />
           </button>
-
         </div>
       </div>
-      <DeleteModal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={confirmDelete}
-      />
-
-      <EditPartnerModal
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-        partner={selectedPartner}
-        onUpdated={fetchPartners}
-      />
-
-      <ViewPartnerModal
-        isOpen={viewOpen}
-        onClose={() => setViewOpen(false)}
-        partner={selectedPartner}
-      />
-      {statusModalOpen && selectedPartner && (
-  <div className="status-modal-overlay">
-    <div className="status-modal">
-
-      <h3>
-        {selectedPartner.isActive
-          ? "Deactivate Partner?"
-          : "Activate Partner?"}
-      </h3>
-
-    <p>
-  Are you sure you want to{" "}
-  <strong>{selectedPartner.isActive ? "deactivate" : "activate"}</strong>{" "}
-  this partner?
-</p>
-
-<div className="status-input-group">
-  <label>Reason:</label>
-  <input
-    type="text"
-    placeholder={selectedPartner.isActive ? "Deactivated by admin" : "Activated by admin"}
-    value={statusReason}
-    onChange={(e) => setStatusReason(e.target.value)}
-    disabled={statusLoading}
-  />
-</div>
-
-<div className="status-input-group">
-  <label>Reason Note:</label>
-  <textarea
-    placeholder={selectedPartner.isActive ? "Partner deactivated by admin" : "Partner activated by admin"}
-    value={statusReasonNote}
-    onChange={(e) => setStatusReasonNote(e.target.value)}
-    disabled={statusLoading}
-  />
-</div>
-
-      <div className="status-modal-actions">
-
-        <button
-          type="button"
-          className="status-cancel-btn"
-         onClick={() => {
-  setStatusModalOpen(false);
-  setSelectedPartner(null);
-  setStatusReason("");
-  setStatusReasonNote("");
-}}
-          disabled={statusLoading}
-        >
-          Cancel
-        </button>
-
-        <button
-          type="button"
-          className="status-confirm-btn"
-          onClick={confirmStatusChange}
-          disabled={statusLoading}
-        >
-          {statusLoading
-            ? "Updating..."
-            : selectedPartner.isActive
-            ? "Deactivate"
-            : "Activate"}
-        </button>
-
-      </div>
-    </div>
-  </div>
-)}
     </div>
   );
 }

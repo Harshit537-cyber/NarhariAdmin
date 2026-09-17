@@ -689,9 +689,10 @@ useEffect(() => {
     try {
       setLoading(true);
       setError(null);
+
 const data = await getAllPandits(currentPage, itemsPerPage);
 
-setPandits(data?.pandits || []);
+setPandits(data?.data || []);
 setTotalPages(data?.totalPages || 1);
 
     } catch (error) {
@@ -827,13 +828,7 @@ const confirmDelete = async () => {
 
  
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-  const currentPandits = filteredPandits.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+const currentPandits = filteredPandits;
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -1150,38 +1145,10 @@ const confirmDelete = async () => {
                     </div>
 
                     <div className="card-right-controls">
-                      <label
-                        className="toggle-switch"
-                        title="Toggle Verified Status"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={!!pandit.isVerified}
-                          disabled={togglingId === pandit._id}
-                          onChange={() => handleToggleVerified(pandit)}
-                        />
-                        <span className="toggle-slider"></span>
-                      </label>
+                     
 
                       <div className="action-button-group">
-                        {approvalStatus === "Pending" && (
-                          <>
-                            <button
-                              className="btn-square-icon"
-                              onClick={() => handleApprove(pandit)}
-                              title="Approve Pandit"
-                            >
-                              <FaCheckCircle />
-                            </button>
-                            <button
-                              className="btn-square-icon btn-delete-accent"
-                              onClick={() => handleReject(pandit)}
-                              title="Reject Pandit"
-                            >
-                              <FaTimes />
-                            </button>
-                          </>
-                        )}
+                        
                         <button
                           className="btn-square-icon"
                           onClick={() => handleView(pandit)}

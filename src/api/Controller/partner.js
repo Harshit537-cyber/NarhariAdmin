@@ -1,14 +1,27 @@
 import apiClient from "../Interceptor/apiClient";
 
-// 1. Get All Partners
-export const getAllPartners = async () => {
+
+
+export const getAllPartners = async (page = 1, limit = 10) => {
   try {
-    const response = await apiClient.get("/admin/dashboard/all-partners");
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.get(
+      `/admin/dashboard/partners-status-list?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: "Something went wrong" };
+    console.error("Get Partners Status List API Error:", error);
+    throw error.response?.data || error;
   }
 };
+
 
 // 2. Get Pending Partners
 export const getPendingPartners = async () => {
@@ -39,7 +52,7 @@ export const updatePartner = async (partnerId, data) => {
     const response = await apiClient.put(
       `/admin/dashboard/partners/${partnerId}`,
       data
-      // 👈 headers config hata diya
+  
     );
     return response.data;
   } catch (error) {
@@ -51,7 +64,7 @@ export const updatePartner = async (partnerId, data) => {
 export const deletePartner = async (partnerId) => {
   try {
     const response = await apiClient.delete(
-      `/admin/dashboard/partner/${partnerId}`
+      `/admin/dashboard/partners/${partnerId}`
     );
     return response.data;
   } catch (error) {
@@ -59,34 +72,7 @@ export const deletePartner = async (partnerId) => {
   }
 };
 
-// 6. Activate Partner
-export const activatePartner = async (partnerId) => {
-  try {
-    const response = await apiClient.put(
-      `/admin/dashboard/partners/${partnerId}/activate`
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Something went wrong" };
-  }
-};
 
-// 7. Deactivate Partner
-export const deactivatePartner = async (
-  partnerId,
-  reason = "Deactivated by admin",
-  reasonNote = "Deactivated by admin"
-) => {
-  try {
-    const response = await apiClient.put(
-      `/admin/dashboard/partners/${partnerId}/deactivate`,
-      { reason, reasonNote }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Something went wrong" };
-  }
-};
 
 // 8. Update Document Status (Approve / Reject Document)
 export const updatePartnerDocumentStatus = async (partnerId, data) => {
@@ -101,5 +87,54 @@ export const updatePartnerDocumentStatus = async (partnerId, data) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Something went wrong" };
+  }
+};
+
+export const getAllPartnersStatus = async () =>
+   {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.get(
+      `/admin/dashboard/all-partners-status`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  }
+   catch (error) 
+  {
+    console.error("Get All Partners Status API Error:", error);
+    throw error.response?.data || error;
+  }
+};
+
+
+export const togglePartnerStatus = async (id, data) => 
+  {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.patch(
+      `/admin/dashboard/partners/${id}/toggle-status`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) 
+  {
+    console.error("Toggle Partner Status API Error:", error);
+    
+    throw error.response?.data || error;
   }
 };

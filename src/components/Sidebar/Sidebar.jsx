@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
-import { AlertCircle, Ticket, Bell, Gift } from "lucide-react";
+import { AlertCircle, Ticket, Bell, Gift, Star , } from "lucide-react";
 import { FaBan, FaBlog, FaVideo } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -20,7 +20,9 @@ export default function Sidebar() {
     location.pathname.startsWith("/chats")
   );
 
-
+  const [panditOpen, setPanditOpen] = useState(
+    location.pathname.startsWith("/pandit")
+  );
   const handleLogoutConfirm = () => {
 
     localStorage.clear();
@@ -109,6 +111,15 @@ export default function Sidebar() {
                 >
                   <span>All Partners</span>
                 </NavLink>
+
+                <NavLink
+                  to="/partner/status"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Partner Status</span>
+                </NavLink>
                 <NavLink
                   to="/partner/profile-approval"
                   className={({ isActive }) =>
@@ -176,16 +187,41 @@ export default function Sidebar() {
 
           </div>
 
-          <NavLink
-            to="/pandit"
-            className={({ isActive }) =>
-              `an-nav-item ${isActive ? "is-active" : ""}`
-            }
-          >
-            <IconPartner />
-            <span className="an-nav-text">Pandit Ji</span>
-          </NavLink>
+          {/* Collapsible Pandit Ji Menu */}
+          <div className="an-nav-group">
+            <button
+              className={`an-nav-item an-nav-parent ${panditOpen ? "is-open" : ""
+                }`}
+              onClick={() => setPanditOpen((prev) => !prev)}
+            >
+              <IconPartner />
+              <span className="an-nav-text">Pandit Ji</span>
+              <IconChevron className="an-nav-chevron" />
+            </button>
 
+            {panditOpen && (
+              <div className="an-nav-submenu">
+                <NavLink
+                  to="/pandit"
+                  end
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>All Pandit </span>
+                </NavLink>
+
+                <NavLink
+                  to="/pandit/approval"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Pandit Ji Approval</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
 
           {/* Rituals */}
           <NavLink
@@ -351,7 +387,7 @@ export default function Sidebar() {
         </NavLink> */}
 
           {/* Orders */}
-          <NavLink
+          {/* <NavLink
             to="/orders"
             className={({ isActive }) =>
               `an-nav-item ${isActive ? "is-active" : ""}`
@@ -359,8 +395,17 @@ export default function Sidebar() {
           >
             <IconList />
             <span className="an-nav-text">Orders</span>
-          </NavLink>
+          </NavLink> */}
 
+          <NavLink
+            to="/ratings"
+            className={({ isActive }) =>
+              `an-nav-item ${isActive ? "is-active" : ""}`
+            }
+          >
+        <Star />
+            <span className="an-nav-text">Rating Management</span>
+          </NavLink>
 
 
           <NavLink
@@ -648,6 +693,20 @@ function IconCategory() {
       strokeLinejoin="round"
     >
       <path d="M3 7h18M3 12h18M3 17h18" />
+    </svg>
+  );
+}
+function IconRating() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
 }

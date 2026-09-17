@@ -8,7 +8,7 @@ export const getAllPandits = async (page = 1, limit = 10) => {
 
     const response = await apiClient.get(
 
-      `/admin/pandit/get-pandits?page=${page}&limit=${limit}`
+      `/admin/dashboard/pandits?page=${page}&limit=${limit}`
     );
 
     return response.data;
@@ -67,6 +67,29 @@ export const updatePandit = async (id, formData) => {
   } catch (error) {
 
     console.error("Update Pandit API Error:", error);
+    throw error.response?.data || error;
+  }
+};
+
+
+export const updatePanditApproval = async (id, data) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.put(
+      `/admin/dashboard/pandits/${id}/approval`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Update Pandit Approval API Error:", error);
     throw error.response?.data || error;
   }
 };
