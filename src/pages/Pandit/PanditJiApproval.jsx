@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./Pandit.css";
-import { getAllPandits ,updatePanditApproval,} from "../../api/Controller/pandit";
+import { getAllPandits, updatePanditApproval, } from "../../api/Controller/pandit";
 
 import {
     FaSearch,
@@ -54,35 +54,95 @@ export default function PanditJiApproval() {
     const [error, setError] = useState(null);
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterType, setFilterType] = useState("all");
-
+    const [filterType, setFilterType] = useState("pending");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
     const itemsPerPage = 8;
-
-   const { show, ToastUI } = useSimpleToast();
-
+    const { show, ToastUI } = useSimpleToast();
+    const [showApprovalPopup, setShowApprovalPopup] = useState(false);
+    const [selectedPandit, setSelectedPandit] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState("");
     useEffect(() => {
         const fetchPandits = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                const response = await getAllPandits(
-                    currentPage,
+                // First API page
+                const firstResponse = await getAllPandits(
+                    1,
                     itemsPerPage
                 );
 
-                console.log("Pandits API Response:", response);
+                console.log(
+                    "First Pandits API Response:",
+                    firstResponse
+                );
 
-                setPandits(response?.data || []);
-                setTotalPages(response?.totalPages || 1);
+                const allPandits = [
+                    ...(firstResponse?.data || [])
+                ];
+
+                const apiTotalPages =
+                    firstResponse?.totalPages || 1;
+
+                // Get all remaining API pages
+                for (
+                    let page = 2;
+                    page <= apiTotalPages;
+                    page++
+                ) {
+                    const response = await getAllPandits(
+                        page,
+                        itemsPerPage
+                    );
+
+                    allPandits.push(
+                        ...(response?.data || [])
+                    );
+                }
+
+                console.log(
+                    "All Pandits:",
+                    allPandits
+                );
+
+                // Only Pending pandits
+                const pendingPandits = allPandits.filter(
+                    (pandit) =>
+                        (pandit.profileApprovalStatus || "Pending") ===
+                        "Pending"
+                );
+
+                console.log(
+                    "Pending Pandits:",
+                    pendingPandits
+                );
+
+                setPandits(pendingPandits);
+
+                // Frontend pagination based on Pending records
+                setTotalPages(
+                    Math.max(
+                        1,
+                        Math.ceil(
+                            pendingPandits.length /
+                            itemsPerPage
+                        )
+                    )
+                );
+
+                setCurrentPage(1);
+
             } catch (error) {
-                console.error("Get Pandits Error:", error);
+                console.error(
+                    "Get Pandits Error:",
+                    error
+                );
 
                 setError(
-                    error?.message || "Failed to load pandits"
+                    error?.message ||
+                    "Failed to load pandits"
                 );
             } finally {
                 setLoading(false);
@@ -90,42 +150,71 @@ export default function PanditJiApproval() {
         };
 
         fetchPandits();
-    }, [currentPage]);
-const handleApproval = async (id, status) => {
-    try {
-     const response = await updatePanditApproval(id, {
-    status: status,
-});
+    }, []);
 
-        console.log("Approval Update Response:", response);
+    const openApprovalPopup = (pandit, status) => {
+        setSelectedPandit(pandit);
+        setSelectedStatus(status);
+        setShowApprovalPopup(true);
+    };
 
-        show(
-            status === "Approved"
-                ? "Pandit approved successfully!"
-                : "Pandit rejected successfully!",
-            "success"
-        );
+    const confirmApproval = async () => {
+        if (!selectedPandit || !selectedStatus) return;
 
-        // UI mein status immediately update
-        setPandits((prevPandits) =>
-            prevPandits.map((pandit) =>
-                pandit._id === id
-                    ? {
-                          ...pandit,
-                          profileApprovalStatus: status,
-                      }
-                    : pandit
-            )
-        );
-    } catch (error) {
-        console.error("Approval Update Error:", error);
+        await handleApproval(selectedPandit._id, selectedStatus);
 
-        show(
-            error?.message || "Failed to update pandit approval",
-            "error"
-        );
-    }
-};
+        setShowApprovalPopup(false);
+        setSelectedPandit(null);
+        setSelectedStatus("");
+    };
+    const handleApproval = async (id, status) => {
+        try {
+            const response = await updatePanditApproval(id, {
+                status: status,
+            });
+
+            console.log("Approval Update Response:", response);
+
+            show(
+                status === "Approved"
+                    ? "Pandit approved successfully!"
+                    : "Pandit rejected successfully!",
+                "success"
+            );
+
+            setPandits((prevPandits) => {
+                const updatedPandits = prevPandits.filter(
+                    (pandit) => pandit._id !== id
+                );
+
+                setTotalPages(
+                    Math.max(
+                        1,
+                        Math.ceil(updatedPandits.length / itemsPerPage)
+                    )
+                );
+
+                // Agar current page empty ho jaye to previous page par jao
+                setCurrentPage((prevPage) => {
+                    const newTotalPages = Math.max(
+                        1,
+                        Math.ceil(updatedPandits.length / itemsPerPage)
+                    );
+
+                    return Math.min(prevPage, newTotalPages);
+                });
+
+                return updatedPandits;
+            });
+        } catch (error) {
+            console.error("Approval Update Error:", error);
+
+            show(
+                error?.message || "Failed to update pandit approval",
+                "error"
+            );
+        }
+    };
     /* ---------------------------------------------------
        STATS
     --------------------------------------------------- */
@@ -212,8 +301,10 @@ const handleApproval = async (id, status) => {
             return true;
         });
     }, [pandits, searchTerm, filterType]);
-
-  const currentPandits = filteredPandits;
+    const currentPandits = pandits.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const handlePageChange = (pageNumber) => {
         if (
@@ -486,61 +577,14 @@ const handleApproval = async (id, status) => {
                     />
 
                 </div>
-
                 <div className="filter-tabs">
-
                     <button
-                        className={`filter-btn ${filterType === "all" ? "active" : ""
-                            }`}
-                        onClick={() => setFilterType("all")}
-                    >
-                        All ({pandits.length})
-                    </button>
-
-                    <button
-                        className={`filter-btn ${filterType === "pending" ? "active" : ""
-                            }`}
+                        className="filter-btn active"
                         onClick={() => setFilterType("pending")}
                     >
                         Approval Pending
                     </button>
-
-                    <button
-                        className={`filter-btn ${filterType === "approved" ? "active" : ""
-                            }`}
-                        onClick={() => setFilterType("approved")}
-                    >
-                        Approved
-                    </button>
-
-                    <button
-                        className={`filter-btn ${filterType === "rejected" ? "active" : ""
-                            }`}
-                        onClick={() => setFilterType("rejected")}
-                    >
-                        Rejected
-                    </button>
-
-                    <button
-                        className={`filter-btn ${filterType === "verified" ? "active" : ""
-                            }`}
-                        onClick={() => setFilterType("verified")}
-                    >
-                        Verified
-                    </button>
-
-                    <button
-                        className={`filter-btn ${filterType === "incomplete" ? "active" : ""
-                            }`}
-                        onClick={() =>
-                            setFilterType("incomplete")
-                        }
-                    >
-                        Incomplete Profile
-                    </button>
-
                 </div>
-
             </div>
 
             {/* CONTENT */}
@@ -806,14 +850,14 @@ const handleApproval = async (id, status) => {
                                             <div className="card-right-controls">
                                                 <button
                                                     className="approve-btn"
-                                                    onClick={() => handleApproval(pandit._id, "Approved")}
+                                                    onClick={() => openApprovalPopup(pandit, "Approved")}
                                                 >
                                                     Approve
                                                 </button>
 
                                                 <button
                                                     className="reject-btn"
-                                                    onClick={() => handleApproval(pandit._id, "Rejected")}
+                                                    onClick={() => openApprovalPopup(pandit, "Rejected")}
                                                 >
                                                     Reject
                                                 </button>
@@ -888,7 +932,52 @@ const handleApproval = async (id, status) => {
                 </div>
 
             </div>
+            {showApprovalPopup && (
+                <div className="approval-popup-overlay">
+                    <div className="approval-popup">
+                        <h2>
+                            {selectedStatus === "Approved"
+                                ? "Approve Pandit?"
+                                : "Reject Pandit?"}
+                        </h2>
 
+                        <p>
+                            Are you sure you want to{" "}
+                            {selectedStatus === "Approved"
+                                ? "approve"
+                                : "reject"}{" "}
+                            this pandit?
+                        </p>
+
+                        <div className="approval-popup-actions">
+                            <button
+                                className="popup-cancel-btn"
+                                onClick={() => {
+                                    setShowApprovalPopup(false);
+                                    setSelectedPandit(null);
+                                    setSelectedStatus("");
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                className={
+                                    selectedStatus === "Approved"
+                                        ? "popup-confirm-approve-btn"
+                                        : "popup-confirm-reject-btn"
+                                }
+                                onClick={confirmApproval}
+                            >
+                                Yes,{" "}
+                                {selectedStatus === "Approved"
+                                    ? "Approve"
+                                    : "Reject"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

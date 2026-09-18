@@ -1081,4 +1081,183 @@ scrollbar-width: none; /* Firefox */
   cursor: pointer;
   font-weight: 600;
   font-size: 12px;
+}/* =====================================================
+   APPROVE / REJECT CONFIRMATION POPUP
+===================================================== */
+
+.approval-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2000;
+  padding: 20px;
+
+  animation: fadeIn 0.25s ease-out;
+}
+
+.approval-popup {
+  width: 100%;
+  max-width: 420px;
+
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+
+  text-align: center;
+
+  box-shadow:
+    0 30px 70px rgba(11, 15, 25, 0.25),
+    0 0 30px rgba(179, 140, 27, 0.12);
+
+  border: 1px solid rgba(226, 232, 240, 0.8);
+
+  animation: approvalPopupSlide 0.3s
+    cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.approval-popup h2 {
+  margin: 0 0 12px;
+
+  font-size: 24px;
+  font-weight: 900;
+
+  color: var(--black-title);
+}
+
+.approval-popup p {
+  margin: 0;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* Popup Buttons */
+
+.approval-popup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  margin-top: 28px;
+}
+
+.popup-cancel-btn {
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #f1f5f9;
+  color: var(--black-title);
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.popup-cancel-btn:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+/* Approve Confirm Button */
+
+.popup-confirm-approve-btn {
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.25);
+
+  transition: all 0.25s ease;
+}
+
+.popup-confirm-approve-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(16, 185, 129, 0.35);
+}
+
+/* Reject Confirm Button */
+
+.popup-confirm-reject-btn {
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 22px rgba(239, 68, 68, 0.25);
+
+  transition: all 0.25s ease;
+}
+
+.popup-confirm-reject-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(239, 68, 68, 0.35);
+}
+
+/* Popup Animation */
+
+@keyframes approvalPopupSlide {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .approval-popup {
+    max-width: 95%;
+    padding: 25px 20px;
+  }
+
+  .approval-popup h2 {
+    font-size: 21px;
+  }
+
+  .approval-popup-actions {
+    flex-direction: column;
+  }
+
+  .popup-cancel-btn,
+  .popup-confirm-approve-btn,
+  .popup-confirm-reject-btn {
+    width: 100%;
+  }
 }
