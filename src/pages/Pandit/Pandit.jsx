@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Pandit.css";
-import { getAllPandits, deletePandit ,updatePandit  } from "../../api/Controller/pandit";
+import { getAllPandits, deletePandit, updatePandit } from "../../api/Controller/pandit";
 import {
   FaEye,
   FaEdit,
@@ -214,86 +214,126 @@ function ViewPanditModal({ isOpen, onClose, pandit }) {
    EDIT MODAL
 --------------------------------------------------- */
 function EditPanditModal({ isOpen, onClose, pandit, onUpdated, showToast }) {
-const [form, setForm] = useState({
-  fullName: "",
-  mobile: "",
-  dateOfBirth: "",
-  gender: "",
-  city: "",
-  poojaServiceMode: "Online",
-  primaryCategory: "",
-  experience: 0,
-  vedicEducation: "",
-  canArrangeSamagri: false,
-  expectedMonthlyEarnings: 0,
-  minPoojaFee: 0,
-  bio: "",
-  isVerified: false,
-  isProfileComplete: false,
-  profileApprovalStatus: "Pending",
-  isOnline: false,
-  expertise: [],
-  languages: [],
-  certificatePhotos: [],
-});
+  const [form, setForm] = useState({
+    fullName: "",
+    mobile: "",
+    dateOfBirth: "",
+    gender: "",
+    city: "",
+    poojaServiceMode: "Online Pooja",
+    primaryCategory: "",
+    experience: 0,
+    vedicEducation: "",
+    canArrangeSamagri: false,
+    expectedMonthlyEarnings: 0,
+    minPoojaFee: 0,
+    bio: "",
+    isVerified: false,
+    isProfileComplete: false,
+    profileApprovalStatus: "Pending",
+    isOnline: false,
+
+    expertise: [],
+    languages: [],
+
+
+  
+
+    // Single profile image
+    profilePic: "",
+    profilePicFile: null,
+  });
 
   useEffect(() => {
     if (pandit) {
-     setForm({
-  fullName: pandit.fullName || "",
-  mobile: pandit.mobile || "",
-  dateOfBirth: pandit.dateOfBirth || "",
-  gender: pandit.gender || "",
-  city: pandit.city || "",
-  poojaServiceMode: pandit.poojaServiceMode || "Online",
-  primaryCategory: pandit.primaryCategory || "",
-  experience: pandit.experience || 0,
-  vedicEducation: pandit.vedicEducation || "",
-  canArrangeSamagri: pandit.canArrangeSamagri || false,
-  expectedMonthlyEarnings: pandit.expectedMonthlyEarnings || 0,
-  minPoojaFee: pandit.minPoojaFee || 0,
-  bio: pandit.bio || "",
-  isVerified: pandit.isVerified || false,
-  isProfileComplete: pandit.isProfileComplete || false,
-  profileApprovalStatus: pandit.profileApprovalStatus || "Pending",
-  isOnline: pandit.isOnline || false,
-  expertise: pandit.expertise || [],
-  languages: pandit.languages || [],
-  certificatePhotos: pandit.certificatePhotos || [],
-});
+      setForm({
+        fullName: pandit.fullName || "",
+        mobile: pandit.mobile || "",
+        dateOfBirth: pandit.dateOfBirth || "",
+        gender: pandit.gender || "",
+        city: pandit.city || "",
+        poojaServiceMode: pandit.poojaServiceMode || "Online Pooja",
+        primaryCategory: pandit.primaryCategory || "",
+        experience: pandit.experience || 0,
+        vedicEducation: pandit.vedicEducation || "",
+        canArrangeSamagri: pandit.canArrangeSamagri || false,
+        expectedMonthlyEarnings: pandit.expectedMonthlyEarnings || 0,
+        minPoojaFee: pandit.minPoojaFee || 0,
+        bio: pandit.bio || "",
+        isVerified: pandit.isVerified || false,
+        isProfileComplete: pandit.isProfileComplete || false,
+        profileApprovalStatus: pandit.profileApprovalStatus || "Pending",
+        isOnline: pandit.isOnline || false,
+        expertise: pandit.expertise || [],
+        languages: pandit.languages || [],
+       
+        profilePic: pandit.profilePic || "",
+        profilePicFile: null,
+      });
     }
   }, [pandit]);
 
   if (!isOpen || !pandit) return null;
+const handleSave = async () => {
+  if (!pandit?._id) {
+    showToast("Pandit ID is missing", "error");
+    return;
+  }
 
- const handleSave = async () => {
   try {
-
     const formData = new FormData();
 
+    // Add normal form fields
     Object.keys(form).forEach((key) => {
-      if (Array.isArray(form[key])) {
-        formData.append(key, JSON.stringify(form[key]));
-      } else {
-        formData.append(key, form[key]);
+      // Profile picture fields ko normal data me append nahi karna
+      if (key === "profilePic" || key === "profilePicFile") {
+        return;
+      }
+
+      const value = form[key];
+
+      if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === "boolean") {
+        formData.append(key, value ? "true" : "false");
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value);
       }
     });
 
+    // Profile picture upload
+    if (form.profilePicFile) {
+      formData.append("profilePic", form.profilePicFile);
+    }
 
+    // Update Pandit
     const response = await updatePandit(pandit._id, formData);
 
-    onUpdated(response.data || { ...pandit, ...form });
+    if (response?.success) {
+      showToast(
+        response?.message || "Pandit updated successfully",
+        "success"
+      );
 
-    showToast("Pandit updated successfully");
-
-    onClose();
-
+      onUpdated(response);
+      onClose();
+    } else {
+      showToast(
+        response?.message || "Failed to update pandit",
+        "error"
+      );
+    }
   } catch (error) {
-    console.log("Update Pandit Error:", error);
-    showToast("Failed to update pandit", "error");
+    console.error("Update Pandit Error:", error);
+
+    showToast(
+      error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong while updating pandit",
+      "error"
+    );
   }
 };
-
   return (
     <div className="pandit-modal-overlay" onClick={onClose}>
       <div className="pandit-modal-box" onClick={(e) => e.stopPropagation()}>
@@ -317,12 +357,47 @@ const [form, setForm] = useState({
           />
         </div>
         <div className="pandit-form-group">
+          <label>Profile Picture</label>
+
+          {form.profilePic && (
+            <img
+              src={form.profilePic}
+              alt="Profile"
+              style={{
+                width: "80px",
+                height: "80px",
+                objectFit: "cover",
+                borderRadius: "50%",
+                marginBottom: "10px",
+              }}
+            />
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                setForm({
+                  ...form,
+                  profilePicFile: file,
+                  profilePic: URL.createObjectURL(file), // 👈 preview ke liye
+                });
+              }
+            }}
+          />
+        </div>
+
+      
+        <div className="pandit-form-group">
           <label>City</label>
           <input
             value={form.city}
             onChange={(e) => setForm({ ...form, city: e.target.value })}
           />
         </div>
+
         <div className="pandit-form-row">
           <div className="pandit-form-group">
             <label>Experience (Yrs)</label>
@@ -334,6 +409,7 @@ const [form, setForm] = useState({
               }
             />
           </div>
+
           <div className="pandit-form-group">
             <label>Min Pooja Fee (₹)</label>
             <input
@@ -346,177 +422,178 @@ const [form, setForm] = useState({
           </div>
         </div>
         <div className="pandit-form-row">
-        
-         
+
+
         </div>
         <div className="pandit-form-row">
-       
-      
+
+
         </div>
-       <div className="pandit-form-group">
-  <label>Date of Birth</label>
-  <input
-    type="date"
-    value={form.dateOfBirth}
-    onChange={(e) =>
-      setForm({ ...form, dateOfBirth: e.target.value })
-    }
-  />
-</div>
+        <div className="pandit-form-group">
+          <label>Date of Birth</label>
+          <input
+            type="date"
+            value={form.dateOfBirth}
+            onChange={(e) =>
+              setForm({ ...form, dateOfBirth: e.target.value })
+            }
+          />
+        </div>
 
-<div className="pandit-form-group">
-  <label>Expected Monthly Earnings</label>
-  <input
-    type="number"
-    value={form.expectedMonthlyEarnings}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        expectedMonthlyEarnings: Number(e.target.value),
-      })
-    }
-  />
-</div>
+        <div className="pandit-form-group">
+          <label>Expected Monthly Earnings</label>
+          <input
+            type="number"
+            value={form.expectedMonthlyEarnings}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                expectedMonthlyEarnings: Number(e.target.value),
+              })
+            }
+          />
+        </div>
 
-<div className="pandit-form-group">
-  <label>Can Arrange Samagri</label>
-  <select
-    value={form.canArrangeSamagri}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        canArrangeSamagri: e.target.value === "true",
-      })
-    }
-  >
-    <option value="true">Yes</option>
-    <option value="false">No</option>
-  </select>
-</div>
+        <div className="pandit-form-group">
+          <label>Can Arrange Samagri</label>
+          <select
+            value={form.canArrangeSamagri}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                canArrangeSamagri: e.target.value === "true",
+              })
+            }
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
 
-<div className="pandit-form-group">
-  <label>Profile Approval Status</label>
-  <select
-    value={form.profileApprovalStatus}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        profileApprovalStatus: e.target.value,
-      })
-    }
-  >
-    <option value="Pending">Pending</option>
-    <option value="approved">Approved</option>
-    <option value="Rejected">Rejected</option>
-  </select>
-</div>
-<div className="pandit-form-group">
-  <label>Gender</label>
-  <select
-    value={form.gender}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        gender: e.target.value,
-      })
-    }
-  >
-    <option value="">Select Gender</option>
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-    <option value="Other">Other</option>
-  </select>
-</div>
+        <div className="pandit-form-group">
+          <label>Profile Approval Status</label>
+          <select
+            value={form.profileApprovalStatus}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                profileApprovalStatus: e.target.value,
+              })
+            }
+          >
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div className="pandit-form-group">
+          <label>Gender</label>
+          <select
+            value={form.gender}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                gender: e.target.value,
+              })
+            }
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
 
-<div className="pandit-form-group">
-  <label>Pooja Service Mode</label>
-  <select
-    value={form.poojaServiceMode}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        poojaServiceMode: e.target.value,
-      })
-    }
-  >
-    <option value="Online">Online</option>
-    <option value="Offline">Offline</option>
-    <option value="Both">Both</option>
-  </select>
-</div>
+        <div className="pandit-form-group">
+          <label>Pooja Service Mode</label>
 
-<div className="pandit-form-group">
-  <label>Primary Category</label>
-  <input
-    type="text"
-    value={form.primaryCategory}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        primaryCategory: e.target.value,
-      })
-    }
-  />
-</div>
+          <select
+            value={form.poojaServiceMode}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                poojaServiceMode: e.target.value,
+              })
+            }
+          >
+            <option value="Online Pooja">Online Pooja</option>
+            <option value="Offline / Home Visit">Offline / Home Visit</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
 
-<div className="pandit-form-group">
-  <label>Vedic Education</label>
-  <input
-    type="text"
-    value={form.vedicEducation}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        vedicEducation: e.target.value,
-      })
-    }
-  />
-</div>
+        <div className="pandit-form-group">
+          <label>Primary Category</label>
+          <input
+            type="text"
+            value={form.primaryCategory}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                primaryCategory: e.target.value,
+              })
+            }
+          />
+        </div>
 
-<div className="pandit-form-group">
-  <label>Bio</label>
-  <textarea
-    value={form.bio}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        bio: e.target.value,
-      })
-    }
-  />
-</div>
+        <div className="pandit-form-group">
+          <label>Vedic Education</label>
+          <input
+            type="text"
+            value={form.vedicEducation}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                vedicEducation: e.target.value,
+              })
+            }
+          />
+        </div>
 
-<div className="pandit-form-group">
-  <label>Is Verified</label>
-  <select
-    value={form.isVerified}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        isVerified: e.target.value === "true",
-      })
-    }
-  >
-    <option value="true">Yes</option>
-    <option value="false">No</option>
-  </select>
-</div>
+        <div className="pandit-form-group">
+          <label>Bio</label>
+          <textarea
+            value={form.bio}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                bio: e.target.value,
+              })
+            }
+          />
+        </div>
 
-<div className="pandit-form-group">
-  <label>Online Status</label>
-  <select
-    value={form.isOnline}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        isOnline: e.target.value === "true",
-      })
-    }
-  >
-    <option value="true">Online</option>
-    <option value="false">Offline</option>
-  </select>
-</div>
+        <div className="pandit-form-group">
+          <label>Is Verified</label>
+          <select
+            value={form.isVerified}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                isVerified: e.target.value === "true",
+              })
+            }
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div className="pandit-form-group">
+          <label>Online Status</label>
+          <select
+            value={form.isOnline}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                isOnline: e.target.value === "true",
+              })
+            }
+          >
+            <option value="true">Online</option>
+            <option value="false">Offline</option>
+          </select>
+        </div>
         <div className="pandit-modal-actions">
           <button className="pandit-btn-secondary" onClick={onClose}>
             Cancel
@@ -684,27 +761,27 @@ export default function Pandit() {
   const itemsPerPage = 8;
 
   const { show: showToast, ToastUI } = useSimpleToast();
-useEffect(() => {
-  const fetchPandits = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  useEffect(() => {
+    const fetchPandits = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-const data = await getAllPandits(currentPage, itemsPerPage);
+        const data = await getAllPandits(currentPage, itemsPerPage);
 
-setPandits(data?.data || []);
-setTotalPages(data?.totalPages || 1);
+        setPandits(data?.data || []);
+        setTotalPages(data?.totalPages || 1);
 
-    } catch (error) {
-      setError(error.message || "Failed to load pandits");
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
+        setError(error.message || "Failed to load pandits");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchPandits();
+    fetchPandits();
 
-}, [currentPage]);
+  }, [currentPage]);
   const handleEdit = (pandit) => {
     setSelectedPandit(pandit);
     setEditOpen(true);
@@ -764,26 +841,26 @@ setTotalPages(data?.totalPages || 1);
     );
     showToast("Pandit rejected", "error");
   };
-const confirmDelete = async () => {
-  console.log("selectedPandit:", selectedPandit);
+  const confirmDelete = async () => {
+    console.log("selectedPandit:", selectedPandit);
 
-  try {
-    await deletePandit(selectedPandit._id);
+    try {
+      await deletePandit(selectedPandit._id);
 
-    setPandits((prev) =>
-      prev.filter((pandit) => pandit._id !== selectedPandit._id)
-    );
+      setPandits((prev) =>
+        prev.filter((pandit) => pandit._id !== selectedPandit._id)
+      );
 
-    showToast("Pandit deleted successfully");
+      showToast("Pandit deleted successfully");
 
-  } catch (error) {
-    console.log("Delete error:", error);
-    showToast("Failed to delete pandit", "error");
-  } finally {
-    setDeleteOpen(false);
-    setSelectedPandit(null);
-  }
-};
+    } catch (error) {
+      console.log("Delete error:", error);
+      showToast("Failed to delete pandit", "error");
+    } finally {
+      setDeleteOpen(false);
+      setSelectedPandit(null);
+    }
+  };
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
@@ -826,9 +903,9 @@ const confirmDelete = async () => {
     });
   }, [pandits, searchTerm, filterType]);
 
- 
 
-const currentPandits = filteredPandits;
+
+  const currentPandits = filteredPandits;
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -869,7 +946,7 @@ const currentPandits = filteredPandits;
         </div>
 
         <div className="db-header-right">
-         
+
           <div className="pulse-ring"></div>
           <span className="status-text">
             <FaBolt /> SYSTEM LIVE
@@ -992,25 +1069,22 @@ const currentPandits = filteredPandits;
             All ({pandits.length})
           </button>
           <button
-            className={`filter-btn ${
-              filterType === "verified" ? "active" : ""
-            }`}
+            className={`filter-btn ${filterType === "verified" ? "active" : ""
+              }`}
             onClick={() => setFilterType("verified")}
           >
             Verified
           </button>
           <button
-            className={`filter-btn ${
-              filterType === "pending" ? "active" : ""
-            }`}
+            className={`filter-btn ${filterType === "pending" ? "active" : ""
+              }`}
             onClick={() => setFilterType("pending")}
           >
             Approval Pending
           </button>
           <button
-            className={`filter-btn ${
-              filterType === "incomplete" ? "active" : ""
-            }`}
+            className={`filter-btn ${filterType === "incomplete" ? "active" : ""
+              }`}
             onClick={() => setFilterType("incomplete")}
           >
             Incomplete Profile
@@ -1082,9 +1156,8 @@ const currentPandits = filteredPandits;
                         {getInitial(pandit.fullName)}
                       </div>
                       <span
-                        className={`online-status-dot ${
-                          pandit.isOnline ? "online" : "offline"
-                        }`}
+                        className={`online-status-dot ${pandit.isOnline ? "online" : "offline"
+                          }`}
                         title={pandit.isOnline ? "Online" : "Offline"}
                       ></span>
                     </div>
@@ -1145,10 +1218,10 @@ const currentPandits = filteredPandits;
                     </div>
 
                     <div className="card-right-controls">
-                     
+
 
                       <div className="action-button-group">
-                        
+
                         <button
                           className="btn-square-icon"
                           onClick={() => handleView(pandit)}
@@ -1197,9 +1270,8 @@ const currentPandits = filteredPandits;
             (page) => (
               <button
                 key={page}
-                className={`pagination-btn ${
-                  currentPage === page ? "active" : ""
-                }`}
+                className={`pagination-btn ${currentPage === page ? "active" : ""
+                  }`}
                 onClick={() => handlePageChange(page)}
               >
                 {page}
@@ -1223,13 +1295,13 @@ const currentPandits = filteredPandits;
         onConfirm={confirmDelete}
       />
 
-    <EditPanditModal
-  isOpen={editOpen}
-  onClose={() => setEditOpen(false)}
-  pandit={selectedPandit}
-  onUpdated={handleUpdated}
-  showToast={showToast}
-/>
+      <EditPanditModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        pandit={selectedPandit}
+        onUpdated={handleUpdated}
+        showToast={showToast}
+      />
 
       <ViewPanditModal
         isOpen={viewOpen}
