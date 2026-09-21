@@ -25,14 +25,38 @@ import {
 } from "react-icons/fa";
 
 // ⚠️ API path ko apne project structure ke hisab se change karein
-import { getAllUsers, deleteUser,   updateUser,
-  } from "../../api/Controller/authController"; 
+import {
+  getAllUsers, deleteUser, updateUser,
+} from "../../api/Controller/authController";
+
+// ---------- Helpers (component ke bahar) ----------
+
+// "2000-01-01T00:00:00.000Z" -> "2000-01-01"  (<input type="date"> ke liye)
+const toDateInput = (value) => {
+  if (!value) return "";
+  return String(value).slice(0, 10);
+};
+
+// "02:30 PM" -> "14:30", "17:45" -> "17:45"  (<input type="time"> ke liye)
+const toTimeInput = (value) => {
+  if (!value) return "";
+  const match = String(value).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return "";
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const meridiem = match[3] ? match[3].toUpperCase() : null;
+
+  if (meridiem === "PM" && hours < 12) hours += 12;
+  if (meridiem === "AM" && hours === 12) hours = 0;
+
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
+};
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,12 +67,17 @@ export default function Users() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
- const [toast, setToast] = useState(null); 
+  const [toast, setToast] = useState(null);
+
+  // Pagination data (backend se aata hai)
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
   };
+
   // Form states for edit modal mapped with backend attributes
   const [editForm, setEditForm] = useState({
     fullName: "",
@@ -58,23 +87,27 @@ export default function Users() {
     gender: "",
     zodiac: "",
     placeOfBirth: "",
-    dateOfBirth: "",     
-  timeOfBirth: "",     
-  profilePic: "", 
+    dateOfBirth: "",
+    timeOfBirth: "",
+    profilePic: "",
   });
 
-  const fetchUsers = async () => {
+  // ================= Fetch (page + limit backend ko bhejna) =================
+  const fetchUsers = async (page = 1) => {
     setLoading(true);
     setError(null);
+
     try {
-      const response = await getAllUsers();
-      // Mapped according to response structure: { success: true, data: [...] }
-      if (response && response.data) {
+      const response = await getAllUsers(page, itemsPerPage);
+
+      if (response?.data) {
         setUsers(response.data);
-      } else if (Array.isArray(response)) {
-        setUsers(response);
+        setTotalPages(response.totalPages || 1);
+        setTotalUsers(response.total ?? response.data.length);
       } else {
         setUsers([]);
+        setTotalPages(1);
+        setTotalUsers(0);
       }
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -85,13 +118,13 @@ export default function Users() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
-  // ================= 2. Dynamic Stats Calculation =================
   const stats = useMemo(() => {
     const today = new Date().toDateString();
-    const totalUsers = users.length;
+
     const activeCount = users.filter((u) => u.isActive).length;
     const inactiveCount = users.filter((u) => !u.isActive).length;
     const newToday = users.filter((u) => {
@@ -100,16 +133,7 @@ export default function Users() {
     }).length;
 
     return { totalUsers, activeCount, inactiveCount, newToday };
-  }, [users]);
-
-  // ================= 3. Handlers =================
-  const handleToggleStatus = (user) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u._id === user._id ? { ...u, isActive: !u.isActive } : u
-      )
-    );
-  };
+  }, [users, totalUsers]);
 
   const handleView = (user) => {
     setSelectedUser(user);
@@ -126,71 +150,78 @@ export default function Users() {
       gender: user.gender || "",
       zodiac: user.zodiac || "",
       placeOfBirth: user.placeOfBirth || "",
-      dateOfBirth: user.dateOfBirth || "",
-timeOfBirth: user.timeOfBirth || "",
-profilePic: user.profilePic || "",
+      dateOfBirth: toDateInput(user.dateOfBirth),
+      timeOfBirth: toTimeInput(user.timeOfBirth),
+      profilePic: user.profilePic || "",
     });
     setEditOpen(true);
   };
 
-const handleSaveEdit = async (e) => {
-  e.preventDefault();
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("fullName", editForm.fullName);
-    formData.append("name", editForm.name);
-    formData.append("email", editForm.email);
-    formData.append("mobile", editForm.mobile);
-    formData.append("gender", editForm.gender);
-    formData.append("zodiac", editForm.zodiac);
-    formData.append("dateOfBirth", editForm.dateOfBirth);
-    formData.append("timeOfBirth", editForm.timeOfBirth);
-    formData.append("placeOfBirth", editForm.placeOfBirth);
+      formData.append("fullName", editForm.fullName);
+      formData.append("name", editForm.name);
+      formData.append("email", editForm.email);
+      formData.append("mobile", editForm.mobile);
+      formData.append("gender", editForm.gender);
+      formData.append("zodiac", editForm.zodiac);
+      formData.append("dateOfBirth", editForm.dateOfBirth);
+      formData.append("timeOfBirth", editForm.timeOfBirth);
+      formData.append("placeOfBirth", editForm.placeOfBirth);
 
-    // Profile Picture
-    if (editForm.profilePic instanceof File) {
-      formData.append("profilePic", editForm.profilePic);
+      // Profile Picture
+      if (editForm.profilePic instanceof File) {
+        formData.append("profilePic", editForm.profilePic);
+      }
+
+      const response = await updateUser(selectedUser._id, formData);
+
+      setUsers((prev) =>
+        prev.map((user) =>
+          user._id === selectedUser._id ? response.data : user
+        )
+      );
+
+      setEditOpen(false);
+      setSelectedUser(null);
+      showToast("success", "Profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+      showToast("error", err?.message || "Failed to update user");
     }
+  };
 
-    const response = await updateUser(selectedUser._id, formData);
-
-    setUsers((prev) =>
-      prev.map((user) =>
-        user._id === selectedUser._id ? response.data : user
-      )
-    );
-
-  setEditOpen(false);
-    setSelectedUser(null);
-    showToast("success", "Profile updated successfully!");
-  } catch (err) {
-    console.error(err);
-    showToast("error", err?.message || "Failed to update user");
-  }
-};
   const handleDeleteInit = (user) => {
     setSelectedUser(user);
     setDeleteOpen(true);
   };
 
- const confirmDelete = async () => {
-  try {
-    await deleteUser(selectedUser._id);
+  const confirmDelete = async () => {
+    try {
+      await deleteUser(selectedUser._id);
 
-    setUsers((prev) => prev.filter((u) => u._id !== selectedUser._id));
+      setDeleteOpen(false);
+      setSelectedUser(null);
+      showToast("success", "User deleted successfully!");
 
- setDeleteOpen(false);
-    setSelectedUser(null);
-    showToast("success", "User deleted successfully!");
-  } catch (err) {
-    console.error("Delete failed:", err);
-    showToast("error", err?.message || "Failed to delete user");
-  }
-};
+      // Page ka last user delete hua to pichle page par jao (effect khud fetch karega),
+      // warna same page dobara fetch karo taaki total / totalPages update ho jaye.
+      if (users.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        fetchUsers(currentPage);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      showToast("error", err?.message || "Failed to delete user");
+    }
+  };
 
-  // ================= 4. Search and Filtering Logic =================
+  // ================= Search and Filtering Logic (current page ke users par) =================
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const displayName = (user.fullName || user.name || "").toLowerCase();
@@ -216,11 +247,7 @@ const handleSaveEdit = async (e) => {
     });
   }, [users, searchTerm, filterType]);
 
-  // ================= 5. Pagination =================
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const currentUsers = filteredUsers;
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -249,12 +276,14 @@ const handleSaveEdit = async (e) => {
 
   return (
     <div className="an-user-container">
-{toast && (
+      {toast && (
         <div className={`cosmic-toast ${toast.type === "success" ? "toast-success" : "toast-error"}`}>
           {toast.type === "success" ? <FaCheckCircle /> : <FaTimes />}
           <span>{toast.message}</span>
         </div>
-      )}      {/* Background Orbs */}
+      )}
+
+      {/* Background Orbs */}
       <div className="ambient-orb orb-1"></div>
       <div className="ambient-orb orb-2"></div>
       <div className="ambient-orb orb-3"></div>
@@ -346,29 +375,26 @@ const handleSaveEdit = async (e) => {
             type="text"
             placeholder="Search by name, email, mobile, zodiac or place..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         <div className="filter-tabs">
           <button
             className={`filter-btn ${filterType === "all" ? "active" : ""}`}
-            onClick={() => { setFilterType("all"); setCurrentPage(1); }}
+            onClick={() => setFilterType("all")}
           >
-            All ({users.length})
+            All ({totalUsers})
           </button>
           <button
             className={`filter-btn ${filterType === "active" ? "active" : ""}`}
-            onClick={() => { setFilterType("active"); setCurrentPage(1); }}
+            onClick={() => setFilterType("active")}
           >
             Active ({stats.activeCount})
           </button>
           <button
             className={`filter-btn ${filterType === "inactive" ? "active" : ""}`}
-            onClick={() => { setFilterType("inactive"); setCurrentPage(1); }}
+            onClick={() => setFilterType("inactive")}
           >
             Inactive ({stats.inactiveCount})
           </button>
@@ -473,15 +499,6 @@ const handleSaveEdit = async (e) => {
                     </div>
 
                     <div className="card-right-controls">
-                      <label className="toggle-switch" title="Toggle Active Status">
-                        <input
-                          type="checkbox"
-                          checked={user.isActive ?? false}
-                          onChange={() => handleToggleStatus(user)}
-                        />
-                        <span className="toggle-slider"></span>
-                      </label>
-
                       <div className="action-button-group">
                         <button
                           className="btn-square-icon"
@@ -515,7 +532,7 @@ const handleSaveEdit = async (e) => {
       </div>
 
       {/* Pagination Footer */}
-      {!loading && filteredUsers.length > 0 && (
+      {!loading && totalPages > 1 && (
         <div className="table-pagination-footer">
           <div className="pagination-container">
             <button
@@ -605,14 +622,15 @@ const handleSaveEdit = async (e) => {
               </button>
             </div>
             <form onSubmit={handleSaveEdit}>
-<div
-  className="modal-body"
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "16px",
-  }}
->                <div className="form-group">
+              <div
+                className="modal-body"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "16px",
+                }}
+              >
+                <div className="form-group">
                   <label>Full Name</label>
                   <input
                     type="text"
@@ -629,36 +647,36 @@ const handleSaveEdit = async (e) => {
                   />
                 </div>
                 <div className="form-group">
-  <label>Profile Picture</label>
+                  <label>Profile Picture</label>
 
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) =>
-      setEditForm({
-        ...editForm,
-        profilePic: e.target.files[0],
-      })
-    }
-  />
-  {editForm.profilePic && (
-    <img
-      src={
-        editForm.profilePic instanceof File
-          ? URL.createObjectURL(editForm.profilePic)
-          : editForm.profilePic
-      }
-      alt="Profile"
-      style={{
-        width: "70px",
-        height: "70px",
-        borderRadius: "50%",
-        objectFit: "cover",
-        marginTop: "10px",
-      }}
-    />
-  )}
-</div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        profilePic: e.target.files[0] || editForm.profilePic,
+                      })
+                    }
+                  />
+                  {editForm.profilePic && (
+                    <img
+                      src={
+                        editForm.profilePic instanceof File
+                          ? URL.createObjectURL(editForm.profilePic)
+                          : editForm.profilePic
+                      }
+                      alt="Profile"
+                      style={{
+                        width: "70px",
+                        height: "70px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        marginTop: "10px",
+                      }}
+                    />
+                  )}
+                </div>
                 <div className="form-group">
                   <label>Email</label>
                   <input
@@ -675,7 +693,7 @@ const handleSaveEdit = async (e) => {
                     onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Gender</label>
                   <input
@@ -693,25 +711,25 @@ const handleSaveEdit = async (e) => {
                   />
                 </div>
                 <div className="form-group">
-  <label>Date of Birth</label>
-  <input
-    type="date"
-    value={editForm.dateOfBirth}
-    onChange={(e) =>
-      setEditForm({ ...editForm, dateOfBirth: e.target.value })
-    }
-  />
-</div>
-<div className="form-group">
-  <label>Time of Birth</label>
-  <input
-    type="time"
-    value={editForm.timeOfBirth}
-    onChange={(e) =>
-      setEditForm({ ...editForm, timeOfBirth: e.target.value })
-    }
-  />
-</div>
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    value={editForm.dateOfBirth}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, dateOfBirth: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Time of Birth</label>
+                  <input
+                    type="time"
+                    value={editForm.timeOfBirth}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, timeOfBirth: e.target.value })
+                    }
+                  />
+                </div>
                 <div className="form-group">
                   <label>Place of Birth</label>
                   <input
@@ -720,7 +738,6 @@ const handleSaveEdit = async (e) => {
                     onChange={(e) => setEditForm({ ...editForm, placeOfBirth: e.target.value })}
                   />
                 </div>
-              
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setEditOpen(false)}>

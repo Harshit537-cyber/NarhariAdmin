@@ -26,24 +26,21 @@ export const loginAdmin = async (data) => {
 };
 
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (page = 1, limit = 10) => {
   try {
-    const response = await apiClient.get("/admin/dashboard/all-users");
-
+    const response = await apiClient.get("/admin/dashboard/all-users", {
+      params: { page, limit },   // -> /admin/dashboard/all-users?page=2&limit=6
+    });
+ 
     return response.data;
-  }
-  catch (error) {
-
+  } catch (error) {
     throw (
-
       error.response?.data || {
-
-        message: "Something went wrong",
+        message: error.message || "Something went wrong",
       }
     );
   }
 };
-
 // Get Dashboard Stats
 export const getDashboardStats = async () => {
 
