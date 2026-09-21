@@ -44,23 +44,27 @@ export default function Partner() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 const [statusReason, setStatusReason] = useState("");
+ const [totalPages, setTotalPages] = useState(1);
 const [statusReasonNote, setStatusReasonNote] = useState("");
   useEffect(() => {
     fetchPartners();
   }, []);
 
-  const fetchPartners = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllPartners();
-      setPartners(res.data || []);
-    } catch (err) {
-      setError(err.message || "Failed to load partners");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchPartners = async (page = 1) => {
+  try {
+    setLoading(true);
 
+    const res = await getAllPartners(page, 10);
+
+    setPartners(res.data || []);
+    setTotalPages(res.pagination?.totalPages || 1);
+
+  } catch (err) {
+    setError(err.message || "Failed to load partners");
+  } finally {
+    setLoading(false);
+  }
+};
   const handleEdit = (partner) => {
     setSelectedPartner(partner);
     setEditOpen(true);
@@ -160,24 +164,14 @@ const confirmStatusChange = async () => {
       return true;
     });
   }, [partners, searchTerm, filterType]);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredPartners.length / itemsPerPage)
-  );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-  const currentPartners = filteredPartners.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
+ const currentPartners = filteredPartners;
+const handlePageChange = (pageNumber) => {
+  if (pageNumber >= 1 && pageNumber <= totalPages) {
+    setCurrentPage(pageNumber);
+    fetchPartners(pageNumber);
+  }
+};
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
 
   return (
