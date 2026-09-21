@@ -25,12 +25,19 @@ export default function RatingManagement() {
 
       const data = rawData.map((item) => ({
         _id: item._id,
-        patientName:
-          item.patientName || item.user?.name || item.patient?.name || "N/A",
-        doctorName:
-          item.doctorName || item.doctor?.name || item.doctor?.fullName || "N/A",
+
+        userName:
+          item.user?.fullName || item.user?.name || "N/A",
+
+        partnerName:
+          item.partner?.fullName || item.partner?.name || "N/A",
+
         rating: item.rating || 0,
-        review: item.review || item.comment || item.feedback || "",
+
+        feedback: item.feedback || "",
+
+        serviceType: item.serviceType || "N/A",
+
         createdAt: item.createdAt,
       }));
 
@@ -95,10 +102,10 @@ export default function RatingManagement() {
             <table className="rating-table">
               <thead>
                 <tr>
-                  <th>PATIENT</th>
-                  <th>DOCTOR</th>
+                  <th>USER</th>
+                  <th>PARTNER</th>
                   <th>RATING</th>
-                  <th>REVIEW</th>
+                  <th>FEEDBACK</th>
                   <th>DATE</th>
                 </tr>
               </thead>
@@ -106,14 +113,24 @@ export default function RatingManagement() {
                 {ratings.map((item) => (
                   <tr key={item._id}>
                     <td>
-                      <span className="cell-title">{item.patientName}</span>
+                      <span className="cell-title">{item.userName}</span>
                     </td>
+
                     <td>
-                      <span className="cell-category">{item.doctorName}</span>
+                      <span className="cell-category">{item.partnerName}</span>
                     </td>
-                    <td>{renderStars(item.rating)}</td>
+
                     <td>
-                      <span className="cell-review">{item.review || "N/A"}</span>
+                      {renderStars(item.rating)}
+                      <span className="rating-number">
+                        {item.rating}/5
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="cell-review">
+                        {item.feedback || "N/A"}
+                      </span>
                     </td>
                     <td>
                       <span className="cell-date">
@@ -146,9 +163,8 @@ export default function RatingManagement() {
                 return (
                   <button
                     key={pageNum}
-                    className={`page-num-btn ${
-                      currentPage === pageNum ? "active-page" : ""
-                    }`}
+                    className={`page-num-btn ${currentPage === pageNum ? "active-page" : ""
+                      }`}
                     onClick={() => handlePageChange(pageNum)}
                   >
                     {pageNum}
