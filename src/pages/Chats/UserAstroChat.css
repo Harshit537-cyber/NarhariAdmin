@@ -338,6 +338,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.04);
+    height: 690px;
 }
 
 .sidebar-header h3 {
@@ -348,13 +349,32 @@
 }
 
 .chat-list-scroll {
+    height: 510px;
+    max-height: 510px;
     overflow-y: auto;
+    overflow-x: hidden;
 
     /* Firefox */
     scrollbar-width: thin;
-    scrollbar-color: #553874 transparent;
+    scrollbar-color: #cbd5e1 transparent;
+}
 
-    
+/* Chrome / Edge */
+.chat-list-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chat-list-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-list-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.chat-list-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .chat-list-scroll::-webkit-scrollbar {
