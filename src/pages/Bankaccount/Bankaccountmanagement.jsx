@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { getAllPartnerBankAccounts } from "../../api/Controller/bankaccount";
-import "./BankAccountManagement.css";
+import "./BankAccountmanagement.css";
 import { toast } from "react-toastify";
 import {
   FaCrown,
