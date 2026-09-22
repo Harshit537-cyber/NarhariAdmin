@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../../pages/Logout/LogoutModal";
 import "./Sidebar.css";
-import { AlertCircle, Ticket, Bell, Gift, Star , } from "lucide-react";
+import { AlertCircle, Ticket, Bell, Gift, Star, } from "lucide-react";
 import { FaBan, FaBlog, FaVideo } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -155,6 +155,15 @@ export default function Sidebar() {
                 >
                   <span>Commission</span>
                 </NavLink>
+                <NavLink
+                  to="/partner/bank-accounts"
+                  className={({ isActive }) =>
+                    `an-nav-subitem ${isActive ? "is-active" : ""}`
+                  }
+                >
+                  <span>Bank Accounts</span>
+                </NavLink>
+
               </div>
             )}
           </div>
@@ -403,7 +412,7 @@ export default function Sidebar() {
               `an-nav-item ${isActive ? "is-active" : ""}`
             }
           >
-        <Star />
+            <Star />
             <span className="an-nav-text">Rating Management</span>
           </NavLink>
 

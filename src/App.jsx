@@ -39,6 +39,7 @@ import RatingManagement from "./pages/Ratingmanagement/Ratingmanagement.jsx";
 import VideoBlog from "./pages/VideoBlogs/VideoBlogs.jsx";
 import PartnerStatus from "./pages/Partner/PartnerStatus/Status.jsx";
 import PanditJiApproval from "./pages/Pandit/PanditJiApproval.jsx";
+import BankAccountManagement from "./pages/Bankaccount/Bankaccountmanagement.jsx";
 const ProtectedRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -83,6 +84,7 @@ const AppRoutes = () => {
               <Route path="/gifts" element={<Gifts />} />
               <Route path="/blog" element={<BlogInsights />} />
               <Route path="/video-blog" element={<VideoBlog />} />
+              <Route path="/partner/bank-accounts" element={<BankAccountManagement />} />
               <Route
                 path="/partner/kyc-verification"
                 element={<KycVerification />}
