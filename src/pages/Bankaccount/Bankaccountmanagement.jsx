@@ -69,6 +69,7 @@ export default function BankAccountManagement() {
         bankName: item.bankAccount?.bankName || "",
         accountNumber: item.bankAccount?.accountNumber || "",
         ifscCode: item.bankAccount?.ifscCode || "",
+        aadhaarNumber: item.bankAccount?.aadhaarNumber || "",
         branchName: item.bankAccount?.branchName || "",
         updatedAt: item.bankAccount?.updatedAt || null,
       }));
@@ -124,7 +125,7 @@ export default function BankAccountManagement() {
   const totalPages = Math.ceil(filteredRows.length / PAGE_SIZE);
   const pagedRows = filteredRows.slice(
     (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
+    currentPage * PAGE_SIZE,
   );
 
   const handlePageChange = (pageNumber) => {
@@ -237,6 +238,7 @@ export default function BankAccountManagement() {
                   <th>BANK</th>
                   <th>ACCOUNT NO.</th>
                   <th>IFSC</th>
+                  <th>AADHAAR NO.</th>
                   <th>BRANCH</th>
                   <th>STATUS</th>
                   <th>UPDATED</th>
@@ -321,6 +323,11 @@ export default function BankAccountManagement() {
                       ) : (
                         <span className="bank-cell-text">N/A</span>
                       )}
+                    </td>
+                    <td>
+                      <span className="bank-cell-text">
+                        {item.aadhaarNumber || "N/A"}
+                      </span>
                     </td>
 
                     <td>
