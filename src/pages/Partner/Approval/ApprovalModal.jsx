@@ -97,7 +97,89 @@ function ProfileApprovalModal({ isOpen, onClose, partner, onApproveProfile, appr
             })}
           </div>
         </div>
+{/* ===== PARTNER DETAILS ===== */}
+<div className="partner-details-section">
+  <label className="section-mini-label">Partner Details</label>
 
+  <div className="details-grid">
+    <div className="detail-item"><span>Gender</span><b>{partner.gender || "N/A"}</b></div>
+    <div className="detail-item">
+      <span>Date of Birth</span>
+      <b>
+        {partner.dateOfBirth
+          ? new Date(partner.dateOfBirth).toLocaleDateString("en-IN")
+          : "N/A"}
+      </b>
+    </div>
+    <div className="detail-item"><span>City</span><b>{partner.city || "N/A"}</b></div>
+    <div className="detail-item"><span>Qualification</span><b>{partner.qualification || "N/A"}</b></div>
+    <div className="detail-item"><span>Experience</span><b>{partner.experience ?? 0} yrs</b></div>
+    <div className="detail-item"><span>Min Rate</span><b>₹{partner.minRate ?? 0}</b></div>
+    <div className="detail-item"><span>Expected Salary</span><b>₹{partner.expectedSalary ?? 0}</b></div>
+    <div className="detail-item"><span>KYC Status</span><b>{partner.kycStatus || "N/A"}</b></div>
+    <div className="detail-item"><span>Wallet</span><b>₹{partner.walletBalance ?? 0}</b></div>
+    <div className="detail-item">
+      <span>Joined</span>
+      <b>{partner.createdAt ? new Date(partner.createdAt).toLocaleDateString("en-IN") : "N/A"}</b>
+    </div>
+  </div>
+
+  <div className="detail-block">
+    <span>Specialties</span>
+    <div className="tag-row">
+      {partner.specialties?.length
+        ? partner.specialties.map((s) => <em key={s} className="info-tag">{s}</em>)
+        : <b>N/A</b>}
+    </div>
+  </div>
+
+  <div className="detail-block">
+    <span>Languages</span>
+    <div className="tag-row">
+      {partner.languages?.length
+        ? partner.languages.map((l) => <em key={l} className="info-tag">{l}</em>)
+        : <b>N/A</b>}
+    </div>
+  </div>
+
+  <div className="detail-block">
+    <span>Categories</span>
+    <div className="tag-row">
+      {partner.categories?.length
+        ? partner.categories.map((c) => <em key={c} className="info-tag">{c}</em>)
+        : <b>N/A</b>}
+    </div>
+  </div>
+
+  <div className="detail-block">
+    <span>Services Allowed</span>
+    <div className="tag-row">
+      <em className={`info-tag ${partner.allowChat ? "on" : "off"}`}>Chat</em>
+      <em className={`info-tag ${partner.allowAudioCalls ? "on" : "off"}`}>Audio Call</em>
+      <em className={`info-tag ${partner.allowVideoCalls ? "on" : "off"}`}>Video Call</em>
+    </div>
+  </div>
+
+  {partner.bio && (
+    <div className="detail-block">
+      <span>Bio</span>
+      <p className="bio-text">{partner.bio}</p>
+    </div>
+  )}
+
+  {partner.additionalPhotos?.length > 0 && (
+    <div className="detail-block">
+      <span>Gallery Photos</span>
+      <div className="gallery-row">
+        {partner.additionalPhotos.map((img, i) => (
+          <a key={i} href={img} target="_blank" rel="noreferrer">
+            <img src={img} alt={`gallery-${i}`} className="gallery-thumb" />
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
         <div className="doc-preview-container">
           {docData?.url ? (
             <div className="preview-image-wrapper">
@@ -168,11 +250,17 @@ export default function ProfileApproval() {
   const openModal = (partner) => setSelectedPartner(partner);
   const closeModal = () => setSelectedPartner(null);
 
-  const handleApproveProfile = async (partnerId, status) => {
-    setApprovingId(partnerId);
-    
-    try {
-      await updatePartnerStatus(partnerId, { status });
+const handleApproveProfile = async (partnerId, status) => {
+  // Approve se pehle check: profile complete hai ya nahi
+  if (status === "Approved" && !selectedPartner?.isProfileComplete) {
+    toast.error("Profile details are not completed");
+    return; // API hit nahi hogi
+  }
+
+  setApprovingId(partnerId);
+
+  try {
+    await updatePartnerStatus(partnerId, { status });
       toast.success(`Partner profile ${status.toLowerCase()} successfully!`);
 
       setPartners((prev) => {
