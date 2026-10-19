@@ -2,7 +2,7 @@ import apiClient from "../Interceptor/apiClient";
 
 
 
-export const getAllPartners = async (page = 1, limit = 10) => {
+export const getAllPartners = async (page = 1, limit = 10, search = "") => {
   try {
     const token = localStorage.getItem("token");
 

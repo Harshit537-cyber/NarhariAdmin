@@ -40,31 +40,42 @@ export default function Partner() {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");   // <-- add
+
+  const [summary, setSummary] = useState({});
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-const [statusReason, setStatusReason] = useState("");
- const [totalPages, setTotalPages] = useState(1);
-const [statusReasonNote, setStatusReasonNote] = useState("");
+  const [statusReason, setStatusReason] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusReasonNote, setStatusReasonNote] = useState("");
+  const [totalPartners, setTotalPartners] = useState(0);
   useEffect(() => {
-    fetchPartners();
-  }, []);
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
-const fetchPartners = async (page = 1) => {
-  try {
-    setLoading(true);
-
-    const res = await getAllPartners(page, 10);
-
-    setPartners(res.data || []);
-    setTotalPages(res.pagination?.totalPages || 1);
-
-  } catch (err) {
-    setError(err.message || "Failed to load partners");
-  } finally {
-    setLoading(false);
-  }
-};
+  // page ya search badle to API call
+  useEffect(() => {
+    fetchPartners(currentPage, debouncedSearch);
+  }, [currentPage, debouncedSearch]);
+  const fetchPartners = async (page = currentPage, search = debouncedSearch) => {
+    try {
+      setLoading(true);
+      const res = await getAllPartners(page, 10, search);   // search bhi bhejo
+      setPartners(res.data || []);
+      setTotalPages(res.pagination?.totalPages || 1);
+      setTotalPartners(res.pagination?.total || 0);          // 19 yahan se aayega
+      setSummary(res.summary || {});
+    } catch (err) {
+      setError(err.message || "Failed to load partners");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleEdit = (partner) => {
     setSelectedPartner(partner);
     setEditOpen(true);
@@ -74,48 +85,48 @@ const fetchPartners = async (page = 1) => {
     setSelectedPartner(partner);
     setViewOpen(true);
   };
-const handleToggleStatus = (partner) => {
-  setSelectedPartner(partner);
-  setStatusReason("");
-  setStatusReasonNote("");
-  setStatusModalOpen(true);
-};
-
-const confirmStatusChange = async () => {
-  if (!selectedPartner) return;
-
-  const isCurrentlyActive = !!selectedPartner.isActive;
-
-  const data = {
-    reason: statusReason.trim() || (isCurrentlyActive ? "Deactivated by admin" : "Activated by admin"),
-    reasonNote: statusReasonNote.trim() || (isCurrentlyActive ? "Partner deactivated by admin" : "Partner activated by admin"),
-  };
-
-  try {
-    setStatusLoading(true);
-    await togglePartnerStatus(selectedPartner._id, data);
-
-    setPartners((prev) =>
-      prev.map((p) =>
-        p._id === selectedPartner._id ? { ...p, isActive: !isCurrentlyActive } : p
-      )
-    );
-
-    toast.success(
-      isCurrentlyActive ? "Partner deactivated successfully" : "Partner activated successfully"
-    );
-
-    setStatusModalOpen(false);
-    setSelectedPartner(null);
+  const handleToggleStatus = (partner) => {
+    setSelectedPartner(partner);
     setStatusReason("");
     setStatusReasonNote("");
-  } catch (err) {
-    console.error("Toggle status error:", err);
-    toast.error(err.message || "Failed to update partner status");
-  } finally {
-    setStatusLoading(false);
-  }
-};
+    setStatusModalOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!selectedPartner) return;
+
+    const isCurrentlyActive = !!selectedPartner.isActive;
+
+    const data = {
+      reason: statusReason.trim() || (isCurrentlyActive ? "Deactivated by admin" : "Activated by admin"),
+      reasonNote: statusReasonNote.trim() || (isCurrentlyActive ? "Partner deactivated by admin" : "Partner activated by admin"),
+    };
+
+    try {
+      setStatusLoading(true);
+      await togglePartnerStatus(selectedPartner._id, data);
+
+      setPartners((prev) =>
+        prev.map((p) =>
+          p._id === selectedPartner._id ? { ...p, isActive: !isCurrentlyActive } : p
+        )
+      );
+
+      toast.success(
+        isCurrentlyActive ? "Partner deactivated successfully" : "Partner activated successfully"
+      );
+
+      setStatusModalOpen(false);
+      setSelectedPartner(null);
+      setStatusReason("");
+      setStatusReasonNote("");
+    } catch (err) {
+      console.error("Toggle status error:", err);
+      toast.error(err.message || "Failed to update partner status");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
   const confirmDelete = async () => {
     try {
       await deletePartner(selectedPartner._id);
@@ -146,15 +157,7 @@ const confirmStatusChange = async () => {
 
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
-      const name = (partner.fullName || "").toLowerCase();
-      const mobile = (partner.mobile || "").toLowerCase();
-      const city = (partner.city || "").toLowerCase();
-      const query = searchTerm.toLowerCase();
 
-      const matchesSearch =
-        name.includes(query) || mobile.includes(query) || city.includes(query);
-
-      if (!matchesSearch) return false;
 
       if (filterType === "active") return partner.isActive;
       if (filterType === "verified") return partner.isVerified;
@@ -165,13 +168,12 @@ const confirmStatusChange = async () => {
     });
   }, [partners, searchTerm, filterType]);
 
- const currentPartners = filteredPartners;
-const handlePageChange = (pageNumber) => {
-  if (pageNumber >= 1 && pageNumber <= totalPages) {
-    setCurrentPage(pageNumber);
-    fetchPartners(pageNumber);
-  }
-};
+  const currentPartners = filteredPartners;
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);   // fetch upar wala useEffect karega
+    }
+  };
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
 
   return (
@@ -282,7 +284,7 @@ const handlePageChange = (pageNumber) => {
             className={`filter-btn ${filterType === "all" ? "active" : ""}`}
             onClick={() => setFilterType("all")}
           >
-            All ({partners.length})
+            All ({totalPartners})
           </button>
           <button
             className={`filter-btn ${filterType === "active" ? "active" : ""}`}
@@ -399,7 +401,9 @@ const handlePageChange = (pageNumber) => {
 
                 <div className="partner-card-footer">
                   <div className="rate-info">
-                    <span className="rate-amount">₹{partner.minRate || 25}</span>
+                    <span className="rate-amount">
+                      {partner.minRate ? `₹${partner.minRate}` : "_"}
+                    </span>
                     <span className="rate-unit">/min</span>
                   </div>
 
@@ -505,7 +509,7 @@ const handlePageChange = (pageNumber) => {
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
         partner={selectedPartner}
-        onUpdated={fetchPartners}
+        onUpdated={() => fetchPartners(currentPage, debouncedSearch)}
       />
 
       <ViewPartnerModal
@@ -514,75 +518,75 @@ const handlePageChange = (pageNumber) => {
         partner={selectedPartner}
       />
       {statusModalOpen && selectedPartner && (
-  <div className="status-modal-overlay">
-    <div className="status-modal">
+        <div className="status-modal-overlay">
+          <div className="status-modal">
 
-      <h3>
-        {selectedPartner.isActive
-          ? "Deactivate Partner?"
-          : "Activate Partner?"}
-      </h3>
+            <h3>
+              {selectedPartner.isActive
+                ? "Deactivate Partner?"
+                : "Activate Partner?"}
+            </h3>
 
-    <p>
-  Are you sure you want to{" "}
-  <strong>{selectedPartner.isActive ? "deactivate" : "activate"}</strong>{" "}
-  this partner?
-</p>
+            <p>
+              Are you sure you want to{" "}
+              <strong>{selectedPartner.isActive ? "deactivate" : "activate"}</strong>{" "}
+              this partner?
+            </p>
 
-<div className="status-input-group">
-  <label>Reason:</label>
-  <input
-    type="text"
-    placeholder={selectedPartner.isActive ? "Deactivated by admin" : "Activated by admin"}
-    value={statusReason}
-    onChange={(e) => setStatusReason(e.target.value)}
-    disabled={statusLoading}
-  />
-</div>
+            <div className="status-input-group">
+              <label>Reason:</label>
+              <input
+                type="text"
+                placeholder={selectedPartner.isActive ? "Deactivated by admin" : "Activated by admin"}
+                value={statusReason}
+                onChange={(e) => setStatusReason(e.target.value)}
+                disabled={statusLoading}
+              />
+            </div>
 
-<div className="status-input-group">
-  <label>Reason Note:</label>
-  <textarea
-    placeholder={selectedPartner.isActive ? "Partner deactivated by admin" : "Partner activated by admin"}
-    value={statusReasonNote}
-    onChange={(e) => setStatusReasonNote(e.target.value)}
-    disabled={statusLoading}
-  />
-</div>
+            <div className="status-input-group">
+              <label>Reason Note:</label>
+              <textarea
+                placeholder={selectedPartner.isActive ? "Partner deactivated by admin" : "Partner activated by admin"}
+                value={statusReasonNote}
+                onChange={(e) => setStatusReasonNote(e.target.value)}
+                disabled={statusLoading}
+              />
+            </div>
 
-      <div className="status-modal-actions">
+            <div className="status-modal-actions">
 
-        <button
-          type="button"
-          className="status-cancel-btn"
-         onClick={() => {
-  setStatusModalOpen(false);
-  setSelectedPartner(null);
-  setStatusReason("");
-  setStatusReasonNote("");
-}}
-          disabled={statusLoading}
-        >
-          Cancel
-        </button>
+              <button
+                type="button"
+                className="status-cancel-btn"
+                onClick={() => {
+                  setStatusModalOpen(false);
+                  setSelectedPartner(null);
+                  setStatusReason("");
+                  setStatusReasonNote("");
+                }}
+                disabled={statusLoading}
+              >
+                Cancel
+              </button>
 
-        <button
-          type="button"
-          className="status-confirm-btn"
-          onClick={confirmStatusChange}
-          disabled={statusLoading}
-        >
-          {statusLoading
-            ? "Updating..."
-            : selectedPartner.isActive
-            ? "Deactivate"
-            : "Activate"}
-        </button>
+              <button
+                type="button"
+                className="status-confirm-btn"
+                onClick={confirmStatusChange}
+                disabled={statusLoading}
+              >
+                {statusLoading
+                  ? "Updating..."
+                  : selectedPartner.isActive
+                    ? "Deactivate"
+                    : "Activate"}
+              </button>
 
-      </div>
-    </div>
-  </div>
-)}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
