@@ -31,7 +31,7 @@ export default function PartnerStatus() {
 
   const [loading, setLoading] = useState(true);
 
- 
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,7 +66,7 @@ export default function PartnerStatus() {
     fetchPartners();
   }, []);
 
- 
+
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
       const name = (partner.fullName || "").toLowerCase();
@@ -142,7 +142,7 @@ export default function PartnerStatus() {
               <FaUsers />
             </div>
             <span className="trend-badge cyan-pill">
-           <FaArrowUp /> TODAY
+              <FaArrowUp /> TODAY
             </span>
           </div>
 
@@ -319,19 +319,24 @@ export default function PartnerStatus() {
 
                 <div className="partner-card-footer">
                   <div className="rate-info">
-                    <span className="rate-amount">₹{partner.minRate || 25}</span>
-                    <span className="rate-unit">/min</span>
+                    {partner.minRate ? (
+                      <>
+                        <span className="rate-amount">₹{partner.minRate}</span>
+                        <span className="rate-unit">/min</span>
+                      </>
+                    ) : (
+                      <span className="rate-amount">—</span>
+                    )}
                   </div>
 
-                 <div className="card-right-controls">
-  <span
-    className={`status-badge ${
-      partner.status === "Active" ? "status-badge-green" : "status-badge-red"
-    }`}
-  >
-    {partner.status === "Active" ? "Active" : "Inactive"}
-  </span>
-</div>
+                  <div className="card-right-controls">
+                    <span
+                      className={`status-badge ${partner.status === "Active" ? "status-badge-green" : "status-badge-red"
+                        }`}
+                    >
+                      {partner.status === "Active" ? "Active" : "Inactive"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -353,9 +358,8 @@ export default function PartnerStatus() {
             (page) => (
               <button
                 key={page}
-                className={`pagination-btn ${
-                  currentPage === page ? "active" : ""
-                }`}
+                className={`pagination-btn ${currentPage === page ? "active" : ""
+                  }`}
                 onClick={() => handlePageChange(page)}
               >
                 {page}
