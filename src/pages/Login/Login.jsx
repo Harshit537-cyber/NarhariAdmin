@@ -16,16 +16,13 @@ import {
 } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 
-
 import { auth } from "../../firebase/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { verifyOtp, registerAdmin } from "../../api/Controller/verifyOtpApi";
 
-
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [step, setStep] = useState(1);
-
 
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -33,18 +30,14 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
 
-
   const [errors, setErrors] = useState({});
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
-
   const navigate = useNavigate();
 
-
-  // Component unmount hone par reCAPTCHA cleanup karne ke liye
   useEffect(() => {
     return () => {
       if (window.recaptchaVerifier) {
@@ -58,8 +51,6 @@ export default function Login() {
     };
   }, []);
 
-
-  // Fresh reCAPTCHA Instance banane ka helper function
   const setupRecaptcha = () => {
     if (window.recaptchaVerifier) {
       try {
@@ -69,7 +60,6 @@ export default function Login() {
       }
       window.recaptchaVerifier = null;
     }
-
 
     window.recaptchaVerifier = new RecaptchaVerifier(
       auth,
@@ -85,7 +75,6 @@ export default function Login() {
     return window.recaptchaVerifier;
   };
 
-
   const resetForm = () => {
     setMobile("");
     setOtp("");
@@ -97,32 +86,25 @@ export default function Login() {
     setShowOtpModal(false);
   };
 
-
   const toggleMode = (mode) => {
     setIsRegister(mode);
     resetForm();
   };
 
-
   async function handleSendOtp(e) {
     if (e) e.preventDefault();
-
 
     if (!/^\d{10}$/.test(mobile)) {
       setErrors({ mobile: "Enter a valid 10-digit mobile number" });
       return;
     }
 
-
     setErrors({});
     setSendingOtp(true);
 
-
     try {
-      // Direct Fresh reCAPTCHA generate karo
       const appVerifier = setupRecaptcha();
       const formattedPhoneNumber = `+91${mobile}`;
-
 
       const confirmation = await signInWithPhoneNumber(
         auth,
@@ -130,22 +112,18 @@ export default function Login() {
         appVerifier
       );
 
-
       setConfirmationResult(confirmation);
       toast.success("OTP sent successfully to your mobile.");
       setShowOtpModal(true);
     } catch (error) {
       console.error("OTP Error:", error);
 
-
-      // Error aane par reCAPTCHA reset karein
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
         } catch (e) {}
         window.recaptchaVerifier = null;
       }
-
 
       Swal.fire({
         icon: "error",
@@ -163,7 +141,6 @@ export default function Login() {
     }
   }
 
-
   function validateOtp() {
     const next = {};
     if (!otp.trim()) {
@@ -174,13 +151,11 @@ export default function Login() {
     return next;
   }
 
-
   async function handleVerifyOtp(e) {
     if (e) e.preventDefault();
     const next = validateOtp();
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-
 
     setSubmitting(true);
     try {
@@ -189,20 +164,28 @@ export default function Login() {
         return;
       }
 
-
       const userCredential = await confirmationResult.confirm(otp);
       const user = userCredential.user;
       const idToken = await user.getIdToken();
-
 
       const verifyResponse = await verifyOtp({
         mobile: `+91${mobile}`,
         idToken: idToken,
       });
 
+      // Token aur Refresh Token dono save karein
+      if (verifyResponse?.token) {
+        localStorage.setItem("token", verifyResponse.token);
+      }
+      if (verifyResponse?.refreshToken) {
+        localStorage.setItem("refreshToken", verifyResponse.refreshToken);
+      }
+      if (verifyResponse?.admin) {
+        localStorage.setItem("role", verifyResponse.admin.role || "admin");
+        localStorage.setItem("admin", JSON.stringify(verifyResponse.admin));
+      }
 
       setShowOtpModal(false);
-
 
       if (isRegister) {
         toast.success("Mobile Verified! Complete your profile.");
@@ -218,7 +201,6 @@ export default function Login() {
     }
   }
 
-
   function validateRegisterFields() {
     const next = {};
     if (!name.trim()) next.name = "Full Name is required";
@@ -231,13 +213,11 @@ export default function Login() {
     return next;
   }
 
-
   async function handleRegisterSubmit(e) {
     if (e) e.preventDefault();
     const next = validateRegisterFields();
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-
 
     setSubmitting(true);
     try {
@@ -248,6 +228,9 @@ export default function Login() {
         mobile: `+91${mobile}`,
       });
 
+      if (response?.admin) {
+        localStorage.setItem("admin", JSON.stringify(response.admin));
+      }
 
       toast.success(response?.message || "Registration Successful! Welcome.");
       navigate("/dashboard");
@@ -258,18 +241,14 @@ export default function Login() {
     }
   }
 
-
   return (
     <div className="an-wp-page">
-      {/* Container hamesha Top level par rahega */}
       <div id="recaptcha-container"></div>
       <div className="an-wp-bg-overlay" />
-
 
       <div className="an-wp-card">
         <div className="an-wp-hero">
           <div className="an-wp-hero-overlay" />
-
 
           <div className="an-wp-hero-content">
             <div className="an-wp-brand">
@@ -279,13 +258,11 @@ export default function Login() {
               <span>NAMAH ASTRO</span>
             </div>
 
-
             <div className="an-wp-hero-body">
               <span className="an-wp-badge">ADMIN CONSOLE</span>
               <h1>Celestial Intelligence &amp; Management Portal</h1>
               <p>Manage calculations, user insights, and system metrics with enterprise precision.</p>
             </div>
-
 
             <div className="an-wp-features">
               <div className="an-wp-feature-item">
@@ -299,7 +276,6 @@ export default function Login() {
             </div>
           </div>
         </div>
-
 
         <div className="an-wp-form-side">
           <div className="an-wp-tabs">
@@ -319,7 +295,6 @@ export default function Login() {
             </button>
           </div>
 
-
           <div className="an-wp-form-header">
             <div className="an-wp-lock-icon">
               <FaLock />
@@ -331,7 +306,6 @@ export default function Login() {
                 : "Sign in to Namah Astro Admin System"}
             </p>
           </div>
-
 
           {(!isRegister || (isRegister && step === 1)) && (
             <form onSubmit={handleSendOtp} noValidate className="an-wp-form">
@@ -352,7 +326,6 @@ export default function Login() {
                 {errors.mobile && <span className="an-wp-error">{errors.mobile}</span>}
               </div>
 
-
               <button type="submit" className="an-wp-btn" disabled={sendingOtp}>
                 {sendingOtp ? (
                   <span className="an-wp-spinner" />
@@ -365,7 +338,6 @@ export default function Login() {
               </button>
             </form>
           )}
-
 
           {isRegister && step === 2 && (
             <form onSubmit={handleRegisterSubmit} noValidate className="an-wp-form">
@@ -384,7 +356,6 @@ export default function Login() {
                 {errors.name && <span className="an-wp-error">{errors.name}</span>}
               </div>
 
-
               <div className="an-wp-field">
                 <label>Email Address</label>
                 <div className="an-wp-input-box">
@@ -399,7 +370,6 @@ export default function Login() {
                 </div>
                 {errors.email && <span className="an-wp-error">{errors.email}</span>}
               </div>
-
 
               <div className="an-wp-field">
                 <label>Address</label>
@@ -416,7 +386,6 @@ export default function Login() {
                 {errors.address && <span className="an-wp-error">{errors.address}</span>}
               </div>
 
-
               <button type="submit" className="an-wp-btn" disabled={submitting}>
                 {submitting ? (
                   <span className="an-wp-spinner" />
@@ -430,13 +399,11 @@ export default function Login() {
             </form>
           )}
 
-
           <div className="an-wp-footer">
             <p>Secured with OTP Authentication Protocol</p>
           </div>
         </div>
       </div>
-
 
       {showOtpModal && (
         <div className="an-wp-modal-overlay">
@@ -446,7 +413,6 @@ export default function Login() {
             </div>
             <h3>Verify OTP</h3>
             <p>Security code sent to <strong>+91 {mobile}</strong></p>
-
 
             <div className="an-wp-otp-box">
               <input
@@ -460,7 +426,6 @@ export default function Login() {
               {errors.otp && <span className="an-wp-error center">{errors.otp}</span>}
             </div>
 
-
             <div className="an-wp-modal-btns">
               <button
                 type="button"
@@ -470,7 +435,6 @@ export default function Login() {
               >
                 {submitting ? <span className="an-wp-spinner" /> : "Verify OTP"}
               </button>
-
 
               <button
                 type="button"

@@ -3,7 +3,8 @@ import "./Partner.css";
 import {
   getAllPartners,
   deletePartner,
-  togglePartnerStatus
+  togglePartnerStatus,
+  updatePartnerMinRate
 } from "../../api/Controller/partner";
 import {
   FaEye,
@@ -22,6 +23,12 @@ import {
   FaArrowUp,
   FaChevronLeft,
   FaChevronRight,
+  FaGraduationCap,
+  FaLanguage,
+  FaVideo,
+  FaComments,
+  FaWallet,
+  FaIdCard
 } from "react-icons/fa";
 import DeleteModal from "./DeleteModal";
 import EditPartnerModal from "./Editpartner";
@@ -40,16 +47,20 @@ export default function Partner() {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");   // <-- add
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [rateModalOpen, setRateModalOpen] = useState(false);
+  const [rateLoading, setRateLoading] = useState(false);
+  const [newMinRate, setNewMinRate] = useState("");
 
   const [summary, setSummary] = useState({});
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
   const [statusReason, setStatusReason] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [statusReasonNote, setStatusReasonNote] = useState("");
   const [totalPartners, setTotalPartners] = useState(0);
+
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -58,17 +69,17 @@ export default function Partner() {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // page ya search badle to API call
   useEffect(() => {
     fetchPartners(currentPage, debouncedSearch);
   }, [currentPage, debouncedSearch]);
+
   const fetchPartners = async (page = currentPage, search = debouncedSearch) => {
     try {
       setLoading(true);
-      const res = await getAllPartners(page, 10, search);   // search bhi bhejo
+      const res = await getAllPartners(page, 10, search);
       setPartners(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
-      setTotalPartners(res.pagination?.total || 0);          // 19 yahan se aayega
+      setTotalPartners(res.pagination?.total || 0);
       setSummary(res.summary || {});
     } catch (err) {
       setError(err.message || "Failed to load partners");
@@ -76,6 +87,7 @@ export default function Partner() {
       setLoading(false);
     }
   };
+
   const handleEdit = (partner) => {
     setSelectedPartner(partner);
     setEditOpen(true);
@@ -85,11 +97,49 @@ export default function Partner() {
     setSelectedPartner(partner);
     setViewOpen(true);
   };
+
   const handleToggleStatus = (partner) => {
     setSelectedPartner(partner);
     setStatusReason("");
     setStatusReasonNote("");
     setStatusModalOpen(true);
+  };
+
+  const handleOpenRateModal = (partner) => {
+    setSelectedPartner(partner);
+    setNewMinRate(partner.minRate ?? "");
+    setRateModalOpen(true);
+  };
+
+  const handleConfirmRateUpdate = async () => {
+    if (!selectedPartner) return;
+
+    if (newMinRate === "" || isNaN(newMinRate) || Number(newMinRate) < 0) {
+      toast.error("Please enter a valid rate");
+      return;
+    }
+
+    try {
+      setRateLoading(true);
+      await updatePartnerMinRate(selectedPartner._id, Number(newMinRate));
+
+      setPartners((prev) =>
+        prev.map((p) =>
+          p._id === selectedPartner._id
+            ? { ...p, minRate: Number(newMinRate) }
+            : p
+        )
+      );
+
+      toast.success("Rate updated and notification sent successfully");
+      setRateModalOpen(false);
+      setSelectedPartner(null);
+      setNewMinRate("");
+    } catch (err) {
+      toast.error(err.message || "Failed to update rate");
+    } finally {
+      setRateLoading(false);
+    }
   };
 
   const confirmStatusChange = async () => {
@@ -127,6 +177,7 @@ export default function Partner() {
       setStatusLoading(false);
     }
   };
+
   const confirmDelete = async () => {
     try {
       await deletePartner(selectedPartner._id);
@@ -144,7 +195,6 @@ export default function Partner() {
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
-    const totalPartners = partners.length;
     const verifiedCount = partners.filter((p) => p.isVerified).length;
     const kycPendingCount = partners.filter(
       (p) => (p.kycStatus || "").toLowerCase() === "pending"
@@ -152,29 +202,39 @@ export default function Partner() {
     const newToday = partners.filter(
       (p) => new Date(p.createdAt).toDateString() === today
     ).length;
-    return { totalPartners, verifiedCount, kycPendingCount, newToday };
-  }, [partners]);
+
+    return {
+      total: summary.totalPartners ?? totalPartners,
+      active: summary.activePartners ?? partners.filter((p) => p.isActive).length,
+      verifiedCount,
+      kycPendingCount,
+      newToday
+    };
+  }, [partners, summary, totalPartners]);
 
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
-
-
       if (filterType === "active") return partner.isActive;
       if (filterType === "verified") return partner.isVerified;
       if (filterType === "kycPending")
         return (partner.kycStatus || "").toLowerCase() === "pending";
-
       return true;
     });
-  }, [partners, searchTerm, filterType]);
+  }, [partners, filterType]);
 
-  const currentPartners = filteredPartners;
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);   // fetch upar wala useEffect karega
+      setCurrentPage(pageNumber);
     }
   };
+
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "P");
+
+  const formatCurrency = (val) => {
+    const num = Number(val);
+    if (isNaN(num)) return "0";
+    return num.toLocaleString("en-IN");
+  };
 
   return (
     <div className="an-partner-container">
@@ -216,8 +276,8 @@ export default function Partner() {
           </div>
 
           <div className="card-middle-data">
-            <h2 className="giant-stat-number">{stats.totalPartners.toLocaleString()}</h2>
-            <p className="giant-stat-label">Total Active Partners</p>
+            <h2 className="giant-stat-number">{stats.total.toLocaleString()}</h2>
+            <p className="giant-stat-label">Total Partners</p>
           </div>
 
           <div className="card-bottom-accent">
@@ -290,7 +350,7 @@ export default function Partner() {
             className={`filter-btn ${filterType === "active" ? "active" : ""}`}
             onClick={() => setFilterType("active")}
           >
-            Active
+            Active ({summary.activePartners ?? 0})
           </button>
           <button
             className={`filter-btn ${filterType === "verified" ? "active" : ""}`}
@@ -319,153 +379,208 @@ export default function Partner() {
           <div className="table-error-box">No partners found matching your search criteria.</div>
         ) : (
           <div className="partner-cards-grid">
-            {currentPartners.map((partner) => (
-              <div className="khatarnak-card partner-card-item" key={partner._id}>
-                <div className="card-glass-shine"></div>
+            {filteredPartners.map((partner) => {
+              const kycStatus = (partner.kycStatus || "Not Submitted").toLowerCase();
+              const isKycApproved = kycStatus === "approved";
+              const isKycPending = kycStatus === "pending";
 
-                <div className="partner-card-header">
-                  <span className={`bold-role-tag ${partner.isActive ? "role-user" : "role-admin"}`}>
-                    {partner.isActive ? "ACTIVE" : "INACTIVE"}
-                  </span>
+              return (
+                <div className="khatarnak-card partner-card-item" key={partner._id}>
+                  <div className="card-glass-shine"></div>
 
-                  <div className="badges-group">
-                    {partner.isVerified && (
-                      <span className="trend-badge cyan-pill">
-                        <FaCheckCircle /> Verified
+                  <div className="partner-card-header">
+                    <div className="status-badges-cluster">
+                      <span className={`bold-role-tag ${partner.isActive ? "role-user" : "role-admin"}`}>
+                        {partner.isActive ? "ACTIVE" : "INACTIVE"}
                       </span>
-                    )}
-                    <span className="trend-badge gold-pill">
-                      <FaStar /> {partner.averageRating || "0.0"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="partner-card-body">
-                  <div className="avatar-wrapper">
-                    {partner.profilePic ? (
-                      <img
-                        src={partner.profilePic}
-                        alt={partner.fullName || "Partner"}
-                        className="partner-avatar-img"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="giant-avatar"
-                      style={{
-                        display: partner.profilePic ? "none" : "flex",
-                      }}
-                    >
-                      {getInitial(partner.fullName)}
+                      <span className={`bold-role-tag kyc-${isKycApproved ? "verified" : isKycPending ? "pending" : "none"}`}>
+                        <FaIdCard /> {partner.kycStatus || "KYC Not Submitted"}
+                      </span>
                     </div>
-                    <span
-                      className={`online-status-dot ${partner.isOnline ? "online" : "offline"}`}
-                      title={partner.isOnline ? "Online" : "Offline"}
-                    ></span>
-                  </div>
 
-                  <h3 className="partner-name">
-                    {partner.fullName || "Name Not Set"}
-                  </h3>
-
-                  <p className="partner-mobile">
-                    <FaPhoneAlt /> {partner.mobile || "No Mobile"}
-                  </p>
-
-                  <div className="partner-meta-row">
-                    {partner.city && (
-                      <span className="meta-item">
-                        <FaMapMarkerAlt /> {partner.city}
-                      </span>
-                    )}
-                    <span className="meta-item">
-                      <FaBriefcase /> {partner.experience || 0} Yrs Exp
-                    </span>
-                  </div>
-
-                  <div className="specialties-row">
-                    {partner.specialties && partner.specialties.length > 0 ? (
-                      partner.specialties.slice(0, 3).map((spec, i) => (
-                        <span key={i} className="spec-tag">
-                          {spec}
+                    <div className="badges-group">
+                      {partner.isVerified && (
+                        <span className="trend-badge cyan-pill" title="Verified Profile">
+                          <FaCheckCircle /> Verified
                         </span>
-                      ))
-                    ) : (
-                      <span className="spec-tag empty">General Astrology</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="partner-card-footer">
-                  <div className="rate-info">
-                    <span className="rate-amount">
-                      {partner.minRate ? `₹${partner.minRate}` : "_"}
-                    </span>
-                    <span className="rate-unit">/min</span>
+                      )}
+                      <span className="trend-badge gold-pill">
+                        <FaStar /> {Number(partner.averageRating || 0).toFixed(1)} ({partner.totalReviews || 0})
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="card-right-controls">
-
-                    <label
-                      className="toggle-switch"
-                      title={
-                        partner.isActive
-                          ? "Deactivate Partner"
-                          : "Activate Partner"
-                      }
-                    >
-                      <input
-                        type="checkbox"
-                        checked={!!partner.isActive}
-                        onChange={() => handleToggleStatus(partner)}
-                      />
-
-                      <span className="toggle-slider"></span>
-                    </label>
-
-                    <div className="action-button-group">
-
-
-
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleView(partner)}
-                        title="View Full Profile"
-                      >
-                        <FaEye />
-                      </button>
-                      <button
-                        className="btn-square-icon"
-                        onClick={() => handleEdit(partner)}
-                        title="Edit Partner"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="btn-square-icon btn-delete-accent"
-                        onClick={() => {
-                          setSelectedPartner(partner);
-                          setDeleteOpen(true);
+                  <div className="partner-card-body">
+                    <div className="avatar-wrapper">
+                      {partner.profilePic ? (
+                        <img
+                          src={partner.profilePic}
+                          alt={partner.fullName || "Partner"}
+                          className="partner-avatar-img"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            if (e.target.nextSibling) {
+                              e.target.nextSibling.style.display = "flex";
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="giant-avatar"
+                        style={{
+                          display: partner.profilePic ? "none" : "flex",
                         }}
-                        title="Delete Partner"
                       >
-                        <FaTrashAlt />
-                      </button>
+                        {getInitial(partner.fullName)}
+                      </div>
+                      <span
+                        className={`online-status-dot ${partner.isOnline ? (partner.isBusy ? "busy" : "online") : "offline"}`}
+                        title={partner.isOnline ? (partner.isBusy ? "Busy" : "Online") : "Offline"}
+                      ></span>
+                    </div>
+
+                    <h3 className="partner-name">
+                      {partner.fullName || "Name Not Set"}
+                    </h3>
+
+                    <p className="partner-mobile">
+                      <FaPhoneAlt /> {partner.mobile || "No Mobile"}
+                    </p>
+
+                    <div className="partner-meta-row">
+                      {partner.city && (
+                        <span className="meta-item" title="Location">
+                          <FaMapMarkerAlt /> {partner.city}
+                        </span>
+                      )}
+                      <span className="meta-item" title="Experience">
+                        <FaBriefcase /> {partner.experience || 0} Yrs Exp
+                      </span>
+                      {partner.qualification && (
+                        <span className="meta-item" title="Qualification">
+                          <FaGraduationCap /> {partner.qualification}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="partner-sub-details">
+                      {partner.languages && partner.languages.length > 0 && (
+                        <div className="detail-pill-row" title="Languages">
+                          <FaLanguage className="detail-icon" />
+                          <span>{partner.languages.join(", ")}</span>
+                        </div>
+                      )}
+
+                      <div className="channels-pill-row">
+                        <span className={`channel-indicator ${partner.allowAudioCalls ? "enabled" : "disabled"}`} title="Audio Call">
+                          <FaPhoneAlt /> Call
+                        </span>
+                        <span className={`channel-indicator ${partner.allowVideoCalls ? "enabled" : "disabled"}`} title="Video Call">
+                          <FaVideo /> Video
+                        </span>
+                        <span className={`channel-indicator ${partner.allowChat ? "enabled" : "disabled"}`} title="Chat">
+                          <FaComments /> Chat
+                        </span>
+                        <span className="channel-indicator wallet-indicator" title="Wallet Balance">
+                          <FaWallet /> ₹{formatCurrency(partner.walletBalance || 0)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="specialties-row">
+                      {partner.specialties && partner.specialties.length > 0 ? (
+                        partner.specialties.slice(0, 4).map((spec, i) => (
+                          <span key={i} className="spec-tag">
+                            {spec}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="spec-tag empty">General Astrology</span>
+                      )}
+                      {partner.specialties && partner.specialties.length > 4 && (
+                        <span className="spec-tag extra">
+                          +{partner.specialties.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="partner-card-footer">
+                    <div
+                      className="rate-box-highlight"
+                      onClick={() => handleOpenRateModal(partner)}
+                      style={{ cursor: "pointer" }}
+                      title="Click to update consultation rate"
+                    >
+                      <span className="rate-badge-title">
+                        CONSULTATION RATE <FaEdit style={{ marginLeft: "4px", fontSize: "11px" }} />
+                      </span>
+                      <div className="rate-amount-display">
+                        <span className="currency-symbol">₹</span>
+                        <span className="rate-number">
+                          {formatCurrency(partner.minRate)}
+                        </span>
+                        <span className="rate-duration">/min</span>
+                      </div>
+                    </div>
+
+                    <div className="card-right-controls">
+                      <label
+                        className="toggle-switch"
+                        title={partner.isActive ? "Deactivate Partner" : "Activate Partner"}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!partner.isActive}
+                          onChange={() => handleToggleStatus(partner)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+
+                      <div className="action-button-group">
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleOpenRateModal(partner)}
+                          title="Update Rate"
+                        >
+                          <FaWallet />
+                        </button>
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleView(partner)}
+                          title="View Full Profile"
+                        >
+                          <FaEye />
+                        </button>
+                        <button
+                          className="btn-square-icon"
+                          onClick={() => handleEdit(partner)}
+                          title="Edit Partner"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn-square-icon btn-delete-accent"
+                          onClick={() => {
+                            setSelectedPartner(partner);
+                            setDeleteOpen(true);
+                          }}
+                          title="Delete Partner"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-
       </div>
+
       <div className="table-pagination-footer">
         <div className="pagination-container">
-
           <button
             className="pagination-btn arrow-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -474,20 +589,15 @@ export default function Partner() {
             <FaChevronLeft />
           </button>
 
-
-          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
-            (page) => (
-              <button
-                key={page}
-                className={`pagination-btn ${currentPage === page ? "active" : ""
-                  }`}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </button>
-            )
-          )}
-
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+            <button
+              key={page}
+              className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
 
           <button
             className="pagination-btn arrow-btn"
@@ -496,9 +606,9 @@ export default function Partner() {
           >
             <FaChevronRight />
           </button>
-
         </div>
       </div>
+
       <DeleteModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -517,10 +627,57 @@ export default function Partner() {
         onClose={() => setViewOpen(false)}
         partner={selectedPartner}
       />
+
+      {rateModalOpen && selectedPartner && (
+        <div className="status-modal-overlay">
+          <div className="status-modal">
+            <h3>Update Consultation Rate</h3>
+            <p>
+              Update rate for <strong>{selectedPartner.fullName || "Partner"}</strong>. Partner will receive an instant push notification.
+            </p>
+
+            <div className="status-input-group">
+              <label>Minimum Rate (₹/min):</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter rate (e.g. 35)"
+                value={newMinRate}
+                onChange={(e) => setNewMinRate(e.target.value)}
+                disabled={rateLoading}
+              />
+            </div>
+
+            <div className="status-modal-actions">
+              <button
+                type="button"
+                className="status-cancel-btn"
+                onClick={() => {
+                  setRateModalOpen(false);
+                  setSelectedPartner(null);
+                  setNewMinRate("");
+                }}
+                disabled={rateLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="status-confirm-btn"
+                onClick={handleConfirmRateUpdate}
+                disabled={rateLoading}
+              >
+                {rateLoading ? "Updating..." : "Update Rate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {statusModalOpen && selectedPartner && (
         <div className="status-modal-overlay">
           <div className="status-modal">
-
             <h3>
               {selectedPartner.isActive
                 ? "Deactivate Partner?"
@@ -555,7 +712,6 @@ export default function Partner() {
             </div>
 
             <div className="status-modal-actions">
-
               <button
                 type="button"
                 className="status-cancel-btn"
@@ -582,7 +738,6 @@ export default function Partner() {
                     ? "Deactivate"
                     : "Activate"}
               </button>
-
             </div>
           </div>
         </div>

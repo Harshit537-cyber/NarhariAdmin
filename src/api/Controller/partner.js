@@ -138,3 +138,27 @@ export const togglePartnerStatus = async (id, data) =>
     throw error.response?.data || error;
   }
 };
+
+
+export const updatePartnerMinRate = async (partnerId, minRate) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await apiClient.put(
+      `/admin/dashboard/partners/${partnerId}/min-rate`,
+      {
+        minRate: Number(minRate),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    // Backend se aaya error message throw karein
+    throw error.response?.data?.message || "Failed to update minimum rate";
+  }
+};
