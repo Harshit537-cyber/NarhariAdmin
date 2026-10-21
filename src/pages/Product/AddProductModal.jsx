@@ -1,15 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { getProductCategories } from "../../api/Controller/product";
-export default function AddProductModal({
-  open,
-  onClose,
-  onSubmit,
-  
-}) {
+
+export default function AddProductModal({ open, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     name: "",
-     slug: "",
+    slug: "",
     shortDescription: "",
     description: "",
     category: "",
@@ -23,8 +18,10 @@ export default function AddProductModal({
     isActive: true,
     images: [],
   });
- const [categories, setCategories] = useState([]);
+
+  const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+
   useEffect(() => {
     if (open) {
       fetchCategories();
@@ -35,7 +32,7 @@ export default function AddProductModal({
     try {
       setLoadingCategories(true);
       const data = await getProductCategories();
-      setCategories(data?.data || data || []); // response structure check kar lena
+      setCategories(data?.data || data || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       setCategories([]);
@@ -43,6 +40,7 @@ export default function AddProductModal({
       setLoadingCategories(false);
     }
   };
+
   if (!open) return null;
 
   const handleChange = (e) => {
@@ -68,8 +66,44 @@ export default function AddProductModal({
     }));
   };
 
+  // 👉 YAHAN CHANGE KIYA GAYA HAI (Validation + FormData creation)
   const handleSubmit = () => {
-    onSubmit(formData);
+    // 1. Check karein ki required fields bhari hain ya nahi
+    if (!formData.name || !formData.slug || !formData.category || !formData.price || !formData.description) {
+      alert("Please fill all required fields: Name, Slug, Category, Price, and Description!");
+      return;
+    }
+
+    // 2. Data ko FormData me convert karein
+    const dataToSend = new FormData();
+    dataToSend.append("name", formData.name);
+    dataToSend.append("slug", formData.slug);
+    dataToSend.append("shortDescription", formData.shortDescription);
+    dataToSend.append("description", formData.description);
+    dataToSend.append("category", formData.category);
+    dataToSend.append("price", formData.price);
+    dataToSend.append("salePrice", formData.salePrice);
+    dataToSend.append("stock", formData.stock);
+    dataToSend.append("howToUse", formData.howToUse);
+    dataToSend.append("careInstructions", formData.careInstructions);
+    dataToSend.append("isFeatured", formData.isFeatured);
+    dataToSend.append("isActive", formData.isActive);
+
+    // Benefits ko array format me stringify karein
+    const benefitsArray = formData.benefits
+      ? formData.benefits.split(",").map((b) => b.trim())
+      : [];
+    dataToSend.append("benefits", JSON.stringify(benefitsArray));
+
+    // Images append karein
+    if (formData.images && formData.images.length > 0) {
+      formData.images.forEach((file) => {
+        dataToSend.append("images", file);
+      });
+    }
+
+    // Parent function ko bhejein
+    onSubmit(dataToSend);
   };
 
   return (
@@ -114,8 +148,6 @@ export default function AddProductModal({
           box-sizing:border-box;
         }
 
-        /* HEADER */
-
         .add-modal-header{
           display:flex;
           justify-content:space-between;
@@ -149,9 +181,7 @@ export default function AddProductModal({
           background:gray;
           color:#555;
           font-size:22px;
-       margin-bottom:20px;
-
-       
+          margin-bottom:20px;
           display:flex;
           align-items:center;
           justify-content:center;
@@ -160,10 +190,7 @@ export default function AddProductModal({
         .close-btn:hover{
           background:red;
           color:#111;
-          
         }
-
-        /* BODY */
 
         .add-modal-body{
           padding:28px;
@@ -246,8 +273,6 @@ export default function AddProductModal({
           color:#999;
         }
 
-        /* CHECKBOXES */
-
         .checkbox-group{
           display:flex;
           align-items:center;
@@ -298,8 +323,6 @@ export default function AddProductModal({
           letter-spacing:normal;
         }
 
-        /* IMAGE */
-
         .image-upload{
           width:100%;
           border:2px dashed #d8dde6;
@@ -326,8 +349,6 @@ export default function AddProductModal({
           font-size:13px;
           color:#666;
         }
-
-        /* FOOTER */
 
         .modal-footer{
           display:flex;
@@ -380,8 +401,6 @@ export default function AddProductModal({
           filter:brightness(1.05);
         }
 
-        /* ANIMATION */
-
         @keyframes fade{
           from{opacity:0;}
           to{opacity:1;}
@@ -411,7 +430,7 @@ export default function AddProductModal({
           <div className="add-modal-body">
             {/* Product Name */}
             <div className="form-group">
-              <label>Product Name</label>
+              <label>Product Name *</label>
               <input
                 type="text"
                 name="name"
@@ -420,16 +439,18 @@ export default function AddProductModal({
                 placeholder="e.g. Rose Gold Facial Serum"
               />
             </div>
-<div className="form-group">
-  <label>Slug</label>
-  <input
-    type="text"
-    name="slug"
-    value={formData.slug}
-    onChange={handleChange}
-    placeholder="e.g. rose-gold-facial-serum"
-  />
-</div>
+
+            <div className="form-group">
+              <label>Slug *</label>
+              <input
+                type="text"
+                name="slug"
+                value={formData.slug}
+                onChange={handleChange}
+                placeholder="e.g. rose-gold-facial-serum"
+              />
+            </div>
+
             {/* Short Description */}
             <div className="form-group">
               <label>Short Description</label>
@@ -444,7 +465,7 @@ export default function AddProductModal({
 
             {/* Category */}
             <div className="form-group">
-              <label>Category</label>
+              <label>Category *</label>
               <select
                 name="category"
                 value={formData.category}
@@ -462,7 +483,7 @@ export default function AddProductModal({
             {/* Price + Sale Price */}
             <div className="form-row">
               <div className="form-group">
-                <label>Price</label>
+                <label>Price *</label>
                 <input
                   type="number"
                   name="price"
@@ -532,7 +553,7 @@ export default function AddProductModal({
 
             {/* Description */}
             <div className="form-group">
-              <label>Description</label>
+              <label>Description *</label>
               <textarea
                 name="description"
                 value={formData.description}

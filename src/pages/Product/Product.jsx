@@ -56,40 +56,61 @@ export default function Product() {
     }
   };
 
-  const handleAddProduct = async (formData) => {
+const handleAddProduct = async (formData) => {
     try {
+      // 1. Agar Modal se already FormData aa raha hai, to direct API call karein
+      if (formData instanceof FormData) {
+        const response = await addProduct(formData);
+        toast.success(response.message || "Product added successfully!");
+        setShowAddModal(false);
+        fetchCategories();
+        return;
+      }
+
+      // 2. Required fields check karein (taaki backend 400 error na feke)
+      if (!formData.name || !formData.slug || !formData.category || !formData.price || !formData.description) {
+        toast.error("Please fill all required fields: Name, Slug, Category, Price, and Description!");
+        return;
+      }
+
       const data = new FormData();
 
-      data.append("name", formData.name);
-      data.append("slug", formData.slug);
-      data.append("shortDescription", formData.shortDescription);
-      data.append("description", formData.description);
-      data.append("category", formData.category);
-      data.append("price", formData.price);
-      data.append("salePrice", formData.salePrice);
-      data.append("stock", formData.stock);
+      data.append("name", formData.name || "");
+      data.append("slug", formData.slug || "");
+      data.append("shortDescription", formData.shortDescription || "");
+      data.append("description", formData.description || "");
+      data.append("category", formData.category || "");
+      data.append("price", formData.price || "");
+      data.append("salePrice", formData.salePrice || "");
+      data.append("stock", formData.stock || 0);
 
-      data.append(
-        "benefits",
-        JSON.stringify(formData.benefits.split(",").map((item) => item.trim()))
-      );
+      // 👉 SAFE BENEFITS: Agar benefits khali bhi ho toh crash nahi hoga
+      const benefitsArray = (formData.benefits || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
 
-      data.append("howToUse", formData.howToUse);
-      data.append("careInstructions", formData.careInstructions);
-      data.append("isFeatured", formData.isFeatured);
-      data.append("isActive", formData.isActive);
+      data.append("benefits", JSON.stringify(benefitsArray));
 
-      formData.images.forEach((img) => {
-        data.append("images", img);
-      });
+      data.append("howToUse", formData.howToUse || "");
+      data.append("careInstructions", formData.careInstructions || "");
+      data.append("isFeatured", !!formData.isFeatured);
+      data.append("isActive", formData.isActive !== undefined ? formData.isActive : true);
+
+      // Multiple Images safely append karein
+      if (formData.images && Array.isArray(formData.images)) {
+        formData.images.forEach((img) => {
+          data.append("images", img);
+        });
+      }
 
       const response = await addProduct(data);
 
-      toast.success(response.message);
+      toast.success(response.message || "Product added successfully!");
       setShowAddModal(false);
       fetchCategories();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Failed to add product");
     }
   };
 
