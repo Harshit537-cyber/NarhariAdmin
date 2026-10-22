@@ -14,8 +14,54 @@ import {
   FaCheckCircle,
   FaTimesCircle, FaEye,
 } from "react-icons/fa";
+const MAX_IMAGE_SIZE = 2.22 * 1024 * 1024;
+const REQUIRED_RATIO = 2.3;
+const RATIO_TOLERANCE = 0.15;
+const MIN_WIDTH = 920;
+const MIN_HEIGHT = 400;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+const validateImage = (file) =>
+  new Promise((resolve) => {
+    if (!file) return resolve({ ok: false, message: "No file selected" });
 
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return resolve({ ok: false, message: "Only JPG, PNG or WEBP images are allowed" });
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      return resolve({ ok: false, message: `Image is ${sizeMB} MB. Max allowed is 2.22 MB` });
+    }
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const ratio = img.width / img.height;
+
+      if (img.width < MIN_WIDTH || img.height < MIN_HEIGHT) {
+        return resolve({
+          ok: false,
+          message: `Image is ${img.width}x${img.height}px. Minimum is ${MIN_WIDTH}x${MIN_HEIGHT}px`,
+        });
+      }
+
+      if (Math.abs(ratio - REQUIRED_RATIO) > RATIO_TOLERANCE) {
+        return resolve({
+          ok: false,
+          message: `Image is ${img.width}x${img.height}px. Please upload a wide banner image, e.g. 1380x600px`,
+        });
+      }
+
+      resolve({ ok: true });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ ok: false, message: "Invalid image file" });
+    };
+    img.src = url;
+  });
 
 export default function Rituals() {
   const [rituals, setRituals] = useState([]);
@@ -23,8 +69,8 @@ export default function Rituals() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
- const [showViewModal, setShowViewModal] = useState(false);
-const [viewData, setViewData] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewData, setViewData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [addFormData, setAddFormData] = useState({
     title: "",
@@ -82,6 +128,19 @@ const [viewData, setViewData] = useState(null);
     }
     setFieldErrors((prev) => ({ ...prev, [fieldName]: "" }));
     setStateFn({ ...currentState, [fieldName]: value });
+  };
+  const handleImageSelect = async (e, setStateFn, currentState) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const result = await validateImage(file);
+    if (!result.ok) {
+      toast.error(result.message);
+      e.target.value = "";
+      return;
+    }
+
+    setStateFn({ ...currentState, image: file });
   };
   const handleAddRitual = async () => {
     if (!addFormData.title) {
@@ -198,10 +257,10 @@ const [viewData, setViewData] = useState(null);
       setCurrentPage(pageNumber);
     }
   };
-const openViewModal = (item) => {
-  setViewData(item);
-  setShowViewModal(true);
-};
+  const openViewModal = (item) => {
+    setViewData(item);
+    setShowViewModal(true);
+  };
   const openEditModal = (item) => {
     setFormData({
       _id: item._id,
@@ -335,18 +394,18 @@ const openViewModal = (item) => {
                       </span>
                     </td>
 
-                    <td style={{ textAlign: "right", gap:"5px" }}>
+                    <td style={{ textAlign: "right", gap: "5px" }}>
 
                       <button
                         className="btn-pro btn-pro-view"
                         onClick={() => openViewModal(item)}>
-                       View
+                        View
                       </button>
                       <button
                         className="btn-pro btn-pro-edit"
                         onClick={() => openEditModal(item)}
                       >
-                       Edit
+                        Edit
                       </button>
                       {/* <button
                         className="btn-pro btn-pro-delete"
@@ -593,13 +652,10 @@ const openViewModal = (item) => {
               </div>
 
               {/* ---- Whats Included Dynamic Array ---- */}
-              <div className="form-group">
+              <div className="form-group whats-included-group">
                 <label>What's Included</label>
                 {addFormData.whatsincluded.map((item, idx) => (
-                  <div
-                    key={idx}
-                    style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
-                  >
+                  <div key={idx} className="array-row">
                     <input
                       type="text"
                       placeholder="Item"
@@ -612,7 +668,9 @@ const openViewModal = (item) => {
                     />
                     <button
                       type="button"
-                      className="btn-pro btn-pro-delete"
+                      className="btn-icon-delete"
+                      aria-label="Remove item"
+                      title="Remove item"
                       onClick={() => {
                         const updated = addFormData.whatsincluded.filter(
                           (_, i) => i !== idx
@@ -626,7 +684,7 @@ const openViewModal = (item) => {
                 ))}
                 <button
                   type="button"
-                  className="btn-pro btn-pro-edit"
+                  className="btn-add-row"
                   onClick={() =>
                     setAddFormData({
                       ...addFormData,
@@ -639,8 +697,8 @@ const openViewModal = (item) => {
               </div>
 
               {/* ---- Form Config ---- */}
-              <div className="form-group">
-                <label>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
                   <input
                     type="checkbox"
                     checked={addFormData.formConfig.askSankalp}
@@ -658,8 +716,8 @@ const openViewModal = (item) => {
                 </label>
               </div>
 
-              <div className="form-group">
-                <label>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
                   <input
                     type="checkbox"
                     checked={addFormData.formConfig.askBirthDetails}
@@ -677,8 +735,8 @@ const openViewModal = (item) => {
                 </label>
               </div>
 
-              <div className="form-group">
-                <label>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
                   <input
                     type="checkbox"
                     checked={addFormData.isFeatured}
@@ -693,8 +751,8 @@ const openViewModal = (item) => {
                 </label>
               </div>
 
-              <div className="form-group">
-                <label>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
                   <input
                     type="checkbox"
                     checked={addFormData.isActive}
@@ -713,14 +771,12 @@ const openViewModal = (item) => {
                 <label>Ritual Image</label>
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      image: e.target.files[0],
-                    })
-                  }
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={(e) => handleImageSelect(e, setAddFormData, addFormData)}
                 />
+                <small className="hint-text">
+                  Wide banner (2.3:1), e.g. 1380x600px | Max 2.22 MB | JPG, PNG, WEBP
+                </small>
               </div>
             </div>
 
@@ -906,14 +962,12 @@ const openViewModal = (item) => {
 
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      image: e.target.files[0],
-                    })
-                  }
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={(e) => handleImageSelect(e, setFormData, formData)}
                 />
+                <small className="hint-text">
+                  Wide banner (2.3:1), e.g. 1380x600px | Max 2.22 MB | JPG, PNG, WEBP
+                </small>
               </div>
             </div>
 
