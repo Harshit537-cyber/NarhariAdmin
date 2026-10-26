@@ -22,32 +22,32 @@ export default function LogoutModal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
-    <div className="logout-overlay" onClick={onClose}>
-      <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose} aria-label="Close">
+    <div className="lm-overlay" onClick={onClose}>
+      <div className="lm-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="lm-close" onClick={onClose} aria-label="Close">
           <FiX />
         </button>
 
-        <div className="icon-wrapper">
-          <div className="icon-pulse"></div>
-          <div className="logout-icon">
+        <div className="lm-icon-wrap">
+          <div className="lm-icon-pulse"></div>
+          <div className="lm-icon">
             <FiLogOut />
           </div>
         </div>
 
-        <div className="modal-content">
+        <div className="lm-content">
           <h2>Ready to leave?</h2>
           <p>
             You are about to log out from{" "}
-            <span className="brand-highlight">NAMAH ASTRO</span> Admin Panel.
+            <span className="lm-brand">NAMAH ASTRO</span> Admin Panel.
           </p>
         </div>
 
-        <div className="logout-actions">
-          <button className="cancel-btn" onClick={onClose}>
+        <div className="lm-actions">
+          <button className="lm-btn lm-btn-cancel" onClick={onClose}>
             Stay Logged In
           </button>
-          <button className="logout-btn" onClick={onConfirm}>
+          <button className="lm-btn lm-btn-logout" onClick={onConfirm}>
             <FiLogOut size={16} />
             <span>Yes, Logout</span>
           </button>

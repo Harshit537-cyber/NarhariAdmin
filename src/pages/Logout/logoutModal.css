@@ -1,4 +1,4 @@
-.logout-overlay {
+.lm-overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 12, 29, 0.55);
@@ -9,28 +9,31 @@
   align-items: center;
   z-index: 99999;
   padding: 16px;
-  animation: modalFadeIn 0.25s ease-out forwards;
+  animation: lmFadeIn 0.25s ease-out forwards;
 }
 
-.logout-modal {
+.lm-modal {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   background: #ffffff;
   border-radius: 24px;
-  padding: 36px 28px 28px;
+  padding: 36px 24px 24px;
   text-align: center;
-  box-shadow: 
+  border: 1px solid rgba(147, 51, 234, 0.12);
+  box-shadow:
     0 20px 40px -15px rgba(124, 58, 237, 0.15),
     0 25px 60px -10px rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(147, 51, 234, 0.12);
-  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: lmScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.close-btn {
+/* Close button: hamesha modal ke andar */
+.lm-close {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 14px;
+  right: 14px;
+  margin: 0;
   width: 34px;
   height: 34px;
   display: flex;
@@ -45,31 +48,29 @@
   transition: all 0.2s ease;
 }
 
-.close-btn:hover {
+.lm-close:hover {
   background: #f1f5f9;
   color: #0f172a;
   transform: rotate(90deg);
 }
 
-.icon-wrapper {
+/* Icon */
+.lm-icon-wrap {
   position: relative;
   width: 76px;
   height: 76px;
   margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.icon-pulse {
+.lm-icon-pulse {
   position: absolute;
   inset: -6px;
   border-radius: 50%;
   background: rgba(168, 85, 247, 0.18);
-  animation: pulseEffect 2.4s infinite ease-in-out;
+  animation: lmPulse 2.4s infinite ease-in-out;
 }
 
-.logout-icon {
+.lm-icon {
   position: relative;
   width: 100%;
   height: 100%;
@@ -83,7 +84,8 @@
   box-shadow: 0 10px 24px rgba(124, 58, 237, 0.35);
 }
 
-.modal-content h2 {
+/* Text */
+.lm-content h2 {
   font-size: 22px;
   font-weight: 700;
   color: #0f172a;
@@ -91,111 +93,94 @@
   letter-spacing: -0.02em;
 }
 
-.modal-content p {
+.lm-content p {
   font-size: 14.5px;
   color: #64748b;
   line-height: 1.55;
   margin: 0 0 28px;
 }
 
-.brand-highlight {
+.lm-brand {
   color: #7c3aed;
   font-weight: 600;
 }
 
-.logout-actions {
+/* Buttons: hamesha ek hi line mein */
+.lm-actions {
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
   gap: 12px;
 }
 
-.cancel-btn,
-.logout-btn {
-  flex: 1;
+.lm-btn {
+  flex: 1 1 0;
+  min-width: 0;
   height: 46px;
+  margin: 0;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-size: 14.5px;
   font-weight: 600;
+  white-space: nowrap;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border: none;
   outline: none;
 }
 
-.cancel-btn {
+.lm-btn:active {
+  transform: scale(0.98);
+}
+
+.lm-btn-cancel {
   background: #f8fafc;
   color: #475569;
   border: 1px solid #e2e8f0;
 }
 
-.cancel-btn:hover {
+.lm-btn-cancel:hover {
   background: #f1f5f9;
   color: #0f172a;
   border-color: #cbd5e1;
 }
 
-.logout-btn {
+.lm-btn-logout {
   background: #ef4444;
   color: #ffffff;
+  border: none;
   box-shadow: 0 6px 18px rgba(239, 68, 68, 0.28);
 }
 
-.logout-btn:hover {
+.lm-btn-logout:hover {
   background: #dc2626;
   transform: translateY(-1px);
   box-shadow: 0 8px 22px rgba(239, 68, 68, 0.38);
 }
 
-.logout-btn:active,
-.cancel-btn:active {
-  transform: scale(0.98);
+/* Animations */
+@keyframes lmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes lmScaleUp {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-@keyframes modalScaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+@keyframes lmPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.18); opacity: 0.2; }
 }
 
-@keyframes pulseEffect {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.18);
-    opacity: 0.2;
-  }
-}
-
-@media (max-width: 480px) {
-  .logout-modal {
-    padding: 30px 20px 22px;
-  }
-  .logout-actions {
-    flex-direction: column-reverse;
-    gap: 10px;
-  }
-  .cancel-btn,
-  .logout-btn {
-    width: 100%;
-  }
+/* Chhoti screen: buttons ab bhi ek line mein, bas thoda chhota */
+@media (max-width: 380px) {
+  .lm-modal { padding: 32px 16px 18px; }
+  .lm-actions { gap: 8px; }
+  .lm-btn { font-size: 13px; padding: 0 8px; }
 }
