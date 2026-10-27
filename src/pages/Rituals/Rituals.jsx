@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Rituals.css";
 import { getAllRituals, addRitual, updateRitual } from "../../api/Controller/rituals";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import {
   FaCrown,
   FaPlus,
@@ -75,7 +76,6 @@ export default function Rituals() {
   const [addFormData, setAddFormData] = useState({
     title: "",
     slug: "",
-
     price: "",
     originalPrice: "",
     discount: "",
@@ -160,10 +160,10 @@ export default function Rituals() {
       payload.append("about", addFormData.about);
       payload.append("category", addFormData.category);
       payload.append("benefits", JSON.stringify(addFormData.benefits));
-      payload.append("whatsincluded", JSON.stringify(addFormData.whatsincluded));
-      payload.append("formConfig", JSON.stringify(addFormData.formConfig));
+      payload.append("whatsIncluded", JSON.stringify(addFormData.whatsincluded)); payload.append("formConfig", JSON.stringify(addFormData.formConfig));
       payload.append("isFeatured", addFormData.isFeatured);
       payload.append("isActive", addFormData.isActive);
+      payload.append("isLive", addFormData.isActive);
       if (addFormData.image) {
         payload.append("image", addFormData.image);
       }
@@ -171,11 +171,10 @@ export default function Rituals() {
       const res = await addRitual(payload);
 
       setRituals((prev) => [res.data || res.ritual, ...prev]);
-      toast.success("Ritual added successfully!");
       setShowAddModal(false);
       setAddFormData({
         title: "",
-
+        slug: "",
         price: "",
         originalPrice: "",
         discount: "",
@@ -190,8 +189,16 @@ export default function Rituals() {
         isFeatured: false,
         isActive: true,
       });
+      toast.success("Ritual added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        toastId: "ritual-add-success",
+      });
     } catch (err) {
-      toast.error(err.message || "Failed to add ritual");
+      toast.error(err?.response?.data?.message || err?.message || "Failed to add ritual", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
   const handleSaveSpecs = async () => {
@@ -225,10 +232,17 @@ export default function Rituals() {
         )
       );
 
-      toast.success("Ritual updated successfully!");
       setShowEditModal(false);
+      toast.success("Ritual updated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        toastId: "ritual-edit-success",
+      });
     } catch (err) {
-      toast.error(err.message || "Failed to update ritual");
+      toast.error(err?.response?.data?.message || err?.message || "Failed to update ritual", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -312,7 +326,6 @@ export default function Rituals() {
             Manage sacred rituals, pricing, and availability across the platform.
           </p>
         </div>
-
         <div className="db-header-right">
           <button className="btn-add-cosmic" onClick={() => setShowAddModal(true)}>
             <FaPlus /> Add Ritual
@@ -338,19 +351,20 @@ export default function Rituals() {
                 <th>TITLE</th>
                 <th>CATEGORY</th>
                 <th>STATUS</th>
+                <th>FORMAT</th>
                 <th style={{ textAlign: "right" }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "60px" }}>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "60px" }}>
                     <div className="gold-loader"></div>
                   </td>
                 </tr>
               ) : rituals.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "40px" }}>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "40px" }}>
                     No rituals found.
                   </td>
                 </tr>
@@ -393,26 +407,32 @@ export default function Rituals() {
                         )}
                       </span>
                     </td>
+                    <td>
+                      <span className={`format-pill ${item.format === "offline" ? "offline" : "online"}`}>
+                        {item.format === "offline" ? "Offline" : "Online"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-btns">
 
-                    <td style={{ textAlign: "right", gap: "5px" }}>
-
-                      <button
-                        className="btn-pro btn-pro-view"
-                        onClick={() => openViewModal(item)}>
-                        View
-                      </button>
-                      <button
-                        className="btn-pro btn-pro-edit"
-                        onClick={() => openEditModal(item)}
-                      >
-                        Edit
-                      </button>
-                      {/* <button
+                        <button
+                          className="btn-pro btn-pro-view"
+                          onClick={() => openViewModal(item)}>
+                          View
+                        </button>
+                        <button
+                          className="btn-pro btn-pro-edit"
+                          onClick={() => openEditModal(item)}
+                        >
+                          Edit
+                        </button>
+                        {/* <button
                         className="btn-pro btn-pro-delete"
                         onClick={() => handleDeleteClick(item._id)}
                       >
                         <FaTrash /> Delete
                       </button> */}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -489,7 +509,7 @@ export default function Rituals() {
                 <label>Slug</label>
                 <input
                   type="text"
-                  value={addFormData.slug}
+                  value={addFormData.slug || ""}
                   onChange={(e) =>
                     setAddFormData({ ...addFormData, slug: e.target.value })
                   }
@@ -1294,7 +1314,7 @@ export default function Rituals() {
         </div>
       )} */}
 
-      <ToastContainer position="top-right" autoClose={3000} />
+
     </div>
   );
 }
