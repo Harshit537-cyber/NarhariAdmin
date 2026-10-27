@@ -36,10 +36,10 @@ export const updateVideo = async (id, data) => {
       }
     );
 
-    return {
-      ...response.data,
-      success: true,
-    };
+ return {
+  success: true,
+  ...response.data,
+};
   } catch (error) {
     console.error("Update Video Blog API Error:", error);
     throw error.response?.data || error;
@@ -61,10 +61,10 @@ export const createVideo = async (data) => {
       }
     );
 
-    return {
-      ...response.data,
-      success: true,
-    };
+   return {
+  success: true,
+  ...response.data,
+};
   } catch (error) {
     console.error("Add Video Blog API Error:", error);
 
@@ -85,10 +85,10 @@ export const deleteVideo = async (id) => {
       }
     );
 
-    return {
-      ...response.data,
-      success: true,
-    };
+ return {
+  success: true,
+  ...response.data,
+};
   } catch (error) {
     console.error("Delete Video Blog API Error:", error);
 

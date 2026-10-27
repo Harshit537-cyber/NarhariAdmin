@@ -2,7 +2,7 @@
    VIDEO BLOG PAGE
 ================================ */
 
-.video-blog-page {
+.blog-page {
   min-height: 100vh;
   background: #f7f9fc;
   padding: 18px 40px 30px;
@@ -27,24 +27,6 @@
   gap: 6px;
   margin-left: 15px;
 }
-.blog-badge {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: linear-gradient(
-    135deg,
-    #fff7d6,
-    #f9e7a7
-  );
-
-  border: 1px solid #e8ca67;
-  color: #b88a00;
-  flex-shrink: 0;
-}
 
 .blog-title {
   margin: 0;
@@ -52,11 +34,7 @@
   line-height: 1.1;
   font-weight: 800;
 
-  background: linear-gradient(
-    90deg,
-    #101d42,
-    #c59b2c
-  );
+  background: linear-gradient(90deg, #101d42, #c59b2c);
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -64,8 +42,7 @@
 }
 
 .blog-subtitle {
-  margin: 7px 0 0;
-  margin-left: 10px;
+  margin: 7px 0 0 10px;
   color: #7a8499;
   font-size: 14px;
 }
@@ -82,11 +59,7 @@
   padding: 12px 20px;
   border-radius: 12px;
 
-  background: linear-gradient(
-    135deg,
-    #d8b342,
-    #b98a18
-  );
+  background: linear-gradient(135deg, #d8b342, #b98a18);
 
   color: #fff;
   font-size: 14px;
@@ -123,33 +96,29 @@
   border-bottom: 1px solid #edf0f5;
 }
 
+/* JSX: <div class="blog-section-title"><span /><h2>..</h2></div> */
 .blog-section-title {
-  position: relative;
-  padding-left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.blog-section-title span {
+  display: block;
+  width: 5px;
+  height: 22px;
+  border-radius: 5px;
+  flex-shrink: 0;
+
+  background: linear-gradient(180deg, #d8b342, #b98a18);
+}
+
+.blog-section-title h2 {
   margin: 0;
 
   color: #17254c;
   font-size: 20px;
   font-weight: 800;
-}
-
-.blog-section-title::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 3px;
-
-  width: 5px;
-  height: 22px;
-
-  border-radius: 5px;
-
-  background: linear-gradient(
-    180deg,
-    #d8b342,
-    #b98a18
-  );
 }
 
 .blog-count {
@@ -201,7 +170,6 @@
 
 .blog-table tbody tr {
   background: #fafbfd;
-
   transition: all 0.2s ease;
 }
 
@@ -215,6 +183,7 @@
 
   color: #273452;
   font-size: 13px;
+  vertical-align: middle;
 
   border-top: 1px solid #f0f2f6;
   border-bottom: 1px solid #f0f2f6;
@@ -229,6 +198,39 @@
 .blog-table tbody td:last-child {
   border-right: 1px solid #f0f2f6;
   border-radius: 0 12px 12px 0;
+}
+
+/* Column widths */
+
+.image-column {
+  width: 130px;
+}
+
+.name-column {
+  min-width: 140px;
+}
+
+.description-column {
+  min-width: 180px;
+}
+
+.category-column {
+  width: 110px;
+  min-width: 90px;
+}
+
+.date-column {
+  width: 110px;
+  min-width: 90px;
+}
+
+.status-column {
+  width: 120px;
+  min-width: 100px;
+}
+
+.action-column {
+  min-width: 210px;
 }
 
 /* ================================
@@ -249,7 +251,6 @@
 
   flex-shrink: 0;
 }
-
 
 .video-thumbnail img {
   width: 100%;
@@ -292,13 +293,11 @@
 }
 
 /* ================================
-   VIDEO TITLE
+   TITLE / DESCRIPTION
 ================================ */
-.name-column {
-  padding-left: 15px !important;
-}
 
 .blog-name {
+  display: block;
   max-width: 220px;
 
   color: #17254c;
@@ -307,6 +306,7 @@
 }
 
 .blog-description {
+  margin: 0;
   max-width: 260px;
 
   color: #7b8496;
@@ -322,11 +322,6 @@
 /* ================================
    CATEGORY
 ================================ */
-
-.category-column {
-  width: 100px;
-  min-width: 90px;
-}
 
 .video-category {
   display: inline-flex;
@@ -349,11 +344,6 @@
    DATE
 ================================ */
 
-.date-column {
-  width: 100px;
-  min-width: 90px;
-}
-
 .video-date {
   color: #7d879a;
   font-size: 12px;
@@ -364,12 +354,7 @@
    STATUS
 ================================ */
 
-.status-column {
-  width: 110px;
-  min-width: 100px;
-}
-
-.status-active {
+.blog-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -387,30 +372,21 @@
   font-weight: 700;
 }
 
-.status-draft {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  padding: 6px 11px;
-
-  border-radius: 20px;
-
+.blog-status.blog-status-draft {
   background: #fff4e5;
-  border: 1px solid #f5d8aa;
-
+  border-color: #f5d8aa;
   color: #b86a10;
-
-  font-size: 11px;
-  font-weight: 700;
 }
 
 /* ================================
    ACTION BUTTONS
 ================================ */
 
-.action-column {
-  min-width: 210px;
+.blog-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: nowrap;
 }
 
 .view-blog-btn,
@@ -419,16 +395,22 @@
   display: flex;
   align-items: center;
   gap: 4px;
+
   padding: 6px 10px;
+
   border: none;
   border-radius: 8px;
+
   font-size: 11px;
   font-weight: 700;
+
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+
   transition: all 0.2s ease;
 }
+
 .view-blog-btn {
   background: #eef1ff;
   color: #5264c7;
@@ -452,74 +434,26 @@
   color: #d45b5b;
 }
 
-.delete-blog-btn:hover {
+.delete-blog-btn:hover:not(:disabled) {
   background: #ffe1e1;
 }
 
-.blog-actions {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: nowrap;
-}
-
-/* ================================
-   VIDEO URL
-================================ */
-
-.video-url-preview {
-  max-width: 200px;
-}
-
-.video-preview-label {
-  display: block;
-
-  margin-bottom: 4px;
-
-  color: #9aa2b1;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.video-preview-link {
-  display: block;
-
-  max-width: 190px;
-
-  color: #5368c9;
-  font-size: 11px;
-  font-weight: 600;
-
-  text-decoration: none;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.video-preview-link:hover {
-  text-decoration: underline;
+.view-blog-btn:disabled,
+.edit-blog-btn:disabled,
+.delete-blog-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* ================================
    LOADING
 ================================ */
 
-.blog-loading {
-  min-height: 250px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #7c879a;
-  font-size: 14px;
-}
-
-.blog-spinner {
+.blog-loader {
   width: 30px;
   height: 30px;
+
+  margin: 0 auto 14px;
 
   border: 3px solid #eceff4;
   border-top-color: #c49a2e;
@@ -546,19 +480,9 @@
   color: #8a93a4;
 }
 
-.blog-empty-icon {
-  width: 55px;
-  height: 55px;
-
+.blog-empty > svg {
+  display: block;
   margin: 0 auto 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 16px;
-
-  background: #fff8df;
   color: #bd921f;
 }
 
@@ -583,14 +507,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 14px;
 
   padding: 20px 0 5px;
 }
 
-.blog-page-btn {
-  width: 34px;
-  height: 34px;
+.blog-pagination button {
+  padding: 8px 16px;
 
   border: 1px solid #e2e6ed;
   border-radius: 9px;
@@ -598,55 +521,29 @@
   background: #fff;
   color: #69748a;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
 
   cursor: pointer;
 
   transition: all 0.2s ease;
 }
 
-.blog-page-btn:hover:not(:disabled) {
+.blog-pagination button:hover:not(:disabled) {
   border-color: #d2b45d;
   color: #a47b0b;
   background: #fffaf0;
 }
 
-.blog-page-btn:disabled {
+.blog-pagination button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.blog-page-number {
-  min-width: 34px;
-  height: 34px;
-
-  padding: 0 9px;
-
-  border: 1px solid #e2e6ed;
-  border-radius: 9px;
-
-  background: #fff;
+.blog-pagination span {
   color: #69748a;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   font-size: 12px;
   font-weight: 600;
-}
-
-.blog-page-number.active {
-  background: linear-gradient(
-    135deg,
-    #d8b342,
-    #b98a18
-  );
-
-  border-color: #c69b2d;
-  color: #fff;
 }
 
 /* ================================
@@ -672,13 +569,19 @@
 }
 
 /* ================================
-   FORM MODAL
+   MODAL BASE
+   (Add/Edit, View and Delete confirmation all use this)
 ================================ */
 
 .blog-modal {
   width: min(760px, 100%);
 
+  height: auto;
+  min-height: 0;
   max-height: 92vh;
+
+  display: flex;
+  flex-direction: column;
 
   background: #fff;
 
@@ -708,9 +611,7 @@
 ================================ */
 
 .blog-modal-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
@@ -721,6 +622,21 @@
   background: #fff;
 
   border-bottom: 1px solid #edf0f5;
+}
+
+.blog-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 4px;
+
+  color: #b88a00;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .blog-modal-header h2 {
@@ -748,27 +664,74 @@
   justify-content: center;
 
   cursor: pointer;
+  flex-shrink: 0;
 
   transition: all 0.2s ease;
 }
 
-.blog-modal-close:hover {
+.blog-modal-close:hover:not(:disabled) {
   background: #fff0f0;
   color: #d25a5a;
+}
+
+.blog-modal-close:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ================================
+   DELETE CONFIRMATION
+   (JSX puts the h2 / p directly inside .blog-modal)
+================================ */
+
+.blog-modal > h2 {
+  color: #1d2947;
+  font-weight: 800;
+}
+
+.blog-modal > p {
+  color: #7b8495;
+}
+
+.blog-modal .blog-form-actions .delete-blog-btn {
+  min-width: 105px;
+  justify-content: center;
+
+  background: #d45b5b;
+  color: #fff;
+}
+
+.blog-modal .blog-form-actions .delete-blog-btn:hover:not(:disabled) {
+  background: #c84949;
 }
 
 /* ================================
    FORM
 ================================ */
 
-.blog-modal-body {
+.blog-form {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
   padding: 24px;
 
-  max-height: calc(92vh - 75px);
   overflow-y: auto;
 }
 
-.blog-form {
+.blog-form-section h3 {
+  margin: 0 0 14px;
+
+  color: #17254c;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.blog-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
@@ -785,16 +748,19 @@
   grid-column: 1 / -1;
 }
 
-.blog-form-label {
+.blog-form-group label {
   color: #34405c;
 
   font-size: 12px;
   font-weight: 700;
 }
 
-.blog-form-input,
-.blog-form-select,
-.blog-form-textarea {
+.blog-form-group label span {
+  color: #e0245e;
+}
+
+.blog-form-group input,
+.blog-form-group textarea {
   width: 100%;
 
   box-sizing: border-box;
@@ -816,21 +782,20 @@
   transition: all 0.2s ease;
 }
 
-.blog-form-input:focus,
-.blog-form-select:focus,
-.blog-form-textarea:focus {
+.blog-form-group input:focus,
+.blog-form-group textarea:focus {
   border-color: #d1ad4d;
 
   box-shadow: 0 0 0 3px rgba(209, 173, 77, 0.12);
 }
 
-.blog-form-textarea {
+.blog-form-group textarea {
   min-height: 110px;
   resize: vertical;
 }
 
-.blog-form-input::placeholder,
-.blog-form-textarea::placeholder {
+.blog-form-group input::placeholder,
+.blog-form-group textarea::placeholder {
   color: #a5adbb;
 }
 
@@ -838,17 +803,20 @@
    CHECKBOX
 ================================ */
 
-.blog-checkbox-wrapper {
+.blog-checkbox-row {
+  display: flex;
+  align-items: center;
+}
+
+.blog-checkbox {
   display: flex;
   align-items: center;
   gap: 9px;
 
-  margin-top: 5px;
-
   cursor: pointer;
 }
 
-.blog-checkbox-wrapper input {
+.blog-checkbox input {
   width: 17px;
   height: 17px;
 
@@ -857,7 +825,7 @@
   cursor: pointer;
 }
 
-.blog-checkbox-wrapper span {
+.blog-checkbox span {
   color: #4d5870;
 
   font-size: 13px;
@@ -865,20 +833,61 @@
 }
 
 /* ================================
-   MODAL FOOTER
+   VIDEO URL PREVIEW (inside form)
 ================================ */
 
-.blog-modal-footer {
+.video-url-preview {
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  background: #f8f9fc;
+  border: 1px solid #edf0f5;
+}
+
+.video-preview-label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #9aa2b1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.video-preview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #5368c9;
+  font-size: 12px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+.video-preview-link:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   FORM / CONFIRM ACTION BUTTONS
+================================ */
+
+.blog-form-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+}
 
-  padding: 17px 24px;
+.blog-form .blog-form-actions {
+  padding-top: 18px;
 
   border-top: 1px solid #edf0f5;
-
-  background: #fbfcfe;
 }
 
 .blog-cancel-btn,
@@ -904,25 +913,21 @@
   color: #626d82;
 }
 
-.blog-cancel-btn:hover {
+.blog-cancel-btn:hover:not(:disabled) {
   background: #f5f7fa;
 }
 
 .blog-submit-btn {
   border: none;
 
-  background: linear-gradient(
-    135deg,
-    #d8b342,
-    #b98a18
-  );
+  background: linear-gradient(135deg, #d8b342, #b98a18);
 
   color: #fff;
 
   box-shadow: 0 6px 16px rgba(184, 138, 24, 0.2);
 }
 
-.blog-submit-btn:hover {
+.blog-submit-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
@@ -937,25 +942,18 @@
    VIEW VIDEO MODAL
 ================================ */
 
-.video-view-modal {
+.blog-modal.video-view-modal {
   width: min(850px, 100%);
-  max-height: 92vh;
-
-  background: #fff;
-
-  border-radius: 22px;
-
-  overflow: hidden;
 
   box-shadow: 0 25px 70px rgba(10, 20, 45, 0.28);
-
-  animation: modalIn 0.22s ease;
 }
 
 .video-view-content {
+  flex: 1;
+  min-height: 0;
+
   padding: 24px;
 
-  max-height: calc(92vh - 75px);
   overflow-y: auto;
 }
 
@@ -1021,6 +1019,15 @@
   gap: 14px;
 }
 
+.video-detail-info h3 {
+  margin: 0;
+
+  color: #17254c;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
 .video-detail-row {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -1032,11 +1039,8 @@
   border-bottom: 1px solid #edf0f5;
 }
 
-.video-detail-row:last-child {
-  border-bottom: none;
-}
-
-.video-detail-label {
+.video-detail-row span,
+.video-description-box span {
   color: #8992a3;
 
   font-size: 11px;
@@ -1046,7 +1050,7 @@
   letter-spacing: 0.5px;
 }
 
-.video-detail-value {
+.video-detail-row strong {
   color: #273452;
 
   font-size: 13px;
@@ -1065,6 +1069,15 @@
   background: #f8f9fc;
 
   border: 1px solid #edf0f5;
+}
+
+.video-description-box span {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.video-description-box p {
+  margin: 0;
 
   color: #69748a;
 
@@ -1079,23 +1092,20 @@
 
 .watch-video-btn {
   width: 100%;
+  box-sizing: border-box;
 
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
 
-  margin-top: 20px;
+  margin-top: 6px;
 
   padding: 12px 18px;
 
   border-radius: 11px;
 
-  background: linear-gradient(
-    135deg,
-    #17254c,
-    #273a70
-  );
+  background: linear-gradient(135deg, #17254c, #273a70);
 
   color: #fff;
 
@@ -1114,105 +1124,12 @@
 }
 
 /* ================================
-   DELETE CONFIRMATION
-================================ */
-
-.blog-delete-modal {
-  width: min(430px, 100%);
-
-  background: #fff;
-
-  border-radius: 20px;
-
-  padding: 27px;
-
-  text-align: center;
-
-  box-shadow: 0 25px 70px rgba(10, 20, 45, 0.25);
-
-  animation: modalIn 0.22s ease;
-}
-
-.blog-delete-icon {
-  width: 54px;
-  height: 54px;
-
-  margin: 0 auto 15px;
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #fff0f0;
-
-  color: #d35b5b;
-}
-
-.blog-delete-modal h3 {
-  margin: 0 0 8px;
-
-  color: #1d2947;
-
-  font-size: 19px;
-  font-weight: 800;
-}
-
-.blog-delete-modal p {
-  margin: 0;
-
-  color: #7b8495;
-
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.blog-delete-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-
-  margin-top: 22px;
-}
-
-.blog-delete-cancel,
-.blog-delete-confirm {
-  min-width: 105px;
-
-  padding: 10px 16px;
-
-  border-radius: 9px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.blog-delete-cancel {
-  border: 1px solid #dfe3ea;
-
-  background: #fff;
-
-  color: #626d82;
-}
-
-.blog-delete-confirm {
-  border: none;
-
-  background: #d45b5b;
-
-  color: #fff;
-}
-
-.blog-delete-confirm:hover {
-  background: #c84949;
-}
-
-/* ================================
    TOAST
 ================================ */
+
+.Toastify__toast-container {
+  z-index: 10000;
+}
 
 .Toastify__toast {
   border-radius: 12px !important;
@@ -1224,28 +1141,28 @@
 ================================ */
 
 .blog-table-wrapper::-webkit-scrollbar,
-.blog-modal-body::-webkit-scrollbar,
+.blog-form::-webkit-scrollbar,
 .video-view-content::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .blog-table-wrapper::-webkit-scrollbar-track,
-.blog-modal-body::-webkit-scrollbar-track,
+.blog-form::-webkit-scrollbar-track,
 .video-view-content::-webkit-scrollbar-track {
   background: #f3f5f8;
   border-radius: 10px;
 }
 
 .blog-table-wrapper::-webkit-scrollbar-thumb,
-.blog-modal-body::-webkit-scrollbar-thumb,
+.blog-form::-webkit-scrollbar-thumb,
 .video-view-content::-webkit-scrollbar-thumb {
   background: #d6dbe4;
   border-radius: 10px;
 }
 
 .blog-table-wrapper::-webkit-scrollbar-thumb:hover,
-.blog-modal-body::-webkit-scrollbar-thumb:hover,
+.blog-form::-webkit-scrollbar-thumb:hover,
 .video-view-content::-webkit-scrollbar-thumb:hover {
   background: #bdc5d2;
 }
@@ -1255,7 +1172,7 @@
 ================================ */
 
 @media (max-width: 1100px) {
-  .video-blog-page {
+  .blog-page {
     padding: 18px 25px 30px;
   }
 
@@ -1265,7 +1182,7 @@
 }
 
 @media (max-width: 768px) {
-  .video-blog-page {
+  .blog-page {
     padding: 15px;
   }
 
@@ -1276,6 +1193,7 @@
 
   .blog-header-left {
     width: 100%;
+    margin-left: 0;
   }
 
   .blog-title {
@@ -1291,7 +1209,7 @@
     padding: 18px;
   }
 
-  .blog-form {
+  .blog-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1304,18 +1222,14 @@
   }
 
   .blog-modal,
-  .video-view-modal {
+  .blog-modal.video-view-modal {
     max-height: 95vh;
     border-radius: 17px;
   }
 
-  .blog-modal-body,
+  .blog-form,
   .video-view-content {
     padding: 18px;
-  }
-
-  .blog-modal-footer {
-    padding: 15px 18px;
   }
 
   .video-detail-row {
@@ -1333,12 +1247,7 @@
     font-size: 12px;
   }
 
-  .blog-badge {
-    width: 42px;
-    height: 42px;
-  }
-
-  .blog-section-title {
+  .blog-section-title h2 {
     font-size: 17px;
   }
 
@@ -1359,21 +1268,13 @@
     font-size: 17px;
   }
 
-  .blog-modal-footer {
-    flex-direction: column;
+  .blog-form-actions {
+    flex-direction: column-reverse;
   }
 
   .blog-cancel-btn,
-  .blog-submit-btn {
-    width: 100%;
-  }
-
-  .blog-delete-actions {
-    flex-direction: column;
-  }
-
-  .blog-delete-cancel,
-  .blog-delete-confirm {
+  .blog-submit-btn,
+  .blog-modal .blog-form-actions .delete-blog-btn {
     width: 100%;
   }
 
