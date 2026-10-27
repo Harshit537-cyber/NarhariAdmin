@@ -26,88 +26,84 @@ import {
 } from "react-icons/fa";
 import { getAllTickets, updateTicket } from "../../api/Controller/ticket";
 
-let DUMMY_TICKETS = [
-  {
-    _id: "6a71ac6ec1b9e59c484ea61f",
-    raisedBy: {
-      _id: "6a6b1845ed0084ecb7ba17e3",
-      name: "Ab ",
-      email: null,
-      mobile: "+916395809794",
-      fullName: "Ab ",
-      profilePic: "https://res.cloudinary.com/dvumlrxml/image/upload/v1785746594/user_profiles/ql1hlpxwn4swgqhwwgdq.jpg",
-    },
-    raisedByModel: "User",
-    subject: "Payment Issue",
-    description: "My money was deducted but call was not connected.",
-    category: "Payment Issue",
-    priority: "High",
-    status: "Pending",
-    attachments: [
-      "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500",
-    ],
-    adminResponse: null,
-    resolvedAt: null,
-    createdAt: "2026-08-04T09:10:06.794Z",
-    updatedAt: "2026-08-04T09:10:06.794Z",
-  },
-  {
-    _id: "6a71ac6ec1b9e59c484ea620",
-    raisedBy: {
-      _id: "6a6b1845ed0084ecb7ba17e4",
-      name: "Pooja Sharma",
-      email: "pooja@example.com",
-      mobile: "+919876543210",
-      fullName: "Pooja Sharma",
-      profilePic: null,
-    },
-    raisedByModel: "User",
-    subject: "Kundli Download Failed",
-    description: "Unable to download my kundli pdf report.",
-    category: "Technical Issue",
-    priority: "Medium",
-    status: "Resolved",
-    attachments: [],
-    adminResponse: "Issue resolved. PDF download re-enabled.",
-    resolvedAt: "2026-08-04T11:00:00.000Z",
-    createdAt: "2026-08-03T10:15:00.000Z",
-    updatedAt: "2026-08-04T11:00:00.000Z",
-  },
-  {
-    _id: "6a71ac6ec1b9e59c484ea621",
-    raisedBy: {
-      _id: "6a6b1845ed0084ecb7ba17e5",
-      name: "Rohan Verma",
-      email: "rohan@example.com",
-      mobile: "+919123456789",
-      fullName: "Rohan Verma",
-      profilePic: null,
-    },
-    raisedByModel: "User",
-    subject: "Astrologer Not Available",
-    description: "Booked slot at 4 PM but astrologer was offline.",
-    category: "Consultation Issue",
-    priority: "High",
-    status: "In Progress",
-    attachments: [],
-    adminResponse: "Checking with astrologer team.",
-    resolvedAt: null,
-    createdAt: "2026-08-04T08:00:00.000Z",
-    updatedAt: "2026-08-04T08:30:00.000Z",
-  },
-];
+// let DUMMY_TICKETS = [
+//   {
+//     _id: "6a71ac6ec1b9e59c484ea61f",
+//     raisedBy: {
+//       _id: "6a6b1845ed0084ecb7ba17e3",
+//       name: "Ab ",
+//       email: null,
+//       mobile: "+916395809794",
+//       fullName: "Ab ",
+//       profilePic: "https://res.cloudinary.com/dvumlrxml/image/upload/v1785746594/user_profiles/ql1hlpxwn4swgqhwwgdq.jpg",
+//     },
+//     raisedByModel: "User",
+//     subject: "Payment Issue",
+//     description: "My money was deducted but call was not connected.",
+//     category: "Payment Issue",
+//     priority: "High",
+//     status: "Pending",
+//     attachments: [
+//       "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500",
+//     ],
+//     adminResponse: null,
+//     resolvedAt: null,
+//     createdAt: "2026-08-04T09:10:06.794Z",
+//     updatedAt: "2026-08-04T09:10:06.794Z",
+//   },
+//   {
+//     _id: "6a71ac6ec1b9e59c484ea620",
+//     raisedBy: {
+//       _id: "6a6b1845ed0084ecb7ba17e4",
+//       name: "Pooja Sharma",
+//       email: "pooja@example.com",
+//       mobile: "+919876543210",
+//       fullName: "Pooja Sharma",
+//       profilePic: null,
+//     },
+//     raisedByModel: "User",
+//     subject: "Kundli Download Failed",
+//     description: "Unable to download my kundli pdf report.",
+//     category: "Technical Issue",
+//     priority: "Medium",
+//     status: "Resolved",
+//     attachments: [],
+//     adminResponse: "Issue resolved. PDF download re-enabled.",
+//     resolvedAt: "2026-08-04T11:00:00.000Z",
+//     createdAt: "2026-08-03T10:15:00.000Z",
+//     updatedAt: "2026-08-04T11:00:00.000Z",
+//   },
+//   {
+//     _id: "6a71ac6ec1b9e59c484ea621",
+//     raisedBy: {
+//       _id: "6a6b1845ed0084ecb7ba17e5",
+//       name: "Rohan Verma",
+//       email: "rohan@example.com",
+//       mobile: "+919123456789",
+//       fullName: "Rohan Verma",
+//       profilePic: null,
+//     },
+//     raisedByModel: "User",
+//     subject: "Astrologer Not Available",
+//     description: "Booked slot at 4 PM but astrologer was offline.",
+//     category: "Consultation Issue",
+//     priority: "High",
+//     status: "In Progress",
+//     attachments: [],
+//     adminResponse: "Checking with astrologer team.",
+//     resolvedAt: null,
+//     createdAt: "2026-08-04T08:00:00.000Z",
+//     updatedAt: "2026-08-04T08:30:00.000Z",
+//   },
+// ];
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-
-
-const deleteTicket = async (id) => {
-  await delay(300);
-  DUMMY_TICKETS = DUMMY_TICKETS.filter((t) => t._id !== id);
-  return { success: true };
-};
-
-
+// const deleteTicket = async (id) => {
+//   await delay(300);
+//   DUMMY_TICKETS = DUMMY_TICKETS.filter((t) => t._id !== id);
+//   return { success: true };
+// };
 
 export default function Tickets() {
   const [tickets, setTickets] = useState([]);
@@ -122,7 +118,7 @@ export default function Tickets() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  // const [deleteOpen, setDeleteOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (type, message) => {
@@ -185,7 +181,6 @@ export default function Tickets() {
   const handleEditInit = (ticket) => {
     setSelectedTicket(ticket);
     setEditForm({
-
       status: ticket.status || "Pending",
       adminResponse: ticket.adminResponse || ticket.adminReply || "",
     });
@@ -196,7 +191,6 @@ export default function Tickets() {
     e.preventDefault();
     try {
       const payload = {
-
         status: editForm.status,
         adminResponse: editForm.adminResponse,
       };
@@ -223,23 +217,23 @@ export default function Tickets() {
     }
   };
 
-  const handleDeleteInit = (ticket) => {
-    setSelectedTicket(ticket);
-    setDeleteOpen(true);
-  };
+  // const handleDeleteInit = (ticket) => {
+  //   setSelectedTicket(ticket);
+  //   setDeleteOpen(true);
+  // };
 
-  const confirmDelete = async () => {
-    try {
-      await deleteTicket(selectedTicket._id);
-      setTickets((prev) => prev.filter((t) => t._id !== selectedTicket._id));
-      setDeleteOpen(false);
-      setSelectedTicket(null);
-      showToast("success", "Ticket deleted successfully!");
-    } catch (err) {
-      console.error("Delete failed:", err);
-      showToast("error", err?.message || "Failed to delete ticket");
-    }
-  };
+  // const confirmDelete = async () => {
+  //   try {
+  //     await deleteTicket(selectedTicket._id);
+  //     setTickets((prev) => prev.filter((t) => t._id !== selectedTicket._id));
+  //     setDeleteOpen(false);
+  //     setSelectedTicket(null);
+  //     showToast("success", "Ticket deleted successfully!");
+  //   } catch (err) {
+  //     console.error("Delete failed:", err);
+  //     showToast("error", err?.message || "Failed to delete ticket");
+  //   }
+  // };
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -527,10 +521,9 @@ export default function Tickets() {
                     const hasAttachments = Array.isArray(ticket.attachments) && ticket.attachments.length > 0;
 
                     return (
-                      <tr key={ticket._id}>   
+                      <tr key={ticket._id}>
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>
-
                           <div className="cell-ticket-info">
                             <span className="ticket-id-badge">#{ticket._id?.slice(-6).toUpperCase()}</span>
                             <div className="ticket-subject-title">
@@ -606,6 +599,7 @@ export default function Tickets() {
                             >
                               <FaEdit />
                             </button>
+                            {/* Delete Ticket button commented out
                             <button
                               className="btn-square-icon btn-delete-accent"
                               onClick={() => handleDeleteInit(ticket)}
@@ -613,6 +607,7 @@ export default function Tickets() {
                             >
                               <FaTrashAlt />
                             </button>
+                            */}
                           </div>
                         </td>
                       </tr>
@@ -688,7 +683,6 @@ export default function Tickets() {
                     <p><FaPhoneAlt /> {selectedTicket.raisedBy.mobile}</p>
                   )}
                   {selectedTicket.raisedBy?.email && (
-
                     <p>
                       <FaEnvelope /> {selectedTicket.raisedBy?.email || selectedTicket.raisedBy?.mobile || "N/A"}
                     </p>
@@ -753,12 +747,6 @@ export default function Tickets() {
                   gap: "16px",
                 }}
               >
-
-
-
-
-
-
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
                   <label>Status</label>
                   <select
@@ -795,6 +783,7 @@ export default function Tickets() {
         </div>
       )}
 
+      {/* Delete confirmation modal commented out
       {deleteOpen && selectedTicket && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content confirm-danger">
@@ -822,6 +811,7 @@ export default function Tickets() {
           </div>
         </div>
       )}
+      */}
     </div>
   );
 }
