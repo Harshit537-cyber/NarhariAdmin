@@ -65,8 +65,8 @@ export default function RestrictionKeywords() {
   // ======================================================
   // FETCH ALL KEYWORDS
   // ======================================================
-const [showViewModal, setShowViewModal] = useState(false);
-const [viewKeyword, setViewKeyword] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewKeyword, setViewKeyword] = useState(null);
   const fetchKeywords = async () => {
     try {
       setLoading(true);
@@ -199,14 +199,14 @@ const [viewKeyword, setViewKeyword] = useState(null);
 
     setShowModal(true);
   };
- const openViewModal=(item)=>{
-  setViewKeyword(item);
-  setShowViewModal(true);
- };
- const closeViewModal=()=>{
-  setViewKeyword(null);
-  setShowViewModal(false);
- };
+  const openViewModal = (item) => {
+    setViewKeyword(item);
+    setShowViewModal(true);
+  };
+  const closeViewModal = () => {
+    setViewKeyword(null);
+    setShowViewModal(false);
+  };
   // ======================================================
   // CLOSE MODAL
   // ======================================================
@@ -616,53 +616,36 @@ const [viewKeyword, setViewKeyword] = useState(null);
                       {/* ACTION */}
 
                       <td>
+
                         <div className="restriction-action-buttons">
+                          {/* View Button */}
                           <button
-                            style={{
-                              padding: "10px 16px",
-                              margin: 0,
-                              minWidth: "50px",
-                              height: "42px",
-                              boxSizing: "border-box",
-                            }}
-                            className="flex items-center justify-center gap-2 rounded-lg bg-blue-100 text-sm font-medium text-blue-600 transition-all duration-300 hover:bg-blue-500 hover:text-white"
-                            onClick={() => openEditModal(item)}
-                            title="Edit Keyword"
-                          >
-                            <FaEdit size={18} />
-                        
-                          </button>
-
-                          <button
-                            style={{
-                              padding: "10px 16px",
-                              margin: 0,
-                              minWidth: "50px",
-                              height: "42px",
-                              boxSizing: "border-box",
-                            }}
-                            className="flex items-center justify-center gap-2 rounded-lg bg-red-100 text-sm font-medium text-red-600 transition-all duration-300 hover:bg-red-500 hover:text-white"
-                            onClick={() => openDeleteModal(item)}
-                            title="Delete Keyword"
-                          >
-                            <FaTrash size={18} />
-                          </button>
-
-                          <button
-                            style={{
-                              padding: "10px 16px",
-                              margin: 0,
-                              minWidth: "50px",
-                              height: "42px",
-                              boxSizing: "border-box",
-                            }}
-                            className="flex items-center justify-center gap-2 rounded-lg bg-green-100 text-sm font-medium text-green-600 transition-all duration-300 hover:bg-green-500 hover:text-white"
+                            className="restriction-btn view-btn"
                             onClick={() => openViewModal(item)}
                             title="View Keyword"
                           >
                             View
                           </button>
+
+                          {/* Edit Button */}
+                          <button
+                            className="restriction-btn edit-btn"
+                            onClick={() => openEditModal(item)}
+                            title="Edit Keyword"
+                          >
+                            <FaEdit size={17} />
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            className="restriction-btn delete-btn"
+                            onClick={() => openDeleteModal(item)}
+                            title="Delete Keyword"
+                          >
+                            <FaTrash size={16} />
+                          </button>
                         </div>
+
                       </td>
                     </tr>
                   );
@@ -872,75 +855,75 @@ const [viewKeyword, setViewKeyword] = useState(null);
       )}
 
       <ToastContainer position="top-right" autoClose={1000} />
-   {showViewModal && viewKeyword && (
-  <div className="ultra-modal-backdrop" onClick={closeViewModal}>
-    <div
-      className="ultra-modal-box view-keyword-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="ultra-modal-header">
-        <div className="modal-header-top">
-          <div>
-            <h3>Restriction Keyword Details</h3>
-            <p className="modal-subtitle">
-              View restriction keyword information
-            </p>
+      {showViewModal && viewKeyword && (
+        <div className="ultra-modal-backdrop" onClick={closeViewModal}>
+          <div
+            className="ultra-modal-box view-keyword-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ultra-modal-header">
+              <div className="modal-header-top">
+                <div>
+                  <h3>Restriction Keyword Details</h3>
+                  <p className="modal-subtitle">
+                    View restriction keyword information
+                  </p>
+                </div>
+
+                <button className="modal-close-btn" onClick={closeViewModal}>
+                  <FaTimes />
+                </button>
+              </div>
+
+            </div>
+
+            <div className="view-keyword-details">
+              <div className="view-detail-item">
+                <span>Keyword</span>
+                <strong>{viewKeyword.keyword || "—"}</strong>
+              </div>
+
+              <div className="view-detail-item">
+                <span>Action</span>
+                <strong>{viewKeyword.action || "—"}</strong>
+              </div>
+
+              <div className="view-detail-item">
+                <span>Status</span>
+                <strong>
+                  {viewKeyword.isActive ? "Active" : "Inactive"}
+                </strong>
+              </div>
+
+              <div className="view-detail-item">
+                <span>Created Date</span>
+                <strong>{formatDate(viewKeyword.createdAt)}</strong>
+              </div>
+
+              <div className="view-detail-item">
+                <span>Last Updated</span>
+                <strong>{formatDate(viewKeyword.updatedAt)}</strong>
+              </div>
+
+              <div className="view-detail-item">
+                <span>Created By</span>
+                <strong>{viewKeyword.createdBy || "—"}</strong>
+              </div>
+
+
+            </div>
+
+            <div className="modal-actions-row">
+              <button
+                className="btn-modal-pro cancel"
+                onClick={closeViewModal}
+              >
+                Close
+              </button>
+            </div>
           </div>
-
-          <button className="modal-close-btn" onClick={closeViewModal}>
-            <FaTimes />
-          </button>
         </div>
-
-      </div>
-
-      <div className="view-keyword-details">
-        <div className="view-detail-item">
-          <span>Keyword</span>
-          <strong>{viewKeyword.keyword || "—"}</strong>
-        </div>
-
-        <div className="view-detail-item">
-          <span>Action</span>
-          <strong>{viewKeyword.action || "—"}</strong>
-        </div>
-
-        <div className="view-detail-item">
-          <span>Status</span>
-          <strong>
-            {viewKeyword.isActive ? "Active" : "Inactive"}
-          </strong>
-        </div>
-
-        <div className="view-detail-item">
-          <span>Created Date</span>
-          <strong>{formatDate(viewKeyword.createdAt)}</strong>
-        </div>
-
-        <div className="view-detail-item">
-          <span>Last Updated</span>
-          <strong>{formatDate(viewKeyword.updatedAt)}</strong>
-        </div>
-
-        <div className="view-detail-item">
-          <span>Created By</span>
-          <strong>{viewKeyword.createdBy || "—"}</strong>
-        </div>
-
-       
-      </div>
-
-      <div className="modal-actions-row">
-        <button
-          className="btn-modal-pro cancel"
-          onClick={closeViewModal}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }

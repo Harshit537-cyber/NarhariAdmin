@@ -28,17 +28,12 @@ export const getNotificationHistory = async (page = 1, limit = 10) => {
 
 
 export const sendNotification = async (payload) => {
-
-  try 
-  {
-    const token = localStorage.getItem("token");
-
+  try {
     const response = await apiClient.post(
       `/admin/notifications/send`,
       payload,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       }

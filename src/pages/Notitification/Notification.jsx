@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +18,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaImage,
+  FaTimes,
 } from "react-icons/fa";
 
 import "./Notification.css";
@@ -37,24 +38,42 @@ const PushNotification = () => {
   const [body, setBody] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [targetType, setTargetType] = useState("all");
-  const [image, setImage] = useState(null);
   const [targetModel, setTargetModel] = useState("");
   const [targetIds, setTargetIds] = useState([]);
   const [targetList, setTargetList] = useState([]);
-  const [openDropdown, setOpenDropdown] = useState(false);
+  const [targetLoading, setTargetLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const requestNotifications = async () => {
+    const res = await getNotificationHistory(1, 10);
+    return res.data || [];
+  };
+
   useEffect(() => {
-    fetchNotifications();
+    let cancelled = false;
+
+    requestNotifications()
+      .then((data) => {
+        if (!cancelled) setNotifications(data);
+      })
+      .catch((error) => {
+        console.error("Notification History Error:", error);
+        if (!cancelled) setNotifications([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const fetchNotifications = async () => {
     setLoading(true);
-
     try {
-      const res = await getNotificationHistory(1, 10);
-
-      setNotifications(res.data || []);
+      setNotifications(await requestNotifications());
     } catch (error) {
       console.error("Notification History Error:", error);
       setNotifications([]);
@@ -64,22 +83,36 @@ const PushNotification = () => {
   };
 
   const fetchTargetList = async (model) => {
+    setTargetLoading(true);
     try {
+      let response;
       if (model === "User") {
-        const res = await getAllUsers();
-        setTargetList(res.data || []);
+        response = await getAllUsers();
       } else if (model === "Partner") {
-        const res = await getAllPartners();
-        setTargetList(res.data || []);
+        response = await getAllPartners();
       } else if (model === "Pandit") {
-        const res = await getAllPandits(1, 50);
-        setTargetList(res.pandits || []); // yaha "pandits" key use karo, "data" nahi
+        response = await getAllPandits(1, 50);
       } else {
         setTargetList([]);
+        return;
       }
+
+      const list = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.data?.data)
+            ? response.data.data
+            : Array.isArray(response?.pandits)
+              ? response.pandits
+              : [];
+      setTargetList(list);
     } catch (error) {
-      console.log(error);
+      console.error("Notification target list error:", error);
       setTargetList([]);
+      toast.error(error?.message || "Failed to load recipients.");
+    } finally {
+      setTargetLoading(false);
     }
   };
   const deleteNotification = async (id) => {
@@ -103,43 +136,50 @@ const PushNotification = () => {
     (sum, n) => sum + (n.failureCount || 0),
     0,
   );
+
+  const closeSendModal = (force = false) => {
+    if (submitLoading && !force) return;
+    setShowModal(false);
+    setTitle("");
+    setBody("");
+    setImageUrl("");
+    setTargetType("all");
+    setTargetModel("");
+    setTargetIds([]);
+    setTargetList([]);
+  };
+
   const handleSendNotification = async () => {
-    const formData = new FormData();
-
-    formData.append("title", title);
-    formData.append("body", body);
-
-    if (targetType === "all") {
-      formData.append("targetType", "all");
-    } else {
-      // users, partners, pandits, specific -- sab backend ke liye "specific" hai
-      formData.append("targetType", targetType);
-      formData.append("targetModel", targetModel);
-      formData.append("targetIds", JSON.stringify(targetIds));
+    if (!title.trim() || !body.trim()) {
+      toast.error("Title and message are required.");
+      return;
     }
 
-    if (imageUrl) formData.append("imageUrl", imageUrl);
+    if (targetType === "specific" && (!targetModel || targetIds.length === 0)) {
+      toast.error("Select a recipient type and at least one recipient.");
+      return;
+    }
+
+    const payload = {
+      title: title.trim(),
+      body: body.trim(),
+      targetType,
+      ...(targetType === "specific" ? { targetModel, targetIds } : {}),
+      ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+    };
 
     try {
-      const res = await sendNotification(formData);
-
-      console.log("Notification Sent:", res);
-
-      toast.success("Notification sent successfully! ");
-
-      setShowModal(false);
-      setTitle("");
-      setBody("");
-      setImageUrl("");
-      setTargetType("all");
-      setTargetModel("");
-      setTargetIds([]);
-      setTargetList([]);
-
-      fetchNotifications();
+      setSubmitLoading(true);
+      await sendNotification(payload);
+      toast.success("Notification sent successfully!");
+      closeSendModal(true);
+      setLoading(true);
+      await fetchNotifications();
     } catch (error) {
       console.error("Send Notification Error:", error);
-      toast.error("Failed to send notification!");
+      toast.error(error?.message || "Failed to send notification.");
+    } finally {
+      setSubmitLoading(false);
     }
   };
   return (
@@ -214,7 +254,7 @@ const PushNotification = () => {
               {loading ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     style={{ textAlign: "center", padding: "60px" }}
                   >
                     <div className="gold-loader"></div>
@@ -223,14 +263,14 @@ const PushNotification = () => {
               ) : notifications.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     style={{ textAlign: "center", padding: "40px" }}
                   >
                     No notifications found.
                   </td>
                 </tr>
               ) : (
-            notifications.map((item, index) => (
+                notifications.map((item, index) => (
                   <tr key={item._id}>
                     <td>{index + 1}</td>
                     <td>
@@ -325,146 +365,176 @@ const PushNotification = () => {
       </div>
 
       {showModal && (
-        <div className="notification-modal-overlay">
-          <div className="notification-modal">
-            <h2>Send Notification</h2>
-            <label>Title</label>
-            <input
-              type="text"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <label>Body</label>
-            <textarea
-              placeholder="Body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-            />
-
-            <select
-              value={targetType}
-              onChange={(e) => {
-                const val = e.target.value;
-                setTargetType(val);
-                setTargetIds([]);
-
-                if (val === "users") {
-                  setTargetModel("User");
-                  fetchTargetList("User");
-                } else if (val === "partners") {
-                  setTargetModel("Partner");
-                  fetchTargetList("Partner");
-                } else if (val === "pandits") {
-                  setTargetModel("Pandit");
-                  fetchTargetList("Pandit");
-                } else if (val === "specific") {
-                  setTargetModel("");
-                  setTargetList([]);
-                } else {
-                  setTargetModel("");
-                  setTargetList([]);
-                }
-              }}
-            >
-              <option value="all">All</option>
-              <option value="users">Users</option>
-              <option value="partners">Partners</option>
-              <option value="pandits">Pandits</option>
-              <option value="specific">Specific</option>
-            </select>
-
-            {targetType === "specific" && (
-              <select
-                value={targetModel}
-                onChange={(e) => {
-                  setTargetModel(e.target.value);
-                  fetchTargetList(e.target.value);
-                }}
-              >
-                <option value="">Select Target Model</option>
-                <option value="User">User</option>
-                <option value="Partner">Partner</option>
-                <option value="Pandit">Pandit</option>
-              </select>
-            )}
-
-            {(targetType === "users" ||
-              targetType === "partners" ||
-              targetType === "pandits" ||
-              targetType === "specific") && (
-              <div className="custom-dropdown">
-                <div
-                  className="dropdown-box"
-                  onClick={() => setOpenDropdown(!openDropdown)}
-                >
-                  {targetIds[0]
-                    ? targetList.find((item) => item._id === targetIds[0])
-                        ?.fullName ||
-                      targetList.find((item) => item._id === targetIds[0])
-                        ?.name ||
-                      targetList.find((item) => item._id === targetIds[0])
-                        ?.mobile
-                    : `Select ${targetType}`}
-                </div>
-
-                {openDropdown && (
-                  <div className="dropdown-list">
-                    {targetList.map((item) => (
-                      <div
-                        key={item._id}
-                        className="dropdown-item"
-                        onClick={() => {
-                          setTargetIds([item._id]);
-                          setOpenDropdown(false);
-                        }}
-                      >
-                        <img
-                          src={item.profilePic || "/default-user.png"}
-                          alt=""
-                        />
-
-                        <div>
-                          <div className="dropdown-name">
-                            {item.fullName || item.name || item.mobile}
-                          </div>
-
-                          <small>{item.mobile}</small>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        <div
+          className="notification-modal-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeSendModal();
+          }}
+        >
+          <form
+            className="notification-modal"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleSendNotification();
+            }}
+          >
+            <div className="notification-modal-header">
+              <div>
+                <span className="notification-modal-eyebrow">COSMIC ALERTS</span>
+                <h2>Send Notification</h2>
               </div>
-            )}
-            {/* Image field sirf "all" ke liye dikhega */}
-            <label>Image URL</label>
-            {targetType === "all" && (
-              <input
-                type="text"
-                placeholder="Paste Image URL"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-            )}
+              <button
+                type="button"
+                className="notification-modal-close"
+                onClick={closeSendModal}
+                aria-label="Close notification form"
+                disabled={submitLoading}
+              >
+                <FaTimes />
+              </button>
+            </div>
 
-            {/* targetType display field last me */}
-            {targetType !== "all" && (
-              <input
-                className="target-display-input"
-                type="text"
-                value={`Target: ${targetType}`}
-                disabled
-                style={{ background: "#f1f5f9", color: "#526075" }}
-              />
-            )}
+            <div className="notification-form-fields">
+              <div className="notification-field">
+                <label htmlFor="notification-title">Title</label>
+                <input
+                  id="notification-title"
+                  type="text"
+                  placeholder="Enter notification title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  maxLength={120}
+                  required
+                />
+              </div>
+
+              <div className="notification-field">
+                <label htmlFor="notification-body">Message</label>
+                <textarea
+                  id="notification-body"
+                  placeholder="Write your message"
+                  value={body}
+                  onChange={(event) => setBody(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="notification-field">
+                <label htmlFor="notification-target">Audience</label>
+                <select
+                  id="notification-target"
+                  value={targetType}
+                  onChange={(event) => {
+                    setTargetType(event.target.value);
+                    setTargetModel("");
+                    setTargetIds([]);
+                    setTargetList([]);
+                  }}
+                >
+                  <option value="all">All recipients</option>
+                  <option value="specific">Specific recipients</option>
+                </select>
+              </div>
+
+              {targetType === "specific" && (
+                <>
+                  <div className="notification-field">
+                    <label htmlFor="notification-model">Recipient type</label>
+                    <select
+                      id="notification-model"
+                      value={targetModel}
+                      onChange={(event) => {
+                        const model = event.target.value;
+                        setTargetModel(model);
+                        setTargetIds([]);
+                        setTargetList([]);
+                        if (model) fetchTargetList(model);
+                      }}
+                      required
+                    >
+                      <option value="">Select recipient type</option>
+                      <option value="User">User</option>
+                      <option value="Partner">Partner</option>
+                      <option value="Pandit">Pandit</option>
+                    </select>
+                  </div>
+
+                  {targetModel && (
+                    <div className="notification-field">
+                      <label htmlFor="notification-recipients">Recipients</label>
+                      <Select
+                        inputId="notification-recipients"
+                        className="notification-recipient-select"
+                        classNamePrefix="notification-select"
+                        isMulti
+                        isLoading={targetLoading}
+                        isDisabled={targetLoading}
+                        options={targetList.map((item) => ({
+                          value: item._id,
+                          label:
+                            item.fullName ||
+                            item.name ||
+                            item.mobile ||
+                            item.email ||
+                            item._id,
+                        }))}
+                        value={targetList
+                          .filter((item) => targetIds.includes(item._id))
+                          .map((item) => ({
+                            value: item._id,
+                            label:
+                              item.fullName ||
+                              item.name ||
+                              item.mobile ||
+                              item.email ||
+                              item._id,
+                          }))}
+                        onChange={(selectedOptions) =>
+                          setTargetIds(
+                            (selectedOptions || []).map((option) => option.value),
+                          )
+                        }
+                        placeholder="Search and select recipients..."
+                        noOptionsMessage={() =>
+                          targetLoading ? "Loading recipients..." : "No recipients found"
+                        }
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="notification-field">
+                <label htmlFor="notification-image-url">Image URL (optional)</label>
+                <input
+                  id="notification-image-url"
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                />
+              </div>
+            </div>
 
             <div className="modal-actions">
-              <button onClick={() => setShowModal(false)}>Cancel</button>
-
-              <button onClick={handleSendNotification}>Send</button>
+              <button
+                type="button"
+                className="notification-cancel-button"
+                onClick={closeSendModal}
+                disabled={submitLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="notification-send-button"
+                disabled={submitLoading || targetLoading}
+              >
+                <FaPaperPlane />
+                {submitLoading ? "Sending..." : "Send"}
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
       {showDeleteModal && (
