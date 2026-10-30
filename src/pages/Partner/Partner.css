@@ -336,7 +336,7 @@
 
 .partner-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: 24px;
   align-items: stretch;
 }
@@ -611,6 +611,7 @@
 
 .partner-card-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding-top: 14px;
@@ -684,6 +685,7 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .toggle-switch {
@@ -737,8 +739,8 @@
 }
 
 .btn-square-icon {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
