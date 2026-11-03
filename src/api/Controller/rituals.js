@@ -61,3 +61,12 @@ export const updateRitual = async (id, formData) => {
     throw error.response?.data || error;
   }
 };
+
+export const deleteRitual = async (id) => {
+  try {
+    const response = await apiClient.delete(`/rituals/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

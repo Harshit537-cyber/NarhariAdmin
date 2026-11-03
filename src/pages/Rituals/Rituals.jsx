@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./Rituals.css";
-import { getAllRituals, addRitual, updateRitual } from "../../api/Controller/rituals";
+import {
+  getAllRituals,
+  addRitual,
+  updateRitual,
+  deleteRitual,
+} from "../../api/Controller/rituals";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -90,7 +95,9 @@ export default function Rituals() {
     isFeatured: false,
     isActive: true,
   });
-  // const [deleteId, setDeleteId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -246,19 +253,30 @@ export default function Rituals() {
     }
   };
 
-  // ---- DELETE RITUAL (dummy) ----
-  // const handleDeleteClick = (id) => {
-  //   setDeleteId(id);
-  //   setShowDeleteModal(true);
-  // };
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
 
-  // const confirmDeleteRitual = () => {
-  //   if (!deleteId) return;
-  //   setRituals((prev) => prev.filter((item) => item._id !== deleteId));
-  //   toast.success("Ritual deleted successfully!");
-  //   setShowDeleteModal(false);
-  //   setDeleteId(null);
-  // };
+  const confirmDeleteRitual = async () => {
+    if (!deleteId || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteRitual(deleteId);
+      const updatedRituals = rituals.filter((item) => item._id !== deleteId);
+      setRituals(updatedRituals);
+      const lastPage = Math.max(1, Math.ceil(updatedRituals.length / itemsPerPage));
+      setCurrentPage((page) => Math.min(page, lastPage));
+      setShowDeleteModal(false);
+      setDeleteId(null);
+      toast.success("Ritual deleted successfully!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to delete ritual");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // ---- Pagination ----
   const totalPages = Math.max(1, Math.ceil(rituals.length / itemsPerPage));
@@ -426,12 +444,13 @@ export default function Rituals() {
                         >
                           Edit
                         </button>
-                        {/* <button
-                        className="btn-pro btn-pro-delete"
-                        onClick={() => handleDeleteClick(item._id)}
-                      >
-                        <FaTrash /> Delete
-                      </button> */}
+                        <button
+                          className="btn-pro-delete"
+                          onClick={() => handleDeleteClick(item._id)}
+                          aria-label={`Delete ${item.title}`}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -1272,23 +1291,40 @@ export default function Rituals() {
           </div>
         </div>
       )}
-      {/* {showDeleteModal && (
+      {showDeleteModal && (
         <div
           className="ultra-modal-backdrop"
-          onClick={() => setShowDeleteModal(false)}
+          onClick={() => {
+            if (!isDeleting) {
+              setShowDeleteModal(false);
+              setDeleteId(null);
+            }
+          }}
         >
           <div
-            className="ultra-modal-box delete-modal-box"
+            className="ultra-modal-box edit-modal-box delete-modal-box"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-ritual-title"
           >
             <div className="ultra-modal-header">
-              <h3>Delete Ritual</h3>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                <FaTimes />
-              </button>
+              <div className="modal-header-top">
+                <h3 id="delete-ritual-title">Delete Ritual</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => {
+                    if (!isDeleting) {
+                      setShowDeleteModal(false);
+                      setDeleteId(null);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  aria-label="Close delete confirmation"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <p className="delete-confirm-text">
@@ -1299,20 +1335,25 @@ export default function Rituals() {
             <div className="modal-actions-row">
               <button
                 className="btn-modal-pro cancel"
-                onClick={() => setShowDeleteModal(false)}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                disabled={isDeleting}
               >
                 Cancel
               </button>
               <button
                 className="btn-modal-pro delete-confirm"
                 onClick={confirmDeleteRitual}
+                disabled={isDeleting}
               >
-                Delete
+                {isDeleting ? "Deleting..." : "Yes, Delete"}
               </button>
             </div>
           </div>
         </div>
-      )} */}
+      )}
 
 
     </div>
