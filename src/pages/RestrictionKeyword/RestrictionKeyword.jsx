@@ -905,10 +905,10 @@ export default function RestrictionKeywords() {
                 <strong>{formatDate(viewKeyword.updatedAt)}</strong>
               </div>
 
-              <div className="view-detail-item">
+              {/* <div className="view-detail-item">
                 <span>Created By</span>
                 <strong>{viewKeyword.createdBy || "—"}</strong>
-              </div>
+              </div> */}
 
 
             </div>
