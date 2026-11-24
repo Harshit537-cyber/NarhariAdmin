@@ -777,3 +777,82 @@
 .blog-modal::-webkit-scrollbar-thumb:hover {
   background: #aeb6c4;
 }
+
+/* ================= RICH TEXT EDITOR ================= */
+
+.blog-form-group .ql-toolbar.ql-snow {
+  border: 1px solid #e1e5eb;
+  border-radius: 9px 9px 0 0;
+  background: #fafbfd;
+}
+
+.blog-form-group .ql-container.ql-snow {
+  border: 1px solid #e1e5eb;
+  border-top: 0;
+  border-radius: 0 0 9px 9px;
+  background: #fafbfd;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.blog-form-group .ql-editor {
+  min-height: 180px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* Quill ke tooltip input par global input CSS ka asar rokne ke liye */
+.blog-form-group .ql-tooltip input[type="text"] {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.blog-form-group .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.quill-wrap {
+  position: relative;
+}
+
+/* Image ka size limit, poora box cover na kare */
+.blog-form-group .ql-editor img {
+  max-width: 50%;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Selected image ka outline */
+.blog-form-group .ql-editor img.img-selected {
+  outline: 2px solid #bd8a1c;
+  outline-offset: 2px;
+}
+
+/* Top-right cross button */
+.img-remove-btn {
+  position: absolute;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.img-remove-btn:hover {
+  background: #dc2626;
+}

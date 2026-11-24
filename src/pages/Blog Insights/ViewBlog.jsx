@@ -9,7 +9,7 @@ import {
   Quote,
   Sparkles,
 } from "lucide-react";
-
+import DOMPurify from "dompurify";
 import { getArticleById } from "../../api/Controller/blogs";
 
 import "./ViewBlogModal.css";
@@ -205,9 +205,10 @@ const ViewBlogModal = ({ blogId, onClose }) => {
 
                 <h3>Article Content</h3>
 
-                <div className="view-blog-main-content">
-                  {blog.mainContent}
-                </div>
+            <div
+  className="view-blog-main-content blog-content"
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.mainContent) }}
+/>
 
               </div>
             )}

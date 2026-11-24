@@ -22,6 +22,12 @@ export const updateArticle = (id, formData) => {
   return apiClient.put(`/admin/insights/update/${id}`, formData);
 };
 
+
+export const uploadBlogImage = (formData) =>
+  apiClient.post("/admin/insights/upload-image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 // Delete Article
 export const deleteArticle = (id) => {
   return apiClient.delete(`/admin/insights/delete/${id}`);

@@ -564,3 +564,26 @@
 .view-blog-modal::-webkit-scrollbar-thumb:hover {
   background: #c4c8ce;
 }
+
+.view-blog-main-content h1 { font-size: 2em; margin: 16px 0 8px; font-weight: 800; }
+.view-blog-main-content h2 { font-size: 1.6em; margin: 14px 0 8px; font-weight: 700; }
+.view-blog-main-content h3 { font-size: 1.3em; margin: 12px 0 6px; font-weight: 700; }
+.view-blog-main-content h4 { font-size: 1.15em; margin: 10px 0 6px; font-weight: 700; }
+.view-blog-main-content h5 { font-size: 1em; margin: 10px 0 6px; font-weight: 700; }
+.view-blog-main-content h6 { font-size: 0.9em; margin: 10px 0 6px; font-weight: 700; }
+
+.view-blog-main-content p { margin: 0 0 10px; }
+.view-blog-main-content ul,
+.view-blog-main-content ol { padding-left: 24px; margin: 0 0 10px; }
+.view-blog-main-content blockquote {
+  border-left: 4px solid #b48616;
+  margin: 10px 0;
+  padding: 4px 14px;
+  color: #58667c;
+}
+.view-blog-main-content a { color: #4f46e5; text-decoration: underline; }
+
+/* Quill alignment classes */
+.view-blog-main-content .ql-align-center { text-align: center; }
+.view-blog-main-content .ql-align-right { text-align: right; }
+.view-blog-main-content .ql-align-justify { text-align: justify; }

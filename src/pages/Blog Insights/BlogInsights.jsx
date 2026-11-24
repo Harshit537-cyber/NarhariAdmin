@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import { Crown, Plus, CheckCircle2, Pencil, Trash2, X, AlertTriangle } from "lucide-react";
 
 import "./BlogInsights.css";
@@ -8,10 +8,14 @@ import {
   createArticle,
   updateArticle,
   deleteArticle,
+  uploadBlogImage,
 } from "../../api/Controller/blogs";
 import ViewBlogModal from "./ViewBlog";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 const BlogInsights = () => {
+
   const [blogs, setBlogs] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -63,11 +67,131 @@ const BlogInsights = () => {
   const [arrayText, setArrayText] = useState(initialArrayText);
 
   const [viewBlogId, setViewBlogId] = useState(null);
+  const quillRef = useRef(null);
+const imageHandler = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.click();
 
-  // ================= IMAGE PREVIEW STATE =================
-  // Holds preview URLs for the three image inputs. Values are either
-  // an existing image URL (when editing) or a local object URL for a
-  // freshly selected file.
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const toastId = toast.loading("Uploading image...");
+
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+
+      const res = await uploadBlogImage(fd);
+      const imageUrl = res?.data?.url || res?.data?.location;
+
+      if (!res?.data?.success || !imageUrl) {
+        throw new Error(res?.data?.message || "Upload failed");
+      }
+
+      const quill = quillRef.current.getEditor();
+
+      // Purani saari images hatao (sirf 1 image allowed)
+      const imageIndexes = [];
+      let index = 0;
+
+      quill.getContents().ops.forEach((op) => {
+        if (typeof op.insert === "string") {
+          index += op.insert.length;
+        } else {
+          if (op.insert?.image) imageIndexes.push(index);
+          index += 1;
+        }
+      });
+
+      imageIndexes.reverse().forEach((i) => quill.deleteText(i, 1));
+
+      // Nayi image ka URL insert karo
+      const range = quill.getSelection(true);
+      quill.insertEmbed(range.index, "image", imageUrl);
+      quill.setSelection(range.index + 1);
+
+      clearImgSelection();
+
+      toast.update(toastId, {
+        render: "Image uploaded",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      });
+    } catch (err) {
+      console.error("Image upload error:", err);
+      toast.update(toastId, {
+        render: err?.response?.data?.message || "Image upload failed",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    }
+  };
+};
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ align: [] }],
+          ["blockquote", "link", "image"],
+          ["clean"],
+        ],
+        handlers: { image: imageHandler },
+      },
+    }),
+    []
+  );
+  const [selectedImg, setSelectedImg] = useState(null); // { node, top, left }
+
+  const clearImgSelection = () => {
+    setSelectedImg((prev) => {
+      prev?.node?.classList.remove("img-selected");
+      return null;
+    });
+  };
+
+  const handleEditorClick = (e) => {
+    const wrap = e.currentTarget;
+
+    if (e.target.tagName === "IMG" && e.target.closest(".ql-editor")) {
+      clearImgSelection();
+
+      const imgRect = e.target.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+
+      e.target.classList.add("img-selected");
+      setSelectedImg({
+        node: e.target,
+        top: imgRect.top - wrapRect.top + 6,
+        left: imgRect.right - wrapRect.left - 30,
+      });
+    } else {
+      clearImgSelection();
+    }
+  };
+
+  const removeSelectedImage = () => {
+    if (!selectedImg) return;
+
+    const quill = quillRef.current.getEditor();
+    const blot = quill.constructor.find(selectedImg.node);
+
+    if (blot) {
+      const index = quill.getIndex(blot);
+      quill.deleteText(index, 1);
+    }
+
+    setSelectedImg(null);
+  };
+
   const [previews, setPreviews] = useState({
     thumbnail: null,
     bannerImage: null,
@@ -121,37 +245,37 @@ const BlogInsights = () => {
 
   // ================= GET BLOGS =================
 
-const fetchBlogs = async () => {
-  try {
-    setLoading(true);
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
 
-    const response = await getAdminArticles({
-      page,
-      limit,
-    });
+      const response = await getAdminArticles({
+        page,
+        limit,
+      });
 
-    if (response?.data?.success) {
-      setBlogs(response.data.data || []);
-      setTotalPages(response.data.totalPages || 1);
-    } else {
+      if (response?.data?.success) {
+        setBlogs(response.data.data || []);
+        setTotalPages(response.data.totalPages || 1);
+      } else {
+        setBlogs([]);
+        toast.error(
+          response?.data?.message || "Failed to fetch blogs"
+        );
+      }
+    } catch (error) {
+      console.error("Get Blogs Error:", error);
+
       setBlogs([]);
+
       toast.error(
-        response?.data?.message || "Failed to fetch blogs"
-      );
-    }
-  } catch (error) {
-    console.error("Get Blogs Error:", error);
-
-    setBlogs([]);
-
-    toast.error(
-      error?.response?.data?.message ||
+        error?.response?.data?.message ||
         "Something went wrong while fetching blogs"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchBlogs();
@@ -187,13 +311,13 @@ const fetchBlogs = async () => {
     }));
   };
 
-// Truncates text to a max word count, adding "..." if it exceeds it
-const truncateWords = (text, maxWords = 7) => {
-  if (!text) return "";
-  const words = text.trim().split(/\s+/);
-  if (words.length <= maxWords) return text;
-  return words.slice(0, maxWords).join(" ") + "...";
-};
+  // Truncates text to a max word count, adding "..." if it exceeds it
+  const truncateWords = (text, maxWords = 7) => {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/);
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
+  };
 
   const handleArrayChange = (name, rawValue) => {
     setArrayText((prev) => ({
@@ -320,105 +444,105 @@ const truncateWords = (text, maxWords = 7) => {
 
   // ================= CREATE / UPDATE =================
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    setSubmitLoading(true);
+    try {
+      setSubmitLoading(true);
 
-    const data = new FormData();
+      const data = new FormData();
 
-    data.append("title", formData.title);
-    data.append("subtitle", formData.subtitle);
-    data.append("summary", formData.summary);
-    data.append("mainContent", formData.mainContent);
-    data.append("category", formData.category);
-    data.append("readTime", formData.readTime);
-    data.append("publishedDate", formData.publishedDate);
-    data.append("slug", formData.slug);
+      data.append("title", formData.title);
+      data.append("subtitle", formData.subtitle);
+      data.append("summary", formData.summary);
+      data.append("mainContent", formData.mainContent);
+      data.append("category", formData.category);
+      data.append("readTime", formData.readTime);
+      data.append("publishedDate", formData.publishedDate);
+      data.append("slug", formData.slug);
 
-    data.append("isPublished", formData.isPublished);
-    data.append("isFeatured", formData.isFeatured);
+      data.append("isPublished", formData.isPublished);
+      data.append("isFeatured", formData.isFeatured);
 
-    data.append("authorName", formData.authorName);
-    data.append("authorDesignation", formData.authorDesignation);
+      data.append("authorName", formData.authorName);
+      data.append("authorDesignation", formData.authorDesignation);
 
-    data.append("quoteText", formData.quoteText);
-    data.append("quoteAuthor", formData.quoteAuthor);
+      data.append("quoteText", formData.quoteText);
+      data.append("quoteAuthor", formData.quoteAuthor);
 
-    data.append(
-      "keyTakeaways",
-      JSON.stringify(formData.keyTakeaways)
-    );
-
-    data.append(
-      "ritual",
-      JSON.stringify(formData.ritual)
-    );
-
-    data.append(
-      "tags",
-      JSON.stringify(formData.tags)
-    );
-
-    if (formData.thumbnail) {
-      data.append("thumbnail", formData.thumbnail);
-    }
-
-    if (formData.bannerImage) {
-      data.append("bannerImage", formData.bannerImage);
-    }
-
-    if (formData.authorProfilePic) {
-      data.append("authorProfilePic", formData.authorProfilePic);
-    }
-
-    let response;
-
-    if (editId) {
-      response = await updateArticle(editId, data);
-    } else {
-      response = await createArticle(data);
-    }
-
-    if (response?.data?.success) {
-      toast.success(
-        editId
-          ? "Blog updated successfully!"
-          : "Blog created successfully!"
+      data.append(
+        "keyTakeaways",
+        JSON.stringify(formData.keyTakeaways)
       );
 
-      closeModal();
+      data.append(
+        "ritual",
+        JSON.stringify(formData.ritual)
+      );
 
-      if (!editId) {
-        setPage(1);
+      data.append(
+        "tags",
+        JSON.stringify(formData.tags)
+      );
+
+      if (formData.thumbnail) {
+        data.append("thumbnail", formData.thumbnail);
       }
 
-      await fetchBlogs();
-    } else {
-      toast.error(
-        response?.data?.message ||
+      if (formData.bannerImage) {
+        data.append("bannerImage", formData.bannerImage);
+      }
+
+      if (formData.authorProfilePic) {
+        data.append("authorProfilePic", formData.authorProfilePic);
+      }
+
+      let response;
+
+      if (editId) {
+        response = await updateArticle(editId, data);
+      } else {
+        response = await createArticle(data);
+      }
+
+      if (response?.data?.success) {
+        toast.success(
+          editId
+            ? "Blog updated successfully!"
+            : "Blog created successfully!"
+        );
+
+        closeModal();
+
+        if (!editId) {
+          setPage(1);
+        }
+
+        await fetchBlogs();
+      } else {
+        toast.error(
+          response?.data?.message ||
           (editId
             ? "Failed to update blog"
             : "Failed to create blog")
+        );
+      }
+    } catch (error) {
+      console.error(
+        editId ? "Update Blog Error:" : "Create Blog Error:",
+        error
       );
-    }
-  } catch (error) {
-    console.error(
-      editId ? "Update Blog Error:" : "Create Blog Error:",
-      error
-    );
 
-    toast.error(
-      error?.response?.data?.message ||
+      toast.error(
+        error?.response?.data?.message ||
         (editId
           ? "Something went wrong while updating the blog"
           : "Something went wrong while creating the blog")
-    );
-  } finally {
-    setSubmitLoading(false);
-  }
-};
+      );
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
 
   // ================= DELETE (custom popup) =================
 
@@ -431,42 +555,42 @@ const truncateWords = (text, maxWords = 7) => {
     setDeleteTarget(null);
   };
 
- const confirmDelete = async () => {
-  if (!deleteTarget) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
-  const id = deleteTarget.id;
+    const id = deleteTarget.id;
 
-  try {
-    setDeletingId(id);
+    try {
+      setDeletingId(id);
 
-    const response = await deleteArticle(id);
+      const response = await deleteArticle(id);
 
-    if (response?.data?.success) {
-      toast.success("Blog deleted successfully!");
+      if (response?.data?.success) {
+        toast.success("Blog deleted successfully!");
 
-      setDeleteTarget(null);
+        setDeleteTarget(null);
 
-      if (blogs.length === 1 && page > 1) {
-        setPage((prev) => prev - 1);
+        if (blogs.length === 1 && page > 1) {
+          setPage((prev) => prev - 1);
+        } else {
+          await fetchBlogs();
+        }
       } else {
-        await fetchBlogs();
+        toast.error(
+          response?.data?.message || "Failed to delete blog"
+        );
       }
-    } else {
-      toast.error(
-        response?.data?.message || "Failed to delete blog"
-      );
-    }
-  } catch (error) {
-    console.error("Delete Blog Error:", error);
+    } catch (error) {
+      console.error("Delete Blog Error:", error);
 
-    toast.error(
-      error?.response?.data?.message ||
+      toast.error(
+        error?.response?.data?.message ||
         "Something went wrong while deleting the blog"
-    );
-  } finally {
-    setDeletingId(null);
-  }
-};
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="blog-page">
@@ -545,20 +669,19 @@ const truncateWords = (text, maxWords = 7) => {
                         </span>
                       </td>
 
-                    <td>
-  <p
-    className="blog-description"
-    title={blog.summary || blog.subtitle || ""}
-  >
-    {truncateWords(blog.summary || blog.subtitle || "No description available", 7)}
-  </p>
-</td>
+                      <td>
+                        <p
+                          className="blog-description"
+                          title={blog.summary || blog.subtitle || ""}
+                        >
+                          {truncateWords(blog.summary || blog.subtitle || "No description available", 7)}
+                        </p>
+                      </td>
 
                       <td>
                         <span
-                          className={`blog-status ${
-                            !blog.isPublished ? "blog-status-draft" : ""
-                          }`}
+                          className={`blog-status ${!blog.isPublished ? "blog-status-draft" : ""
+                            }`}
                         >
                           <CheckCircle2 size={10} strokeWidth={3} />
 
@@ -750,14 +873,34 @@ const truncateWords = (text, maxWords = 7) => {
 
                   <div className="blog-form-group full-width">
                     <label>Content</label>
+                    <div
+                      className="quill-wrap"
+                      onClick={handleEditorClick}
+                      onScrollCapture={clearImgSelection}
+                    >
+                      <ReactQuill
+                        ref={quillRef}
+                        theme="snow"
+                        value={formData.mainContent}
+                        onChange={(value) =>
+                          setFormData((prev) => ({ ...prev, mainContent: value }))
+                        }
+                        modules={quillModules}
+                        placeholder="Enter blog content"
+                      />
 
-                    <textarea
-                      name="mainContent"
-                      value={formData.mainContent}
-                      onChange={handleChange}
-                      placeholder="Enter blog content"
-                      rows="7"
-                    />
+                      {selectedImg && (
+                        <button
+                          type="button"
+                          className="img-remove-btn"
+                          style={{ top: selectedImg.top, left: selectedImg.left }}
+                          onClick={removeSelectedImage}
+                          title="Remove image"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
